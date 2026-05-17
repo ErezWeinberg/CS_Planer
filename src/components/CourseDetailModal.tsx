@@ -23,6 +23,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
     completedCourses, semesters,
     selectedPrereqGroups, setSelectedPrereqGroup,
     trackId,
+    catalogYear,
     binaryPass, setBinaryPass,
     removeCourseFromSemester,
     courseChainAssignments, setCourseChainAssignment,
@@ -37,16 +38,18 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
     selectedPrereqGroups: state.selectedPrereqGroups,
     setSelectedPrereqGroup: state.setSelectedPrereqGroup,
     trackId: state.trackId,
+    catalogYear: state.catalogYear,
     binaryPass: state.binaryPass,
     setBinaryPass: state.setBinaryPass,
     removeCourseFromSemester: state.removeCourseFromSemester,
     courseChainAssignments: state.courseChainAssignments,
     setCourseChainAssignment: state.setCourseChainAssignment,
     setNoAdditionalCreditOverride: state.setNoAdditionalCreditOverride,
+    catalogYear: state.catalogYear,
   })));
 
   const chainMemberships = useMemo(() => {
-    const allSpecs = trackId ? getTrackSpecializationCatalog(trackId).groups : [];
+    const allSpecs = trackId ? getTrackSpecializationCatalog(trackId, catalogYear).groups : [];
     return allSpecs
       .filter((g) =>
         g.mandatoryCourses.includes(course.id) || g.electiveCourses.includes(course.id)
@@ -56,7 +59,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
         name: g.name,
         role: g.mandatoryCourses.includes(course.id) ? 'mandatory' as const : 'elective' as const,
       }));
-  }, [trackId, course.id]);
+  }, [trackId, catalogYear, course.id]);
 
   const gKey = gradeKey(course.id, semester);
   const currentGrade = grades[gKey];
