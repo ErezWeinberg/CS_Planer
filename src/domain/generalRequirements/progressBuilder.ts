@@ -45,7 +45,7 @@ function buildCourseRef(
   const sap = courses.get(bareId(id));
   if (!sap) return null;
   return {
-    courseId: id,
+    courseId: bareId(id),
     name: sap.name,
     credits,
     language: isCourseTaughtInEnglish(sap, englishTaughtCourses) ? 'EN' : 'HE',
