@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useAuth } from '../context/AuthContext';
 import type { TrackDefinition } from '../types';
 import { gradesWithSemesterFromTranscriptPayload } from '../utils/transcriptImport';
 import { getAllSemesterEntryCourseIds } from '../data/tracks/semesterSchedule';
-
-const OPTIGRADE_API_URL = import.meta.env.VITE_OPTIGRADE_API_URL as string | undefined;
+import { extractLinesFromPdf } from '../utils/pdfTextExtractor';
+import { parseTranscriptLines } from '../utils/transcriptParser';
 
 interface Props {
   trackDef: TrackDefinition;
@@ -28,7 +27,6 @@ export function GradeSheetModal({
   trackDef, catalogYear, trackId, onClose,
   addCourseToSemester, setGrade, toggleCompleted, markTrackInitialized,
 }: Props) {
-  const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -45,37 +43,18 @@ export function GradeSheetModal({
 
   async function handleSubmit() {
     if (!file) return;
-
-    if (!OPTIGRADE_API_URL) {
-      setSubmitState({ status: 'error', message: 'VITE_OPTIGRADE_API_URL לא מוגדר ב-.env.local' });
-      return;
-    }
-
-    if (!user) {
-      setSubmitState({ status: 'error', message: 'יש להתחבר כדי לסרוק גיליון ציונים' });
-      return;
-    }
-
     setSubmitState({ status: 'loading' });
 
     try {
-      const token = await user.getIdToken();
-      const body = new FormData();
-      body.append('file', file);
+      // Parse PDF client-side — no backend or auth required
+      const buffer = await file.arrayBuffer();
+      const lines = await extractLinesFromPdf(buffer);
+      const rows = parseTranscriptLines(lines);
+      const gradesWithSemester = gradesWithSemesterFromTranscriptPayload(rows);
 
-      const res = await fetch(`${OPTIGRADE_API_URL}/api/v1/transcripts/parse-pdf`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body,
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(`שגיאת שרת (${res.status})${text ? `: ${text}` : ''}`);
+      if (Object.keys(gradesWithSemester).length === 0) {
+        throw new Error('לא נמצאו קורסים בקובץ. ודא שהעלית גיליון ציונים בפורמט האנגלי של הטכניון');
       }
-
-      const data: { courses?: unknown } = await res.json();
-      const gradesWithSemester = gradesWithSemesterFromTranscriptPayload(data.courses);
 
       // Build a map from course ID → degree slot from the current schedule
       const schedule = new Map<string, number>();
@@ -129,7 +108,7 @@ export function GradeSheetModal({
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           <p className="text-sm text-gray-600">
-            העלה את גיליון הציונים שלך מהטכניון (PDF). הקורסים יוסדרו אוטומטית לפי תכנית הלימודים.
+            העלה את גיליון הציונים שלך מהטכניון (PDF אנגלי). הקורסים יוסדרו אוטומטית לפי תכנית הלימודים.
           </p>
 
           {/* Drop zone */}
