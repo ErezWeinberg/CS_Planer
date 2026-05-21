@@ -121,5 +121,21 @@ export const csTrack: TrackDefinition = {
         { semester: 7, courses: ['00440169'] },
       ],
     },
+
+    // 2025/26: Calculus 1M = 104012; 104064 direct (no alt group); sem 4: 104034;
+    //          sem 5: 046267 restored; mandatoryCredits 106.5
+    2025: {
+      totalCreditsRequired: 159.5,
+      mandatoryCredits: 106.5,
+      semesterSchedule: [
+        { semester: 1, courses: ['00440102','01040012','01040064','01140071','02340117','03240033'] },
+        { semester: 2, courses: ['00440252','01040013','01040038','01040136','01140075'] },
+        { semester: 3, courses: ['00440105','00440114','00440268','01040134','01040214','01040215','01040220'] },
+        { semester: 4, courses: ['00440127','00440131','00440157','00440101','00460002','01040034'] },
+        { semester: 5, courses: ['00440137','00460209','00460210','00440334','00460267'] },
+        { semester: 6, courses: ['00440167'] },
+        { semester: 7, courses: ['00440169'] },
+      ],
+    },
   },
 };
