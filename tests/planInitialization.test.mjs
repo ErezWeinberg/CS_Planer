@@ -162,3 +162,92 @@ test('auto-init guard: existing user with populated initializedTracks is backwar
   // Different year not in the list
   assert.equal(shouldAutoInit(initializedTracks, 'cs', 2021), false);
 });
+
+// ── transcriptParser ─────────────────────────────────────────────────────────
+
+// Load transcriptParser after patching its import of transcriptImport
+async function loadTranscriptParser(transcriptImportUrl) {
+  const absolutePath = join(repoRoot, 'src', 'utils', 'transcriptParser.ts');
+  const source = readFileSync(absolutePath, 'utf8')
+    .replace("'./transcriptImport'", `'${transcriptImportUrl}'`)
+    .replace('"./transcriptImport"', `"${transcriptImportUrl}"`);
+  const transpiled = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  return import(`data:text/javascript;base64,${Buffer.from(transpiled).toString('base64')}`);
+}
+
+const transcriptImportUrl = `data:text/javascript;base64,${Buffer.from(
+  ts.transpileModule(
+    readFileSync(join(repoRoot, 'src', 'utils', 'transcriptImport.ts'), 'utf8')
+      .replace("'./courseNumberNormalize'", `'${normalizeModuleUrl}'`)
+      .replace('"./courseNumberNormalize"', `"${normalizeModuleUrl}"`),
+    { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } },
+  ).outputText,
+).toString('base64')}`;
+
+const { parseTranscriptLines } = await loadTranscriptParser(transcriptImportUrl);
+
+test('parseTranscriptLines: numeric grade with name', () => {
+  const lines = ['00440102 Introduction to EE 3.0 95 2022-2023 Winter'];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].course_id, '00440102');
+  assert.equal(result[0].grade, '95');
+  assert.equal(result[0].is_numeric_grade, true);
+  assert.equal(result[0].is_pass, false);
+  assert.equal(result[0].semester, '2022-2023 Winter');
+});
+
+test('parseTranscriptLines: numeric grade without name', () => {
+  const lines = ['01040036 5.0 82 2022-2023 Spring'];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].course_id, '01040036');
+  assert.equal(result[0].grade, '82');
+  assert.equal(result[0].is_numeric_grade, true);
+  assert.equal(result[0].name, '');
+});
+
+test('parseTranscriptLines: Pass grade without credits', () => {
+  const lines = ['03940900 Pass 2022-2023 Winter'];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].course_id, '03940900');
+  assert.equal(result[0].is_pass, true);
+  assert.equal(result[0].grade, 'Pass');
+  assert.equal(result[0].semester, '2022-2023 Winter');
+});
+
+test('parseTranscriptLines: Exemption with points', () => {
+  const lines = ['00460195 Algorithms 3.0 Exemption with points 2021-2022 Winter'];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].course_id, '00460195');
+  assert.equal(result[0].is_pass, true);
+  assert.equal(result[0].grade, 'Exemption with points');
+});
+
+test('parseTranscriptLines: multi-line course name (pending prefix)', () => {
+  const lines = [
+    'Introduction to',         // prefix line (no course ID)
+    '00440102 EE 3.0 90 2022-2023 Winter',
+  ];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].course_id, '00440102');
+  assert.ok(result[0].name.includes('Introduction to'));
+});
+
+test('parseTranscriptLines: skips non-course lines', () => {
+  const lines = [
+    'Transcript of John Doe  ID: 123456789',
+    'for the degree Bachelor of Science',
+    'in the faculty of Electrical Engineering',
+    'accumulated 120.5 credit points out of 157.5 credit points with a GPA of 85.3',
+    '',
+    'Page 1 of 2',
+  ];
+  const result = parseTranscriptLines(lines);
+  assert.equal(result.length, 0);
+});
