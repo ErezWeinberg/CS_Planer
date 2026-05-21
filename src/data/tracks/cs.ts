@@ -55,14 +55,18 @@ export const csTrack: TrackDefinition = {
     // 2021/22: base schedule (no overrides)
     2021: {},
 
-    // 2022/23: Calculus 1M changed to 104036; sem 2 gains 104038 + 104136;
+    // 2022/23: Calculus 1M = 104036 (retired SAP code → alt group with 104012); sem 2 gains 104038 + 104136;
     //          sem 3 → 104214, 104215; sem 5 keeps 046267
     2022: {
       totalCreditsRequired: 159.5,
       semesterSchedule: [
         {
           semester: 1,
-          courses: ['00440102','01040036','01040016','01140071','02340117','03240033'],
+          // 104036 is the 22/23 Calculus code (retired from SAP); 104012 is the current equivalent
+          courses: ['00440102','01040016','01140071','02340117','03240033'],
+          alternativeGroups: [
+            { courseIds: ['01040012','01040036'], defaultCourseId: '01040012' },
+          ],
         },
         {
           semester: 2,
@@ -85,8 +89,7 @@ export const csTrack: TrackDefinition = {
       ],
     },
 
-    // 2023/24: Calculus 1M = 104012; 104016 replaces 104064; sem 3 adds 104220;
-    //          sem 4: 104033 replaces 104034; sem 5: 046267 removed
+    // 2023/24: Calculus 1M = 104012; 104016 replaces 104064; sem 3 adds 104220; sem 5: 046267 removed
     2023: {
       totalCreditsRequired: 159.5,
       semesterSchedule: [
@@ -111,7 +114,7 @@ export const csTrack: TrackDefinition = {
         },
         {
           semester: 4,
-          courses: ['00440127','00440131','00440157','00440101','00460002','01040033'],
+          courses: ['00440127','00440131','00440157','00440101','00460002','01040034'],
         },
         {
           semester: 5,
