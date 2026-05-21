@@ -108,11 +108,14 @@ export async function fetchCourses(): Promise<Map<string, SapCourse>> {
   // Fallback entries for legacy courses no longer offered in recent semesters
   const LEGACY_COURSES: Record<string, { name: string; credits: number }> = {
     '01130013': { name: 'פיזיקה 1מ', credits: 4 },
-    '01040036': { name: 'משוואות דיפרנציליות רגילות', credits: 3.5 },
+    '01040031': { name: "חשבון אינפיניטסימלי 1מ'", credits: 5.5 },   // Calc 1M 2021 code
+    '01040036': { name: 'חשבון דיפרנציאלי ואינטגרלי 1ת', credits: 5 }, // Calc 1 2022 code (was wrong: 3.5 ODE)
     '01040035': { name: "מד\"ר ואינפי 2ח'", credits: 5 },
     '01040221': { name: "פונקצ' מרוכבות והתמרות אינטגרליות", credits: 4 },
     '01040223': { name: "מד\"ח וטורי פוריה", credits: 4 },
     '01130014': { name: 'פיזיקה 2ממ', credits: 4 },
+    '00440159': { name: 'מעבדה בהנדסת חשמל 2', credits: 2.5 },        // EE Lab 2, in 2021-23 schedules
+    '00440166': { name: 'מעבדה בהנדסת חשמל 3', credits: 2.5 },        // EE Lab 3, in 2021-23 schedules
     // קורסים שהוצעו בסמסטרים ישנים (לא ב-last_semesters.json)
     '00460746': { name: 'אלגוריתמים ויישומים בראייה ממוחשבת', credits: 3 },
     '02360309': { name: 'מבוא לתורת הצפינה', credits: 3 },
