@@ -77,6 +77,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     catalogYear,
     setCatalogYear,
     switchCatalogYear,
+    initializedTracks,
   } = usePlanStore(useShallow((state) => ({
     trackId: state.trackId,
     resetPlan: state.resetPlan,
@@ -100,6 +101,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     catalogYear: state.catalogYear,
     setCatalogYear: state.setCatalogYear,
     switchCatalogYear: state.switchCatalogYear,
+    initializedTracks: state.initializedTracks,
   })));
   const specializationCatalog = getTrackSpecializationCatalog(trackDef.id, catalogYear);
   const specs = specializationCatalog.groups;
@@ -168,6 +170,10 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     if (shareMode?.isShareReview) return;
     const initializedTrackKey = catalogYear ? `${trackId}:${catalogYear}` : trackId;
 
+    // Only auto-seed if this track+year has been explicitly initialized by the user.
+    // First-time users start with empty semesters; seeding is opt-in via the planning menu.
+    if (!initializedTracks?.includes(initializedTrackKey)) return;
+
     suppressAutoInitCloudPending.current = true;
     try {
       const allPlaced = new Set(Object.values(semesters).flat());
@@ -186,7 +192,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     } finally {
       suppressAutoInitCloudPending.current = false;
     }
-  }, [shareMode, trackId, catalogYear, semesters, trackDef.semesterSchedule, courses, addCourseToSemester, dismissedRecommendedCourses, englishScore, markTrackInitialized]);
+  }, [shareMode, trackId, catalogYear, semesters, trackDef.semesterSchedule, courses, addCourseToSemester, dismissedRecommendedCourses, englishScore, markTrackInitialized, initializedTracks]);
 
   useEffect(() => {
     // Any share route is isolated from the owner's personal cloud document.
