@@ -9,6 +9,7 @@ import { VersionTabs } from './components/VersionTabs';
 import { VersionCompareModal } from './components/VersionCompareModal';
 import { useAuth } from './context/AuthContext';
 import { TrackSelector } from './components/TrackSelector';
+import { DegreePlanningMenu } from './components/DegreePlanningMenu';
 import { SemesterGrid } from './components/SemesterGrid';
 import { RequirementsPanel } from './components/RequirementsPanel';
 import { SpecializationPanel } from './components/SpecializationPanel';
@@ -121,6 +122,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
   const latestLocalSignature = useRef(getPlanSignature(extractEnvelope(usePlanStore.getState())));
   const lastSaveTime = useRef(0);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
+  const [showGradeSheetModal, setShowGradeSheetModal] = useState(false);
   const [syncErrorMessage, setSyncErrorMessage] = useState<string | null>(null);
   const [shareSaveStatus, setShareSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const shareTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -579,8 +581,13 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), TOAST_DURATION_MS);
   }
 
-  function handleResetToDefault() {
-    if (window.confirm('האם לאפס את המערכת למומלצת? כל השינויים שלך יימחקו.')) {
+  function handleInitializeRecommended() {
+    const key = catalogYear ? `${trackId}:${catalogYear}` : trackId ?? '';
+    if (key) markTrackInitialized(key);
+  }
+
+  function handlePlanFromScratch() {
+    if (window.confirm('האם לאפס את תכנית הלימודים? כל השינויים שלך יימחקו.')) {
       resetToDefault();
     }
   }
@@ -717,14 +724,12 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
               >
                 <span>↩</span><span className="hidden sm:inline"> בטל</span>
               </button>
-              <button
-                onClick={handleResetToDefault}
-                className="text-sm border px-3 py-1.5 rounded-lg transition-colors"
-                style={{ color: 'rgba(252,211,77,0.9)', borderColor: 'rgba(252,211,77,0.35)' }}
-                title="החזר את המערכת לתכנית הלימודים המומלצת"
-              >
-                <span>⟳</span><span className="hidden sm:inline"> מומלצת</span>
-              </button>
+              <DegreePlanningMenu
+                onInitializeRecommended={handleInitializeRecommended}
+                onPlanFromScratch={handlePlanFromScratch}
+                onScanGradeSheet={() => setShowGradeSheetModal(true)}
+                readOnly={!!shareMode?.isShareReview}
+              />
               <button
                 onClick={() => setShowDegreeCheck(true)}
                 className={`text-sm border px-3 py-1.5 rounded-lg transition-colors font-medium ${
