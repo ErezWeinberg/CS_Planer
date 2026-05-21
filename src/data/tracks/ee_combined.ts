@@ -5,7 +5,7 @@ export const eeCombinedTrack: TrackDefinition = {
   name: 'מסלול משולב חשמל+פיזיקה (ב.מ.)',
   description: 'מסלול משולב לתואר ראשון ומוסמך בהנדסת חשמל ופיזיקה. 8 סמסטרים, 178 נ"ז',
   // Base = entry year 2021/22
-  totalCreditsRequired: 178,
+  totalCreditsRequired: 179.5,
   mandatoryCredits: 136,
   electiveCreditsRequired: 30,
   generalCreditsRequired: 12,
@@ -98,6 +98,7 @@ export const eeCombinedTrack: TrackDefinition = {
     // 2022/23: Calculus 1M = 104036; sem 2 gains 104038+104136 (drops 104035 and 039409.01);
     //          sem 3 → 104214/104215/104220
     2022: {
+      totalCreditsRequired: 180,
       semesterSchedule: [
         { semester: 1, courses: ['00440102','01040036','01040016','01140020','01140074','02340117','03240033'] },
         { semester: 2, courses: ['00440252','01040013','01040038','01040136','01140076'] },
@@ -126,6 +127,7 @@ export const eeCombinedTrack: TrackDefinition = {
     //          114246 now direct (no replaces); 114035 moves to sem 6;
     //          440159 and 440166 dropped
     2023: {
+      totalCreditsRequired: 176,
       semesterSchedule: [
         {
           semester: 1,
@@ -153,6 +155,7 @@ export const eeCombinedTrack: TrackDefinition = {
     // 2025/26: 104016/104064 as alt group in sem 1; sem 3 drops 114030;
     //          sem 4: showBoth for 114246/440140
     2025: {
+      totalCreditsRequired: 178,
       semesterSchedule: [
         {
           semester: 1,

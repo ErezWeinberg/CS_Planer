@@ -5,18 +5,18 @@ export const ceTrack: TrackDefinition = {
   name: 'הנדסת מחשבים',
   description: 'מסלול להנדסת מחשבים המשלב ידע בחומרה, תוכנה ומערכות מחשב מתקדמות',
   // Base = entry year 2021/22
-  totalCreditsRequired: 158.5,
+  totalCreditsRequired: 158,
   mandatoryCredits: 113.5,
   electiveCreditsRequired: 27,
   generalCreditsRequired: 12,
-  specializationGroupsRequired: 2,
+  specializationGroupsRequired: 3,
   electivePolicy: {
     facultyCourseAreas: ['ee', 'cs'],
   },
   coreRequirement: {
-    // 2021/22 core: includes 234129
+    // 2021/22 core: includes 234129; required = 3
     courses: ['00440198', '00440202', '00440334', '02340292', '02360343', '02340129'],
-    required: 2,
+    required: 3,
   },
   labPool: {
     required: 0,
@@ -83,6 +83,7 @@ export const ceTrack: TrackDefinition = {
     // 2022/23: Calculus 1M = 104036; sem 2 gains 104038 + 104136 (drops 104035);
     //          sem 3 → 104214/104215/104220
     2022: {
+      totalCreditsRequired: 158.5,
       semesterSchedule: [
         {
           semester: 1,
@@ -117,8 +118,10 @@ export const ceTrack: TrackDefinition = {
     // 2023/24: Calculus 1M = 104012; 104016 replaces 104064; 234129+234114 now direct in sem 1;
     //          sem 2 gains 234125 (drops 104038); sem 4 drops 104134; 104134 moves to sem 5
     2023: {
+      totalCreditsRequired: 158.5,
+      specializationGroupsRequired: 2,
       coreRequirement: {
-        // 2023/24 core: 234129 removed
+        // 2023/24 core: 234129 removed; required drops to 2
         courses: ['00440198', '00440202', '00440334', '02340292', '02360343'],
         required: 2,
       },
@@ -148,6 +151,8 @@ export const ceTrack: TrackDefinition = {
 
     // 2025/26: 104016/104064 as alt group; 234129/234114 direct in sem 1; 234123 direct in sem 5
     2025: {
+      totalCreditsRequired: 158.5,
+      specializationGroupsRequired: 2,
       coreRequirement: {
         courses: ['00440198', '00440202', '02360334', '00440334', '02340292', '02360343'],
         required: 2,
