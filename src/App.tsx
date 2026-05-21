@@ -10,6 +10,7 @@ import { VersionCompareModal } from './components/VersionCompareModal';
 import { useAuth } from './context/AuthContext';
 import { TrackSelector } from './components/TrackSelector';
 import { DegreePlanningMenu } from './components/DegreePlanningMenu';
+import { GradeSheetModal } from './components/GradeSheetModal';
 import { SemesterGrid } from './components/SemesterGrid';
 import { RequirementsPanel } from './components/RequirementsPanel';
 import { SpecializationPanel } from './components/SpecializationPanel';
@@ -79,6 +80,8 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     setCatalogYear,
     switchCatalogYear,
     initializedTracks,
+    setGrade,
+    toggleCompleted,
   } = usePlanStore(useShallow((state) => ({
     trackId: state.trackId,
     resetPlan: state.resetPlan,
@@ -103,6 +106,8 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     setCatalogYear: state.setCatalogYear,
     switchCatalogYear: state.switchCatalogYear,
     initializedTracks: state.initializedTracks,
+    setGrade: state.setGrade,
+    toggleCompleted: state.toggleCompleted,
   })));
   const specializationCatalog = getTrackSpecializationCatalog(trackDef.id, catalogYear);
   const specs = specializationCatalog.groups;
@@ -807,6 +812,18 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
       onClose={() => setShowDegreeCheck(false)}
       data={degreeCompletion}
     />
+    {showGradeSheetModal && trackId && (
+      <GradeSheetModal
+        trackDef={trackDef}
+        catalogYear={catalogYear}
+        trackId={trackId}
+        onClose={() => setShowGradeSheetModal(false)}
+        addCourseToSemester={addCourseToSemester}
+        setGrade={setGrade}
+        toggleCompleted={toggleCompleted}
+        markTrackInitialized={markTrackInitialized}
+      />
+    )}
     </>
   );
 }
