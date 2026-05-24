@@ -9,9 +9,9 @@ const TRACK_ICONS: Record<string, string> = {
   ee_physics: '🔬',
 };
 
-function formatYear(year: number): string {
-  return `${year}/${String(year + 1).slice(-2)}`;
-}
+// function formatYear(year: number): string {
+//   return `${year}/${String(year + 1).slice(-2)}`;
+// }
 
 export function TrackSelector({ tracks }: { tracks: TrackDefinition[] }) {
   const setTrack = usePlanStore((s) => s.setTrack);

@@ -77,7 +77,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     markCloudSyncSettled,
     copyShareReviewToEditableVersion,
     catalogYear,
-    setCatalogYear,
+    // setCatalogYear,
     switchCatalogYear,
     initializedTracks,
     setGrade,
@@ -266,7 +266,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
       unsubscribe();
       if (shareTimer.current) clearTimeout(shareTimer.current);
     };
-  }, [shareMode]);
+  }, [shareMode, loadEnvelope]);
 
   // Live share snapshot: mirror remote shares/{shareId} changes into the
   // local store so all participants see each other in real time.
