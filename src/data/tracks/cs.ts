@@ -6,8 +6,8 @@ export const csTrack: TrackDefinition = {
   description: 'מכשיר מהנדסי מחשבים המתמחים בתכנון ובנייה של מערכות מחשב, תכנה וחומרה',
   // Base = entry year 2021/22
   totalCreditsRequired: 159,
-  mandatoryCredits: 105,
-  electiveCreditsRequired: 42,
+  mandatoryCredits: 105.5,
+  electiveCreditsRequired: 41.5,
   generalCreditsRequired: 12,
   specializationGroupsRequired: 2,
   electivePolicy: {
@@ -59,6 +59,8 @@ export const csTrack: TrackDefinition = {
     //          sem 3 → 104214, 104215; sem 5 keeps 046267
     2022: {
       totalCreditsRequired: 159.5,
+      mandatoryCredits: 106,
+      electiveCreditsRequired: 41.5,
       semesterSchedule: [
         {
           semester: 1,
@@ -92,6 +94,8 @@ export const csTrack: TrackDefinition = {
     // 2023/24: Calculus 1M = 104012; 104016 replaces 104064; sem 3 adds 104220; sem 5: 046267 removed
     2023: {
       totalCreditsRequired: 159.5,
+      mandatoryCredits: 106.5,
+      electiveCreditsRequired: 41,
       semesterSchedule: [
         {
           semester: 1,
