@@ -9,6 +9,7 @@ import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordi
 import { useShallow } from 'zustand/react/shallow';
 import { SemesterColumn } from './SemesterColumn';
 import { CourseCard } from './CourseCard';
+import { BucketView } from './BucketView';
 import type { SapCourse, TrackDefinition, SpecializationGroup } from '../types';
 import { usePlanStore, MAX_SEMESTERS } from '../store/planStore';
 import { usePrerequisiteStatus } from '../hooks/usePlan';
@@ -19,7 +20,7 @@ import {
   getRecognizedCredits,
 } from '../domain/noAdditionalCredit';
 import { getFacultyStyle, getFacultyShortName, COLOR_OPTIONS } from '../utils/faculty';
-import { isFreeElectiveCourseId, isSportCourseId } from '../data/generalRequirements/courseClassification';
+import { isFreeElectiveCourseId, isSportCourseId, isAdvancedDegreeCourseId } from '../data/generalRequirements/courseClassification';
 import { getVisibleMandatoryCourseIds } from '../data/tracks/semesterSchedule';
 import { buildCoreLockedSet } from '../domain/degreeCompletion/helpers';
 import { createSemesterGridCollisionDetection } from '../utils/semesterGridCollision';
@@ -119,8 +120,8 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
   const completedSet = useMemo(() => new Set(completedCourses), [completedCourses]);
 
   const coreLockedSet = useMemo(
-    () => buildCoreLockedSet({ semesters, completedCourses, coreToChainOverrides }, trackDef),
-    [semesters, completedCourses, coreToChainOverrides, trackDef],
+    () => buildCoreLockedSet({ semesters, completedCourses, coreToChainOverrides, courseChainAssignments }, trackDef),
+    [semesters, completedCourses, coreToChainOverrides, courseChainAssignments, trackDef],
   );
 
   // Map courseId → chain name for selected specializations (core-locked courses excluded)
@@ -147,7 +148,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
     return map;
   }, [specializations, selectedSpecializations, courseChainAssignments, coreLockedSet]);
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'rows'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'rows' | 'buckets'>('grid');
   const [showLegend, setShowLegend] = useState(false);
   const [gridCols, setGridCols] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8>(4);
   const [colorPickerFor, setColorPickerFor] = useState<string | null>(null);
@@ -248,19 +249,49 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
 
   // Per-semester Technion rule warnings
   const semesterRuleWarnings = useMemo(() => {
-    const warnings: Record<number, ('melag' | 'sport')[]> = {};
+    const warnings: Record<number, ('melag' | 'sport' | 'advancedDegree')[]> = {};
     for (const [semStr, ids] of Object.entries(semesters)) {
       const sem = Number(semStr);
       if (sem === 0) continue; // skip unassigned pool
-      const w: ('melag' | 'sport')[] = [];
+      const w: ('melag' | 'sport' | 'advancedDegree')[] = [];
       const melagCount = ids.filter((id) => isFreeElectiveCourseId(id)).length;
       const sportCount = ids.filter((id) => isSportCourseId(id)).length;
       if (melagCount > 2) w.push('melag');
       if (sportCount > 1) w.push('sport');
       if (w.length > 0) warnings[sem] = w;
     }
+
+    // Advanced-degree (0048) count limit — only for ee/cs/ce tracks
+    if (trackDef.externalFacultyElectiveEnabled) {
+      const seenCr = new Set<string>();
+      let roughTotal = 0;
+      const addCr = (id: string) => {
+        const bare = bareId(id);
+        if (seenCr.has(bare) || noAdditionalCreditCourseIds.has(bare)) return;
+        seenCr.add(bare);
+        roughTotal += courses.get(bare)?.credits ?? 0;
+      };
+      for (const id of completedCourses) addCr(id);
+      for (const ids of Object.values(semesters)) for (const id of ids) addCr(id);
+      const adLimit = roughTotal >= 86 ? 3 : 2;
+
+      let totalAdvanced = 0;
+      const semsWithAdvanced = new Set<number>();
+      for (const [semStr, ids] of Object.entries(semesters)) {
+        const sem = Number(semStr);
+        if (sem === 0) continue;
+        const count = ids.filter((id) => isAdvancedDegreeCourseId(bareId(id))).length;
+        if (count > 0) { totalAdvanced += count; semsWithAdvanced.add(sem); }
+      }
+      if (totalAdvanced > adLimit) {
+        for (const sem of semsWithAdvanced) {
+          (warnings[sem] ??= []).push('advancedDegree');
+        }
+      }
+    }
+
     return warnings;
-  }, [semesters]);
+  }, [semesters, completedCourses, courses, noAdditionalCreditCourseIds, trackDef.externalFacultyElectiveEnabled]);
 
   const semesterMutualExclusionWarnings = useMemo(() => {
     const warnings: Record<number, string[]> = {};
@@ -316,7 +347,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
       onMarkSemesterComplete: sem > 0 ? () => markSemesterComplete(sem) : undefined,
       summerIndex: summerSemesters.includes(sem) ? summerSemesters.indexOf(sem) + 1 : undefined,
       regularIndex: regularIndexMap.get(sem),
-      isRowMode: viewMode === 'rows',
+      isRowMode: viewMode === 'rows' || viewMode === 'buckets',
       semesterType: getSemesterType(sem),
       onSetSemesterType: (type: 'winter' | 'spring') => setSemesterType(sem, type),
       warningsIgnored: !!(semesterWarningsIgnored ?? []).includes(sem),
@@ -373,14 +404,28 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
     >
       {/* Toolbar */}
       <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <button
-          onClick={() => setViewMode(viewMode === 'grid' ? 'rows' : 'grid')}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
-          title={viewMode === 'grid' ? 'עבור לתצוגת שורות' : 'עבור לתצוגת גריד'}
-        >
-          <span>{viewMode === 'grid' ? '☰' : '⊞'}</span>
-          <span>{viewMode === 'grid' ? 'תצוגת שורות' : 'תצוגת גריד'}</span>
-        </button>
+        {/* 3-way segmented view toggle */}
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
+          {([
+            { mode: 'grid' as const, icon: '⊞', label: 'גריד' },
+            { mode: 'rows' as const, icon: '☰', label: 'שורות' },
+            { mode: 'buckets' as const, icon: '📋', label: 'חובה/בחירה' },
+          ] as const).map(({ mode, icon, label }) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 transition-colors border-r border-gray-200 last:border-r-0 ${
+                viewMode === mode
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+              title={`תצוגת ${label}`}
+            >
+              <span>{icon}</span>
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </div>
 
         {viewMode === 'grid' && (
           <div className="hidden md:flex items-center gap-1 border border-gray-300 rounded-lg overflow-hidden text-sm text-gray-600">
@@ -453,20 +498,34 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
         </div>
       )}
 
-      <SortableContext items={semesterList.map(s => `col-${s}`)} strategy={rectSortingStrategy}>
-        {rows.map((row, rowIdx) => (
-          <div
-            key={rowIdx}
-            className={viewMode === 'grid'
-              ? `grid gap-3 mb-3 ${GRID_COLS_RESPONSIVE[gridCols]}`
-              : 'flex flex-col gap-3 mb-3'}
-          >
-            {row.map((s) => <SemesterColumn key={s} {...semColProps(s)} />)}
-          </div>
-        ))}
-      </SortableContext>
+      {viewMode === 'buckets' ? (
+        <BucketView
+          courses={courses}
+          semesters={semesters}
+          mandatoryIds={mandatoryIds}
+          completedSet={completedSet}
+          prereqStatus={prereqStatus}
+          noAdditionalCreditConflicts={noAdditionalCreditConflicts}
+          noAdditionalCreditCourseIds={noAdditionalCreditCourseIds}
+          courseChainMap={courseChainMap}
+          coreLockedSet={coreLockedSet}
+        />
+      ) : (
+        <SortableContext items={semesterList.map(s => `col-${s}`)} strategy={rectSortingStrategy}>
+          {rows.map((row, rowIdx) => (
+            <div
+              key={rowIdx}
+              className={viewMode === 'grid'
+                ? `grid gap-3 mb-3 ${GRID_COLS_RESPONSIVE[gridCols]}`
+                : 'flex flex-col gap-3 mb-3'}
+            >
+              {row.map((s) => <SemesterColumn key={s} {...semColProps(s)} />)}
+            </div>
+          ))}
+        </SortableContext>
+      )}
 
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch mb-3">
+      <div className={`flex flex-col sm:flex-row gap-3 items-stretch mb-3 ${viewMode === 'buckets' ? 'hidden' : ''}`}>
         <div className="flex-1">
           <SemesterColumn {...semColProps(0)} />
         </div>

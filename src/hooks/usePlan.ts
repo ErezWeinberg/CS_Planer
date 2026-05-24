@@ -515,9 +515,35 @@ export function computeRequirementsProgress(
     const counted = new Set<string>();
     const generalElectiveCourseIds = new Set<string>();
     const generalElectiveCredits = new Map<string, number>();
-    const externalFacultyElectiveCourseIds = new Set<string>();
     const specializationCourseIds = buildSpecializationCourseIds(specializationCatalog);
+
+    // Phase 1: pre-consume the 9-credit external-faculty pool for 0048 advanced-degree courses.
+    // Only applies to tracks where external faculty electives are enabled (ee, cs, ce).
+    // 0048 courses are always faculty electives (ee area), but they take priority in the pool
+    // so that regular external-faculty courses see the reduced budget.
     let externalFacultyElectiveCredits = 0;
+    const externalFacultyElectiveCourseIds = new Set<string>();
+    if (trackDef.externalFacultyElectiveEnabled) {
+      const advancedDegreePreScanned = new Set<string>();
+      for (const id of iteratePlacedCourseIds(completedCourses, effectiveSemesters, semesterOrder)) {
+        if (!id.startsWith('0048')) continue;
+        if (advancedDegreePreScanned.has(id)) continue;
+        advancedDegreePreScanned.add(id);
+        if (noAdditionalCreditCourseIds.has(id)) continue;
+        const adCourse = courses.get(id);
+        if (!adCourse) continue;
+        const isMandatoryExcluded =
+          mandatoryIds.has(id) &&
+          !(trackDef.id === 'ce' && (id === CE_PROJECT_A_ID || id === CE_PROJECT_B_ID) && !ceMandatoryProjectIds.has(id));
+        if (isMandatoryExcluded || mandatoryLabIdSet.has(id) || excessLabIdSet.has(id)) continue;
+        const consumed = Math.min(
+          adCourse.credits,
+          Math.max(0, EXTERNAL_FACULTY_ELECTIVE_MAX_CREDITS - externalFacultyElectiveCredits),
+        );
+        externalFacultyElectiveCredits += consumed;
+        if (consumed > 0) externalFacultyElectiveCourseIds.add(id);
+      }
+    }
     const electiveAreaCredits = new Map<Exclude<ElectiveCreditArea, 'general'>, number>();
     const electiveAreaCourseIds = new Map<Exclude<ElectiveCreditArea, 'general'>, Set<string>>();
     const electiveAssignmentChoices: ElectiveAssignmentChoice[] = [];
@@ -570,7 +596,9 @@ export function computeRequirementsProgress(
           course,
           selectedArea,
           specializationCourseIds.has(id),
-          EXTERNAL_FACULTY_ELECTIVE_MAX_CREDITS - externalFacultyElectiveCredits,
+          trackDef.externalFacultyElectiveEnabled
+            ? EXTERNAL_FACULTY_ELECTIVE_MAX_CREDITS - externalFacultyElectiveCredits
+            : Number.MAX_SAFE_INTEGER,
         );
         electiveCredits += split.facultyCredits;
         addGeneralCredit(id, split.generalCredits);
@@ -865,7 +893,7 @@ export function computeRequirementsProgress(
         generalCreditsByCourseId: Object.fromEntries(generalElectiveCredits),
         externalFaculty: {
           earned: externalFacultyElectiveCredits,
-          limit: EXTERNAL_FACULTY_ELECTIVE_MAX_CREDITS,
+          limit: trackDef.externalFacultyElectiveEnabled ? EXTERNAL_FACULTY_ELECTIVE_MAX_CREDITS : 0,
           courseIds: [...externalFacultyElectiveCourseIds],
         },
       },

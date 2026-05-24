@@ -38,7 +38,7 @@ interface Props {
   courseChainMap?: Map<string, string>;
   coreLockedSet?: Set<string>;
   isDragging?: boolean;
-  ruleWarnings?: ('melag' | 'sport')[];
+  ruleWarnings?: ('melag' | 'sport' | 'advancedDegree')[];
   mutualExclusionWarnings?: string[];
   noAdditionalCreditConflicts?: Map<string, NoAdditionalCreditConflict[]>;
   noAdditionalCreditCourseIds?: ReadonlySet<string>;
@@ -226,6 +226,11 @@ export const SemesterColumn = memo(function SemesterColumn({
               ⚠️ בטכניון ניתן לקחת קורס ספורט אחד בסמסטר
             </p>
           )}
+          {ruleWarnings.includes('advancedDegree') && (
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              ⚠️ חרגת ממגבלת קורסי תארים מתקדמים (0048)
+            </p>
+          )}
         </div>
       )}
 
@@ -242,18 +247,7 @@ export const SemesterColumn = memo(function SemesterColumn({
       <div className={`gap-1.5 p-2 flex-1 ${isRowMode ? 'grid grid-cols-2 sm:grid-cols-3' : 'flex flex-col'}`}>
         {filteredIds.map((id, idx) => {
           const course = courses.get(bareId(id));
-          if (!course) {
-            return (
-              <div
-                key={`${id}_${idx}`}
-                className="rounded-lg border border-red-200 bg-red-50 px-2 py-2 text-xs text-red-700"
-                title="Missing static course data"
-              >
-                <div className="font-semibold">חסר מידע קורס</div>
-                <div className="font-mono text-[11px]">{id}</div>
-              </div>
-            );
-          }
+          if (!course) return null;
           const missingPrereqGroups = prereqStatus.get(id) ?? [];
           const courseNoAdditionalCreditConflicts = noAdditionalCreditConflicts.get(id) ?? [];
           const recognizedCredits = getRecognizedCredits(course, noAdditionalCreditCourseIds);

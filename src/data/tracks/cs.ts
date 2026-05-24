@@ -10,6 +10,7 @@ export const csTrack: TrackDefinition = {
   electiveCreditsRequired: 41.5,
   generalCreditsRequired: 12,
   specializationGroupsRequired: 2,
+  externalFacultyElectiveEnabled: true,
   electivePolicy: {
     facultyCourseAreas: ['ee', 'cs'],
   },
