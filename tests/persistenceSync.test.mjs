@@ -186,7 +186,11 @@ test('App sync logic uses the shared envelope helpers instead of ad-hoc serializ
   assert.match(appSource, /shouldApplyCloudEnvelope/, 'App should decide cloud overwrite using the freshness helper');
   assert.match(appSource, /markCloudSyncPending/, 'App should persist explicit pending-sync metadata for local edits');
   assert.match(appSource, /markCloudSyncSettled/, 'App should clear pending-sync metadata after confirmed sync');
-  assert.match(appSource, /initializedTracks/, 'App serialization path should include initializedTracks via the shared serializer');
+  assert.doesNotMatch(
+    appSource,
+    /if \(\(initializedTracks \?\? \[\]\)\.includes/,
+    'App should reconcile missing recommended courses even for already-initialized local plans',
+  );
   assert.match(
     appSource,
     /const suppressAutoInitCloudPending = useRef\(false\);/,
@@ -199,7 +203,7 @@ test('App sync logic uses the shared envelope helpers instead of ad-hoc serializ
   );
   assert.match(
     appSource,
-    /suppressAutoInitCloudPending\.current = true;[\s\S]*markTrackInitialized\(trackId\);[\s\S]*suppressAutoInitCloudPending\.current = false;/,
+    /suppressAutoInitCloudPending\.current = true;[\s\S]*markTrackInitialized\([^)]*\);[\s\S]*suppressAutoInitCloudPending\.current = false;/,
     'App should bracket track auto-initialization so recommended seeding does not look like a user edit',
   );
   assert.match(

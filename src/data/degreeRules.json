@@ -1,0 +1,23 @@
+{
+  "_comment": "Source: header.xlsx (C:/Users/gal40/OneDrive - Technion/Technion/sem9/project/תוכניות לימודים מפורט/final_clean/header.xlsx). Keys are entry years (e.g. 2021 = cohort entering 2021/22). mandatoryAndCore = sum of mandatory + core + specialty-bucket courses at minimum completion. freeElective, malag, pe are informational; they sum with mandatoryAndCore to equal totalCreditsRequired.",
+  "ee": {
+    "2021": { "totalCreditsRequired": 159,   "specializationGroupsRequired": 3, "coreRequired": 0, "mandatoryAndCore": 147,   "freeElective": 4, "malag": 6, "pe": 2 },
+    "2022": { "totalCreditsRequired": 159.5, "specializationGroupsRequired": 3, "coreRequired": 0, "mandatoryAndCore": 147.5, "freeElective": 4, "malag": 6, "pe": 2 },
+    "2023": { "totalCreditsRequired": 157.5, "specializationGroupsRequired": 3, "coreRequired": 0, "mandatoryAndCore": 145.5, "freeElective": 4, "malag": 6, "pe": 2 }
+  },
+  "ce": {
+    "2021": { "totalCreditsRequired": 158,   "specializationGroupsRequired": 3, "coreRequired": 3, "mandatoryAndCore": 146,   "freeElective": 4, "malag": 6, "pe": 2 },
+    "2022": { "totalCreditsRequired": 158.5, "specializationGroupsRequired": 3, "coreRequired": 3, "mandatoryAndCore": 146.5, "freeElective": 4, "malag": 6, "pe": 2 },
+    "2023": { "totalCreditsRequired": 158.5, "specializationGroupsRequired": 2, "coreRequired": 2, "mandatoryAndCore": 146.5, "freeElective": 4, "malag": 6, "pe": 2 }
+  },
+  "cs": {
+    "2021": { "totalCreditsRequired": 159,   "specializationGroupsRequired": 2, "coreRequired": 4, "mandatoryAndCore": 147,   "freeElective": 4, "malag": 6, "pe": 2 },
+    "2022": { "totalCreditsRequired": 159.5, "specializationGroupsRequired": 2, "coreRequired": 4, "mandatoryAndCore": 147.5, "freeElective": 4, "malag": 6, "pe": 2 },
+    "2023": { "totalCreditsRequired": 159.5, "specializationGroupsRequired": 2, "coreRequired": 4, "mandatoryAndCore": 147.5, "freeElective": 4, "malag": 6, "pe": 2 }
+  },
+  "ee_combined": {
+    "2021": { "totalCreditsRequired": 179.5, "specializationGroupsRequired": 2, "coreRequired": 1, "mandatoryAndCore": 167.5, "freeElective": 4, "malag": 6, "pe": 2 },
+    "2022": { "totalCreditsRequired": 180,   "specializationGroupsRequired": 2, "coreRequired": 1, "mandatoryAndCore": 168,   "freeElective": 4, "malag": 6, "pe": 2 },
+    "2023": { "totalCreditsRequired": 176,   "specializationGroupsRequired": 2, "coreRequired": 1, "mandatoryAndCore": 166,   "freeElective": 4, "malag": 6, "pe": 2 }
+  }
+}
