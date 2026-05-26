@@ -71,6 +71,8 @@ const { eeTrack } = await loadTranspiledModule('src/data/tracks/ee.ts');
 const { csTrack } = await loadTranspiledModule('src/data/tracks/cs.ts');
 const { eePhysicsTrack } = await loadTranspiledModule('src/data/tracks/ee_physics.ts');
 const { eeCombinedTrack } = await loadTranspiledModule('src/data/tracks/ee_combined.ts');
+const { resolveTrackForYear } = await loadTranspiledModule('src/domain/resolveTrack.ts');
+const eeCombinedTrack2025 = resolveTrackForYear(eeCombinedTrack, 2025);
 const { eeMathTrack } = await loadTranspiledModule('src/data/tracks/ee_math.ts');
 const { ceTrack } = await loadTranspiledModule('src/data/tracks/ce.ts');
 const { computeQuantumComputingMinorProgress } = await loadTranspiledModule('src/hooks/useQuantumComputingMinor.ts');
@@ -348,7 +350,7 @@ function eeCombinedMandatoryProgress({
       entrepreneurshipMinorEnabled: false,
     },
     eeCombinedMandatoryCourses,
-    eeCombinedTrack,
+    eeCombinedTrack2025,
     emptyCatalog(eeCombinedTrack.id),
     null,
   );
