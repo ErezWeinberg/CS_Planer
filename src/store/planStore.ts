@@ -8,6 +8,7 @@ import { eePhysicsTrack } from '../data/tracks/ee_physics';
 import { eeCombinedTrack } from '../data/tracks/ee_combined';
 import { ceTrack } from '../data/tracks/ce';
 import { getAllScheduledCourseIds } from '../data/tracks/semesterSchedule';
+import { getAvailableYears, resolveTrackForYear } from '../domain/resolveTrack';
 import {
   clearRepeatableCourseSemesterGrade,
   gradeKey,
@@ -42,7 +43,9 @@ interface PlanState extends StudentPlan {
   hasPendingCloudSync: boolean;
   lastLocalEditAt: number;
 
-  setTrack: (trackId: TrackId) => void;
+  setTrack: (trackId: TrackId, catalogYear?: number | null) => void;
+  setCatalogYear: (year: number | null) => void;
+  switchCatalogYear: (newYear: number, oldScheduledIds: string[]) => void;
   beginTrackSwitch: () => void;
   finishTrackSwitch: () => void;
   addCourseToSemester: (courseId: string, semester: number) => void;
@@ -131,6 +134,16 @@ const CS_ADDED_RECOMMENDED_COURSES: Record<number, string[]> = {
 
 const TRACKS = [eeTrack, csTrack, eeMathTrack, eePhysicsTrack, eeCombinedTrack, ceTrack];
 
+function getAllAutoSeededCourseIds(track: (typeof TRACKS)[number]): string[] {
+  const ids = new Set(getAllScheduledCourseIds(track));
+  for (const year of getAvailableYears(track)) {
+    for (const courseId of getAllScheduledCourseIds(resolveTrackForYear(track, year))) {
+      ids.add(courseId);
+    }
+  }
+  return [...ids];
+}
+
 // Sport/PE pool courses auto-placed in the unassigned column on first load.
 // Empty: sport appears in the recommended schedule (semesterSchedule); נבחרת users add it manually.
 export const AUTO_SEEDED_POOL_IDS: string[] = [];
@@ -139,7 +152,7 @@ const AUTO_SEEDED_COURSES_BY_TRACK = Object.fromEntries(
   TRACKS.map((track) => [
     track.id,
     new Set([
-      ...getAllScheduledCourseIds(track),
+      ...getAllAutoSeededCourseIds(track),
       ...AUTO_SEEDED_POOL_IDS,
     ]),
   ]),
@@ -215,6 +228,7 @@ const initialState: StudentPlan = {
   initializedTracks: [],
   targetGraduationSemesterId: null,
   loadProfile: 'fulltime' as const,
+  catalogYear: null,
 };
 
 function removeRecommendedCourses(
@@ -483,7 +497,7 @@ export const usePlanStore = create<PlanState>()(
       hasPendingCloudSync: false,
       lastLocalEditAt: 0,
 
-      setTrack: (newTrackId) =>
+      setTrack: (newTrackId, newCatalogYear) =>
         set((state) => {
           if (isShareReviewReadOnly(state)) return state;
           // Save current track state
@@ -495,6 +509,7 @@ export const usePlanStore = create<PlanState>()(
           if (savedTracks[newTrackId]) {
             return {
               ...planToStateFields(savedTracks[newTrackId], state),
+              catalogYear: newCatalogYear ?? savedTracks[newTrackId].catalogYear ?? null,
               savedTracks,
               _history: [],
               _initKey: state._initKey,
@@ -507,6 +522,7 @@ export const usePlanStore = create<PlanState>()(
           return {
             ...initialState,
             trackId: newTrackId,
+            catalogYear: newCatalogYear ?? null,
             semesters: { ...DEFAULT_SEMESTER_MAP },
             semesterOrder: [...DEFAULT_ORDER],
             savedTracks,
@@ -515,6 +531,32 @@ export const usePlanStore = create<PlanState>()(
             isSwitchingTrack: state.isSwitchingTrack,
             hasPendingCloudSync: state.hasPendingCloudSync,
             lastLocalEditAt: state.lastLocalEditAt,
+          };
+        }),
+
+      setCatalogYear: (year) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          return { catalogYear: year };
+        }),
+
+      switchCatalogYear: (newYear, oldScheduledIds) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          const oldSet = new Set(oldScheduledIds);
+          const completedSet = new Set(state.completedCourses ?? []);
+          const newSemesters: typeof state.semesters = {};
+          for (const [key, ids] of Object.entries(state.semesters)) {
+            newSemesters[Number(key)] = (ids as string[]).filter(
+              (id) => !oldSet.has(id) || completedSet.has(id),
+            );
+          }
+          return {
+            catalogYear: newYear,
+            semesters: newSemesters,
+            initializedTracks: (state.initializedTracks ?? []).filter(
+              (id) => id !== state.trackId && !id.startsWith(`${state.trackId}:`),
+            ),
           };
         }),
 
@@ -532,6 +574,7 @@ export const usePlanStore = create<PlanState>()(
             _history: [],
             _initKey: 0,
             isSwitchingTrack: true,
+            catalogYear: null,
             hasPendingCloudSync: state.hasPendingCloudSync,
             lastLocalEditAt: state.lastLocalEditAt,
           };
@@ -1128,7 +1171,9 @@ export const usePlanStore = create<PlanState>()(
             _history: [],
             _initKey: state._initKey + 1,
             isSwitchingTrack: false,
-            initializedTracks: (state.initializedTracks ?? []).filter((id) => id !== state.trackId),
+            initializedTracks: (state.initializedTracks ?? []).filter(
+              (id) => id !== state.trackId && !id.startsWith(`${state.trackId}:`),
+            ),
             targetGraduationSemesterId: null,
             loadProfile: 'fulltime' as const,
             hasPendingCloudSync: false,
