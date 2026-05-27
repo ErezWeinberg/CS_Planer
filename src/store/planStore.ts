@@ -77,6 +77,7 @@ interface PlanState extends StudentPlan {
   toggleRoboticsMinor: () => void;
   toggleEntrepreneurshipMinor: () => void;
   toggleQuantumComputingMinor: () => void;
+  toggleNewLabFormat: () => void;
   setEnglishScore: (score: number | null) => void;
   setTargetGraduationSemesterId: (semId: number | null) => void;
   setLoadProfile: (profile: 'working' | 'fulltime') => void;
@@ -225,6 +226,7 @@ const initialState: StudentPlan = {
   roboticsMinorEnabled: false,
   entrepreneurshipMinorEnabled: false,
   quantumComputingMinorEnabled: false,
+  newLabFormatEnabled: false,
   initializedTracks: [],
   targetGraduationSemesterId: null,
   loadProfile: 'fulltime' as const,
@@ -1043,6 +1045,11 @@ export const usePlanStore = create<PlanState>()(
       toggleQuantumComputingMinor: () =>
         set((state) => (
           isShareReviewReadOnly(state) ? state : { quantumComputingMinorEnabled: !state.quantumComputingMinorEnabled }
+        )),
+
+      toggleNewLabFormat: () =>
+        set((state) => (
+          isShareReviewReadOnly(state) ? state : { newLabFormatEnabled: !state.newLabFormatEnabled }
         )),
 
       setTargetGraduationSemesterId: (semId) =>

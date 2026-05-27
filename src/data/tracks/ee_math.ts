@@ -37,11 +37,18 @@ export const eeMathTrack: TrackDefinition = {
   semesterSchedule: [
     {
       semester: 1,
-      courses: ['00440102','01040000','01040002','01040195','01040066','01140071','01140032','02340117'],
+      courses: ['00440102','01040000','01040002','01040195','01040066','02340117'],
+      alternativeGroups: [
+        { courseIds: ['01140071','01140074'], defaultCourseId: '01140071', useDefaultCreditsForMandatory: true },
+        { courseIds: ['01140032','01140020'], defaultCourseId: '01140032', useDefaultCreditsForMandatory: true },
+      ],
     },
     {
       semester: 2,
-      courses: ['00440252','01040281','01040168','01140075','03240033'],
+      courses: ['00440252','01040281','01040168','03240033'],
+      alternativeGroups: [
+        { courseIds: ['01140075','01140076'], defaultCourseId: '01140075', useDefaultCreditsForMandatory: true },
+      ],
     },
     {
       semester: 3,

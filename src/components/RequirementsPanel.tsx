@@ -643,6 +643,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     toggleRoboticsMinor,
     toggleEntrepreneurshipMinor,
     toggleQuantumComputingMinor,
+    toggleNewLabFormat,
     addCourseToSemester,
     setElectiveCreditAssignment,
     miluimCredits,
@@ -651,6 +652,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     roboticsMinorEnabled,
     entrepreneurshipMinorEnabled,
     quantumComputingMinorEnabled,
+    newLabFormatEnabled,
     semesterOrder,
     summerSemesters,
     semesters,
@@ -666,6 +668,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     toggleRoboticsMinor: state.toggleRoboticsMinor,
     toggleEntrepreneurshipMinor: state.toggleEntrepreneurshipMinor,
     toggleQuantumComputingMinor: state.toggleQuantumComputingMinor,
+    toggleNewLabFormat: state.toggleNewLabFormat,
     addCourseToSemester: state.addCourseToSemester,
     setElectiveCreditAssignment: state.setElectiveCreditAssignment,
     miluimCredits: state.miluimCredits,
@@ -674,6 +677,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     roboticsMinorEnabled: state.roboticsMinorEnabled ?? false,
     entrepreneurshipMinorEnabled: state.entrepreneurshipMinorEnabled ?? false,
     quantumComputingMinorEnabled: state.quantumComputingMinorEnabled ?? false,
+    newLabFormatEnabled: state.newLabFormatEnabled ?? false,
     semesterOrder: state.semesterOrder,
     summerSemesters: state.summerSemesters,
     semesters: state.semesters,
@@ -1179,6 +1183,20 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
           התמחות משנית במנהיגות יזמית
         </label>
       </div>
+
+      {trackId === 'ee' && (
+        <div className="mb-2 flex items-center gap-2">
+          <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={newLabFormatEnabled}
+              onChange={toggleNewLabFormat}
+              className="rounded"
+            />
+            מעבדות בפורמט חדש
+          </label>
+        </div>
+      )}
 
       {entrepreneurshipMinorEnabled && progress.entrepreneurshipMinorProgress && (() => {
         const ep = progress.entrepreneurshipMinorProgress;

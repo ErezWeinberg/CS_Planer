@@ -399,6 +399,7 @@ export function computeRequirementsProgress(
     roboticsMinorEnabled,
     entrepreneurshipMinorEnabled,
     quantumComputingMinorEnabled,
+    newLabFormatEnabled,
     countOnlyCompleted,
   } = input;
 
@@ -421,7 +422,7 @@ export function computeRequirementsProgress(
       ...completedCourses,
       ...Object.values(effectiveSemesters).flat(),
     ]);
-    const mandatoryCreditsRequired = getEffectiveMandatoryCreditsRequired(trackDef, allPlaced, courses);
+    let mandatoryCreditsRequired = getEffectiveMandatoryCreditsRequired(trackDef, allPlaced, courses);
     const electiveCreditsRequired = getEffectiveElectiveCreditsRequired(trackDef, allPlaced, courses);
     const ceMandatoryProjectIds = trackDef.id === 'ce'
       ? new Set(getCeProjectRequirementProfile(trackDef, allPlaced, courses).mandatoryProjectCourseIds)
@@ -486,6 +487,28 @@ export function computeRequirementsProgress(
     }
 
     const mandatoryIds = getVisibleMandatoryCourseIds(trackDef, courses, englishScore);
+
+    // Issue 1: "מעבדות בפורמט חדש" — when enabled, exclude old EE lab courses from mandatory.
+    // Net adjustment = −oldLabCredits + labPool.required (the labPool now fills their slot):
+    // e.g. −5 (440159 + 440166) + 3 (labPool) = −2 net reduction in the required bar.
+    const OLD_LAB_FORMAT_COURSES = new Set(['00440159', '00440166']);
+    const hasOldLabCourses = [...mandatoryIds].some((id) => OLD_LAB_FORMAT_COURSES.has(id));
+    if (newLabFormatEnabled && hasOldLabCourses) {
+      OLD_LAB_FORMAT_COURSES.forEach((id) => mandatoryIds.delete(id));
+      const oldLabCredits = [...OLD_LAB_FORMAT_COURSES].reduce(
+        (sum, id) => sum + (courses.get(id)?.credits ?? 0),
+        0,
+      );
+      const labPoolRequired = trackDef.labPool?.required ?? 0;
+      // Remove old lab credits, add back the labPool requirement (net −2 for EE: −5 + 3)
+      mandatoryCreditsRequired -= oldLabCredits - labPoolRequired;
+    }
+
+    // Issue 3: partialMandatoryIds tracks courses where only a capped amount (the default course's
+    // credits) counted toward mandatory. The remainder is eligible for free-choice elective.
+    // courseId → credits already allocated to mandatory
+    const partialMandatoryIds = new Map<string, number>();
+
     let mandatoryDone = 0;
     for (const semesterEntry of trackDef.semesterSchedule) {
       for (const id of semesterEntry.courses) {
@@ -500,7 +523,19 @@ export function computeRequirementsProgress(
       for (const group of semesterEntry.alternativeGroups ?? []) {
         const satisfiedCourseId = getSatisfiedAlternativeCourseId(group, allPlaced, courses, englishScore);
         if (satisfiedCourseId) {
-          mandatoryDone += getRecognizedCredits(courses.get(satisfiedCourseId), noAdditionalCreditCourseIds);
+          if (
+            group.useDefaultCreditsForMandatory &&
+            group.defaultCourseId &&
+            satisfiedCourseId !== group.defaultCourseId &&
+            courses.has(group.defaultCourseId)
+          ) {
+            // Cap mandatory at the default (original) course's credits; remainder goes to free choice
+            const defaultCredits = getRecognizedCredits(courses.get(group.defaultCourseId), noAdditionalCreditCourseIds);
+            mandatoryDone += defaultCredits;
+            partialMandatoryIds.set(satisfiedCourseId, defaultCredits);
+          } else {
+            mandatoryDone += getRecognizedCredits(courses.get(satisfiedCourseId), noAdditionalCreditCourseIds);
+          }
         }
       }
     }
@@ -562,8 +597,12 @@ export function computeRequirementsProgress(
     };
 
     for (const id of iteratePlacedCourseIds(completedCourses, effectiveSemesters, semesterOrder)) {
+      // A course is excluded from elective counting if it's fully mandatory.
+      // Exception: courses in partialMandatoryIds already donated some credits to mandatory
+      // (via useDefaultCreditsForMandatory alternativeGroup) — their REMAINDER is eligible for elective.
       const isMandatoryForElectiveExclusion =
         mandatoryIds.has(id) &&
+        !partialMandatoryIds.has(id) &&
         !(trackDef.id === 'ce' && (id === CE_PROJECT_A_ID || id === CE_PROJECT_B_ID) && !ceMandatoryProjectIds.has(id));
       if (
         !isMandatoryForElectiveExclusion &&
@@ -581,6 +620,17 @@ export function computeRequirementsProgress(
           continue;
         }
 
+        // For partial-mandatory courses: only the remaining credits (full minus mandatory portion) count as elective
+        const mandatoryAllocated = partialMandatoryIds.get(id) ?? 0;
+        const effectiveCourse = mandatoryAllocated > 0
+          ? { ...course, credits: Math.max(0, course.credits - mandatoryAllocated) }
+          : course;
+
+        if (effectiveCourse.credits <= 0) {
+          counted.add(id);
+          continue;
+        }
+
         const selectedArea = resolveElectiveCreditArea(course, trackDef, electiveCreditAssignments);
         const options = getElectiveCreditAssignmentOptions(course, trackDef);
         if (options.length > 1) {
@@ -593,7 +643,7 @@ export function computeRequirementsProgress(
         }
 
         const split = allocateElectiveCredits(
-          course,
+          effectiveCourse,
           selectedArea,
           specializationCourseIds.has(id),
           trackDef.externalFacultyElectiveEnabled
@@ -975,6 +1025,7 @@ export function useRequirementsProgress(
   const roboticsMinorEnabled = usePlanStore((s) => s.roboticsMinorEnabled ?? false);
   const entrepreneurshipMinorEnabled = usePlanStore((s) => s.entrepreneurshipMinorEnabled ?? false);
   const quantumComputingMinorEnabled = usePlanStore((s) => s.quantumComputingMinorEnabled ?? false);
+  const newLabFormatEnabled = usePlanStore((s) => s.newLabFormatEnabled ?? false);
   const countOnlyCompletedCourses = usePlanStore((s) => s.countOnlyCompletedCourses ?? false);
 
   return useMemo(
@@ -1000,6 +1051,7 @@ export function useRequirementsProgress(
           roboticsMinorEnabled,
           entrepreneurshipMinorEnabled,
           quantumComputingMinorEnabled,
+          newLabFormatEnabled,
           countOnlyCompleted: countOnlyCompletedCourses,
         },
         courses,
@@ -1007,7 +1059,7 @@ export function useRequirementsProgress(
         specializationCatalog,
         weightedAverage,
       ),
-    [semesters, completedCourses, completedInstances, grades, binaryPass, courses, trackDef, specializationCatalog, selectedSpecializations, doubleSpecializations, hasEnglishExemption, miluimCredits, englishScore, englishTaughtCourses, semesterOrder, coreToChainOverrides, courseChainAssignments, electiveCreditAssignments, noAdditionalCreditOverrides, roboticsMinorEnabled, entrepreneurshipMinorEnabled, quantumComputingMinorEnabled, countOnlyCompletedCourses, weightedAverage],
+    [semesters, completedCourses, completedInstances, grades, binaryPass, courses, trackDef, specializationCatalog, selectedSpecializations, doubleSpecializations, hasEnglishExemption, miluimCredits, englishScore, englishTaughtCourses, semesterOrder, coreToChainOverrides, courseChainAssignments, electiveCreditAssignments, noAdditionalCreditOverrides, roboticsMinorEnabled, entrepreneurshipMinorEnabled, quantumComputingMinorEnabled, newLabFormatEnabled, countOnlyCompletedCourses, weightedAverage],
   );
 }
 

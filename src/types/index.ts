@@ -51,6 +51,14 @@ export interface SemesterScheduleAlternativeGroup {
   showBoth?: boolean;
   defaultCourseId?: string;
   warningText?: string;
+  /**
+   * When true and a non-default course satisfies this slot, the mandatory credit
+   * counted is capped at the DEFAULT course's credits (fetched from SAP data at
+   * runtime). The placed course's remaining credits are eligible for elective
+   * classification (typically free-choice for physics courses in EE tracks).
+   * Use for "ללא זיכוי נוסף" science-equivalent replacements.
+   */
+  useDefaultCreditsForMandatory?: boolean;
 }
 
 export interface SemesterScheduleEntry {
@@ -301,6 +309,7 @@ export interface StudentPlan {
   roboticsMinorEnabled?: boolean;  // student opted into the robotics minor
   entrepreneurshipMinorEnabled?: boolean;  // student opted into the entrepreneurial leadership minor
   quantumComputingMinorEnabled?: boolean;  // student opted into the quantum computing minor
+  newLabFormatEnabled?: boolean;  // EE/ee_math/ee_physics: use new lab format (labPool only, exclude old 440159/440166)
   initializedTracks?: string[];  // trackIds that have been fully initialized at least once
   targetGraduationSemesterId?: number | null;  // semesterId from semesterOrder the student wants to graduate in
   loadProfile?: 'working' | 'fulltime';  // student's load preference for smart scheduling
