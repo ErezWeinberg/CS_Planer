@@ -936,6 +936,24 @@ export function applySpecializationGroupYearVariant(
   };
 }
 
+export function buildEffectiveChainAssignments(
+  chainEligibleIds: Set<string>,
+  allGroups: SpecializationGroup[],
+  explicitAssignments: Record<string, string> | undefined,
+): Record<string, string> {
+  const result: Record<string, string> = { ...explicitAssignments };
+  for (const courseId of chainEligibleIds) {
+    if (result[courseId]) continue;
+    const chains = allGroups.filter(
+      (g) => g.mandatoryCourses.includes(courseId) || g.electiveCourses.includes(courseId),
+    );
+    if (chains.length === 1) {
+      result[courseId] = chains[0].id;
+    }
+  }
+  return result;
+}
+
 export function evaluateSpecializationGroup(
   group: SpecializationGroup,
   takenCourseNumbers: Iterable<string>,
@@ -944,8 +962,11 @@ export function evaluateSpecializationGroup(
 ): SpecializationGroupEvaluation {
   const takenCourses = new Set(
     [...takenCourseNumbers].filter((id) => {
-      const assignment = courseChainAssignments?.[id];
-      return !assignment || assignment === group.id;
+      // When no assignment map is provided (e.g. unit tests calling the function directly),
+      // use the legacy permissive behavior so all chain-eligible courses count.
+      // When an effective assignment map is provided, require an explicit assignment to this group.
+      if (courseChainAssignments === undefined) return true;
+      return courseChainAssignments[id] === group.id;
     }),
   );
   const requirements = group.requirementsByMode[mode] ?? group.requirementsByMode.single;

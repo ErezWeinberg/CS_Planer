@@ -1,7 +1,7 @@
 ﻿import { lazy, Suspense, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { SpecializationGroup, SpecializationRuleBlock, SapCourse, TrackSpecializationCatalog } from '../types';
-import { evaluateSpecializationGroup } from '../domain/specializations';
+import { buildEffectiveChainAssignments, evaluateSpecializationGroup } from '../domain/specializations';
 import { usePlanStore } from '../store/planStore';
 import { buildCoreLockedSet } from '../domain/degreeCompletion/helpers';
 import { getTrackDefinition } from '../data/tracks';
@@ -59,6 +59,14 @@ export function SpecializationPanel({ catalog, courses }: Props) {
     const coreLockedSet = buildCoreLockedSet({ semesters, completedCourses, coreToChainOverrides, courseChainAssignments }, trackDef);
     return new Set([...allPlaced].filter((id) => !coreLockedSet.has(id)));
   }, [allPlaced, semesters, completedCourses, coreToChainOverrides, courseChainAssignments, trackDef]);
+  const selectedGroups = useMemo(
+    () => groups.filter((g) => selectedSpecializations.includes(g.id)),
+    [groups, selectedSpecializations],
+  );
+  const effectiveChainAssignments = useMemo(
+    () => buildEffectiveChainAssignments(chainEligibleSet, selectedGroups, courseChainAssignments),
+    [chainEligibleSet, selectedGroups, courseChainAssignments],
+  );
   const [openGroup, setOpenGroup] = useState<SpecializationGroup | null>(null);
   const doubles = doubleSpecializations ?? [];
   const interactionDisabled = catalog.interactionDisabled;
@@ -100,11 +108,20 @@ export function SpecializationPanel({ catalog, courses }: Props) {
           {groups.map((group) => {
             const isSelected = selectedSpecializations.includes(group.id);
             const isDouble = doubles.includes(group.id);
+            // For unselected groups (potential view): exclude courses explicitly assigned
+            // to another chain, but still count all other chain-eligible courses.
+            // For selected groups: use strict effective assignments.
+            const takenForEval = isSelected
+              ? chainEligibleSet
+              : new Set([...chainEligibleSet].filter((id) => {
+                  const a = courseChainAssignments?.[id];
+                  return !a || a === group.id;
+                }));
             const evaluation = evaluateSpecializationGroup(
               group,
-              chainEligibleSet,
+              takenForEval,
               isDouble && group.canBeDouble ? 'double' : 'single',
-              courseChainAssignments,
+              isSelected ? effectiveChainAssignments : undefined,
             );
             const progress = getRuleProgress(evaluation.ruleBlocks);
             const pct = Math.min(
