@@ -1,13 +1,10 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { TrackDefinition } from '../types';
-import { gradesWithSemesterFromTranscriptPayload } from '../utils/transcriptImport';
-import { getAllSemesterEntryCourseIds } from '../data/tracks/semesterSchedule';
+import { gradesWithSemesterFromTranscriptPayload, transcriptSemesterToSlot } from '../utils/transcriptImport';
 import { extractLinesFromPdf } from '../utils/pdfTextExtractor';
 import { parseTranscriptLines } from '../utils/transcriptParser';
 
 interface Props {
-  trackDef: TrackDefinition;
   catalogYear: number | null;
   trackId: string;
   onClose: () => void;
@@ -15,6 +12,8 @@ interface Props {
   setGrade: (courseId: string, grade: number | null, semester?: number) => void;
   toggleCompleted: (courseId: string) => void;
   markTrackInitialized: (key: string) => void;
+  addSemester: () => void;
+  maxSemester: number;
 }
 
 type SubmitState =
@@ -24,8 +23,9 @@ type SubmitState =
   | { status: 'error'; message: string };
 
 export function GradeSheetModal({
-  trackDef, catalogYear, trackId, onClose,
+  catalogYear, trackId, onClose,
   addCourseToSemester, setGrade, toggleCompleted, markTrackInitialized,
+  addSemester, maxSemester,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -56,19 +56,21 @@ export function GradeSheetModal({
         throw new Error('לא נמצאו קורסים בקובץ. ודא שהעלית גיליון ציונים בפורמט האנגלי של הטכניון');
       }
 
-      // Build a map from course ID → degree slot from the current schedule
-      const schedule = new Map<string, number>();
-      for (const entry of trackDef.semesterSchedule) {
-        for (const id of getAllSemesterEntryCourseIds(entry)) {
-          schedule.set(id, entry.semester);
-        }
+      // Map transcript semester labels → sequential slot numbers (1 = earliest semester)
+      const semLabels = Object.values(gradesWithSemester).map(({ semester }) => semester);
+      const slotMap = transcriptSemesterToSlot(semLabels);
+
+      // Expand semester columns if the transcript spans more than the current plan
+      const neededSemesters = slotMap.size > 0 ? Math.max(...slotMap.values()) : 0;
+      for (let i = maxSemester; i < neededSemesters; i++) {
+        addSemester();
       }
 
       let placed = 0;
       let graded = 0;
 
-      for (const [courseId, { grade }] of Object.entries(gradesWithSemester)) {
-        const slot = schedule.get(courseId) ?? 0; // 0 = unassigned semester
+      for (const [courseId, { grade, semester }] of Object.entries(gradesWithSemester)) {
+        const slot = (semester !== null ? slotMap.get(semester) : undefined) ?? 0;
         addCourseToSemester(courseId, slot);
         toggleCompleted(courseId);
         placed++;

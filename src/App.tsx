@@ -82,6 +82,8 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     initializedTracks,
     setGrade,
     toggleCompleted,
+    addSemester,
+    maxSemester,
   } = usePlanStore(useShallow((state) => ({
     trackId: state.trackId,
     resetPlan: state.resetPlan,
@@ -108,6 +110,8 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     initializedTracks: state.initializedTracks,
     setGrade: state.setGrade,
     toggleCompleted: state.toggleCompleted,
+    addSemester: state.addSemester,
+    maxSemester: state.maxSemester,
   })));
   const specializationCatalog = getTrackSpecializationCatalog(trackDef.id, catalogYear);
   const specs = specializationCatalog.groups;
@@ -830,7 +834,6 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     />
     {showGradeSheetModal && trackId && (
       <GradeSheetModal
-        trackDef={trackDef}
         catalogYear={catalogYear}
         trackId={trackId}
         onClose={() => setShowGradeSheetModal(false)}
@@ -838,6 +841,8 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
         setGrade={setGrade}
         toggleCompleted={toggleCompleted}
         markTrackInitialized={markTrackInitialized}
+        addSemester={addSemester}
+        maxSemester={maxSemester}
       />
     )}
     </>
