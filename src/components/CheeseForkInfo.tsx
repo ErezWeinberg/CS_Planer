@@ -21,7 +21,7 @@ type LoadState =
   | { status: 'empty' }
   | { status: 'hidden' };
 
-type Role = 'lecturer' | 'ta';
+type Role = 'lecturer' | 'ta' | 'semester';
 
 interface ParsedPost {
   post: CheeseForkPost;
@@ -30,8 +30,9 @@ interface ParsedPost {
 }
 
 interface NameOption {
-  name: string;
+  name: string;        // storage key (used in the selected set)
   count: number;
+  label?: string;      // optional display override (e.g. formatted semester)
 }
 
 interface MergeSuggestion {
@@ -190,7 +191,7 @@ function FilterMenuPanel({
                 >
                   {isOn && <span className="block text-[10px] leading-3 text-center">✓</span>}
                 </span>
-                <span className="truncate">{opt.name}</span>
+                <span className="truncate">{opt.label ?? opt.name}</span>
               </span>
               <span className="text-gray-400 ms-2">{opt.count}</span>
             </button>
@@ -237,6 +238,7 @@ export function CheeseForkInfo({ courseId }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedLecturers, setSelectedLecturers] = useState<Set<string>>(() => new Set());
   const [selectedTAs, setSelectedTAs] = useState<Set<string>>(() => new Set());
+  const [selectedSemesters, setSelectedSemesters] = useState<Set<string>>(() => new Set());
   const [openMenu, setOpenMenu] = useState<Role | null>(null);
 
   const lecturerAliases = usePlanStore(
@@ -258,6 +260,7 @@ export function CheeseForkInfo({ courseId }: Props) {
     setCurrentIndex(0);
     setSelectedLecturers(new Set());
     setSelectedTAs(new Set());
+    setSelectedSemesters(new Set());
     setOpenMenu(null);
   }
 
@@ -292,6 +295,18 @@ export function CheeseForkInfo({ courseId }: Props) {
     [parsedPosts, taAliases],
   );
 
+  const semesterOptions: NameOption[] = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of parsedPosts) {
+      const sem = p.post.semester;
+      if (!sem) continue;
+      counts.set(sem, (counts.get(sem) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count, label: formatCheeseForkSemester(name) }))
+      .sort((a, b) => b.name.localeCompare(a.name));
+  }, [parsedPosts]);
+
   const lecturerSuggestions = useMemo(
     () => buildSuggestions(parsedPosts, (p) => p.lecturerRaw, lecturerAliases, dismissed),
     [parsedPosts, lecturerAliases, dismissed],
@@ -315,8 +330,11 @@ export function CheeseForkInfo({ courseId }: Props) {
         return name !== null && selectedTAs.has(name);
       });
     }
+    if (selectedSemesters.size > 0) {
+      arr = arr.filter((p) => p.post.semester && selectedSemesters.has(p.post.semester));
+    }
     return [...arr].sort((a, b) => b.post.timestamp - a.post.timestamp).map((p) => p.post);
-  }, [parsedPosts, selectedLecturers, selectedTAs, lecturerAliases, taAliases]);
+  }, [parsedPosts, selectedLecturers, selectedTAs, selectedSemesters, lecturerAliases, taAliases]);
 
   if (state.status === 'hidden') return null;
 
@@ -334,11 +352,12 @@ export function CheeseForkInfo({ courseId }: Props) {
   const hasPosts = filteredPosts.length > 0;
   const canGoNewer = hasPosts && safeIndex > 0;
   const canGoOlder = hasPosts && safeIndex < filteredPosts.length - 1;
-  const hasFilter = selectedLecturers.size > 0 || selectedTAs.size > 0;
+  const hasFilter =
+    selectedLecturers.size > 0 || selectedTAs.size > 0 || selectedSemesters.size > 0;
   const totalAvailable = posts.length;
   const showFilterRow =
     state.status === 'ready' &&
-    (lecturerOptions.length > 0 || taOptions.length > 0 ||
+    (lecturerOptions.length > 0 || taOptions.length > 0 || semesterOptions.length > 0 ||
       lecturerSuggestions.length > 0 || taSuggestions.length > 0 || hasFilter);
 
   const handleMergeLecturer = (s: MergeSuggestion) => {
@@ -410,6 +429,18 @@ export function CheeseForkInfo({ courseId }: Props) {
     setSelectedTAs(new Set());
     setCurrentIndex(0);
   };
+  const toggleSemester = (name: string) => {
+    setSelectedSemesters((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+    setCurrentIndex(0);
+  };
+  const clearSemesters = () => {
+    setSelectedSemesters(new Set());
+    setCurrentIndex(0);
+  };
 
   const lecturerChipLabel = selectedLecturers.size === 0
     ? 'מרצה'
@@ -421,6 +452,11 @@ export function CheeseForkInfo({ courseId }: Props) {
     : selectedTAs.size === 1
       ? `מתרגל: ${selectedTAs.values().next().value}`
       : `מתרגל (${selectedTAs.size})`;
+  const semesterChipLabel = selectedSemesters.size === 0
+    ? 'סמסטר'
+    : selectedSemesters.size === 1
+      ? `סמסטר: ${formatCheeseForkSemester(selectedSemesters.values().next().value as string)}`
+      : `סמסטר (${selectedSemesters.size})`;
 
   return (
     <div className="mb-4 border border-gray-200 rounded-lg p-3">
@@ -474,6 +510,13 @@ export function CheeseForkInfo({ courseId }: Props) {
                   onClick={() => setOpenMenu(openMenu === 'ta' ? null : 'ta')}
                   onClear={selectedTAs.size > 0 ? clearTAs : undefined}
                 />
+                <FilterChip
+                  label={semesterChipLabel}
+                  active={selectedSemesters.size > 0}
+                  open={openMenu === 'semester'}
+                  onClick={() => setOpenMenu(openMenu === 'semester' ? null : 'semester')}
+                  onClear={selectedSemesters.size > 0 ? clearSemesters : undefined}
+                />
                 {hasFilter && (
                   <span className="text-xs text-gray-400">
                     {filteredPosts.length}/{totalAvailable}
@@ -503,6 +546,18 @@ export function CheeseForkInfo({ courseId }: Props) {
                   onMerge={handleMergeTA}
                   onDismiss={(s) => dismissReviewNameSuggestion(courseId, s.clusterKey)}
                   emptyLabel="לא זוהו שמות מתרגלים בביקורות"
+                />
+              )}
+              {openMenu === 'semester' && (
+                <FilterMenuPanel
+                  options={semesterOptions}
+                  selected={selectedSemesters}
+                  onToggle={toggleSemester}
+                  onClear={clearSemesters}
+                  suggestions={EMPTY_SUGGESTIONS}
+                  onMerge={noop}
+                  onDismiss={noop}
+                  emptyLabel="אין סמסטרים בביקורות"
                 />
               )}
             </>
@@ -576,3 +631,5 @@ export function CheeseForkInfo({ courseId }: Props) {
 
 const EMPTY_ALIASES: Record<string, string> = {};
 const EMPTY_DISMISSED: string[] = [];
+const EMPTY_SUGGESTIONS: MergeSuggestion[] = [];
+const noop = () => {};
