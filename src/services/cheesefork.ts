@@ -186,19 +186,205 @@ export function extractInstructorNames(
 const HEBREW_FINAL_MAP: Record<string, string> = {
   'ם': 'מ', 'ן': 'נ', 'ך': 'כ', 'ף': 'פ', 'ץ': 'צ',
 };
-// Hebrew diacritics (niqqud + cantillation) range, plus quote-like marks.
-const STRIP_CHARS = /[֑-ׇ\s_.\-־׳״"'`]/g;
+
+function foldFinals(s: string): string {
+  let out = '';
+  for (const ch of s) out += HEBREW_FINAL_MAP[ch] ?? ch;
+  return out;
+}
+
+// Hebrew diacritics (niqqud + cantillation), quote-like marks, separators.
+const STRIP_PUNCT = /[֑-ׇ.\-־"'`׳״]/g;
+
+// Junk tokens commonly attached to instructor names: titles, recording markers,
+// content qualifiers, conjunctions. Pre-folded to match post-fold tokens.
+const BLOCKED_TOKENS = new Set(
+  [
+    'מוקלט', 'מוקלטת', 'מוקלטות', 'מוקלטים',
+    'הקלט', 'הקלטה', 'הקלטות',
+    'פיראטי', 'פירטי', 'פיראטית',
+    'מצגת', 'מצגות', 'סיכום', 'סיכומים',
+    'חצי', 'סמסטר',
+    'קצת', 'הרבה', 'מעט', 'בעיקר',
+    'ואז', 'וגם', 'אבל',
+    // Titles
+    'פרופ', 'דר', 'מר', 'גב',
+  ].map((t) => foldFinals(t).toLowerCase()),
+);
+
+// Phrases at which we cut and discard the remainder: "X / Y" → keep X; "X ואז Y" → keep X.
+const CUT_RE = /\s+(?:\/|,|ואז|וגם|אבל)\s+|\s*\/\s*|\s*,\s*/;
+
+function stripParens(s: string): string {
+  let prev = s;
+  let next = s.replace(/\([^)]*\)/g, ' ');
+  while (next !== prev) {
+    prev = next;
+    next = next.replace(/\([^)]*\)/g, ' ');
+  }
+  return next.replace(/[()]/g, ' ');
+}
 
 /**
- * Collapse a raw instructor name into a grouping key for deduplication.
- * Strips whitespace, underscores, hyphens, punctuation, Hebrew diacritics, and
- * folds final letter forms (ם→מ etc). Output is for clustering only, not display.
+ * Clean an instructor name into a list of meaningful name tokens.
+ * Removes parenthesized noise, cuts at multi-person separators ("/", "ואז"),
+ * strips titles ("פרופ׳", "ד\"ר") and recording markers ("מוקלט", "הקלטה").
+ * Returns tokens in original order, post-final-letter-folding.
+ */
+export function instructorTokens(name: string): string[] {
+  if (!name) return [];
+  let s = stripParens(name);
+  const cutMatch = CUT_RE.exec(s);
+  if (cutMatch && cutMatch.index > 0) {
+    s = s.slice(0, cutMatch.index);
+  }
+  s = s.replace(STRIP_PUNCT, ' ');
+  const tokens = s.split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  for (const t of tokens) {
+    const folded = foldFinals(t).toLowerCase();
+    if (!folded) continue;
+    if (BLOCKED_TOKENS.has(folded)) continue;
+    out.push(folded);
+  }
+  return out;
+}
+
+/**
+ * Collapse a raw instructor name into a stable cluster key. Two names whose
+ * cleaned token sets are equal will produce the same key. Used for grouping.
  */
 export function normalizeInstructorName(name: string): string {
-  if (!name) return '';
-  let out = '';
-  for (const ch of name) {
-    out += HEBREW_FINAL_MAP[ch] ?? ch;
+  const tokens = instructorTokens(name);
+  return [...new Set(tokens)].sort().join(' ');
+}
+
+/**
+ * Reconstruct a display-friendly canonical name from a raw entry, preserving
+ * original casing and word order while dropping the same noise that
+ * instructorTokens drops. Used to suggest a clean merge target.
+ */
+function canonicalizeForDisplay(raw: string): string {
+  if (!raw) return raw;
+  let s = stripParens(raw);
+  const cutMatch = CUT_RE.exec(s);
+  if (cutMatch && cutMatch.index > 0) {
+    s = s.slice(0, cutMatch.index);
   }
-  return out.replace(STRIP_CHARS, '').toLowerCase();
+  s = s.replace(STRIP_PUNCT, ' ');
+  const tokens = s.split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  for (const t of tokens) {
+    const folded = foldFinals(t).toLowerCase();
+    if (BLOCKED_TOKENS.has(folded)) continue;
+    out.push(t);
+  }
+  const cleaned = out.join(' ').trim();
+  return cleaned || raw.trim();
+}
+
+export interface InstructorCluster {
+  clusterKey: string;
+  canonicalName: string;
+  rawNames: string[];
+}
+
+/**
+ * Group raw instructor names into merge clusters. Two raw names cluster when:
+ *  - their cleaned-token sets are equal (handles spelling/order variants), or
+ *  - one name's tokens are a strict subset of exactly one other name's tokens
+ *    (handles "ניר" being a short form of "ניר קציר" when there's no other Nir).
+ *
+ * Names with no surviving tokens (all-noise) are excluded.
+ * Returns only clusters that contain ≥2 distinct raw names — i.e. merge candidates.
+ */
+export function buildInstructorClusters(
+  rawCounts: Map<string, number>,
+): InstructorCluster[] {
+  interface Bucket {
+    key: string;
+    tokens: Set<string>;
+    members: Map<string, number>;
+  }
+
+  const buckets = new Map<string, Bucket>();
+  for (const [raw, count] of rawCounts) {
+    const tokens = new Set(instructorTokens(raw));
+    if (tokens.size === 0) continue;
+    const key = [...tokens].sort().join(' ');
+    let b = buckets.get(key);
+    if (!b) {
+      b = { key, tokens, members: new Map() };
+      buckets.set(key, b);
+    }
+    b.members.set(raw, (b.members.get(raw) ?? 0) + count);
+  }
+
+  const all = Array.from(buckets.values()).sort((a, b) => b.tokens.size - a.tokens.size);
+
+  // For each smaller bucket, find supersets among the larger ones.
+  const redirect = new Map<string, string>(); // smallKey → bigKey
+  for (const small of all) {
+    const supersets = all.filter(
+      (big) =>
+        big.key !== small.key &&
+        big.tokens.size > small.tokens.size &&
+        [...small.tokens].every((t) => big.tokens.has(t)),
+    );
+    if (supersets.length === 1) {
+      redirect.set(small.key, supersets[0].key);
+    }
+  }
+
+  function resolveTarget(key: string): string {
+    let cur = key;
+    const seen = new Set<string>();
+    while (redirect.has(cur)) {
+      if (seen.has(cur)) break;
+      seen.add(cur);
+      cur = redirect.get(cur)!;
+    }
+    return cur;
+  }
+
+  const merged = new Map<string, Bucket>();
+  for (const b of all) {
+    const targetKey = resolveTarget(b.key);
+    let tgt = merged.get(targetKey);
+    if (!tgt) {
+      const base = buckets.get(targetKey)!;
+      tgt = { key: targetKey, tokens: base.tokens, members: new Map() };
+      merged.set(targetKey, tgt);
+    }
+    for (const [raw, count] of b.members) {
+      tgt.members.set(raw, (tgt.members.get(raw) ?? 0) + count);
+    }
+  }
+
+  const out: InstructorCluster[] = [];
+  for (const b of merged.values()) {
+    if (b.members.size < 2) continue;
+    // Pick the raw whose cleaned form is most "complete" and least noisy.
+    const ranked = Array.from(b.members.entries())
+      .map(([raw, count]) => {
+        const cleanedTokens = instructorTokens(raw).length;
+        const totalTokens = raw.trim().split(/\s+/).filter(Boolean).length || 1;
+        return {
+          raw,
+          count,
+          cleanedTokens,
+          noiseRatio: 1 - cleanedTokens / totalTokens,
+        };
+      })
+      .sort((a, b2) => {
+        if (b2.cleanedTokens !== a.cleanedTokens) return b2.cleanedTokens - a.cleanedTokens;
+        if (b2.count !== a.count) return b2.count - a.count;
+        if (a.noiseRatio !== b2.noiseRatio) return a.noiseRatio - b2.noiseRatio;
+        return a.raw.length - b2.raw.length;
+      });
+    const canonicalName = canonicalizeForDisplay(ranked[0].raw);
+    const rawNames = Array.from(b.members.keys());
+    out.push({ clusterKey: b.key, canonicalName, rawNames });
+  }
+  return out;
 }
