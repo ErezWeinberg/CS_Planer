@@ -30,14 +30,21 @@ export const eeTrack: TrackDefinition = {
     {
       semester: 1,
       // 2021/22: Calculus 1M = 104031, Linear Algebra 1 = 104016
-      courses: ['00440102','01040031','01040016','01140071','02340117','03240033'],
+      courses: ['00440102','01040031','01040016','02340117','03240033'],
+      alternativeGroups: [
+        // 01140071 = Physics 2H (engineers); 01140074 = Physics 2 (full science) — ללא זיכוי נוסף pair
+        { courseIds: ['01140071','01140074'], defaultCourseId: '01140071', useDefaultCreditsForMandatory: true },
+      ],
     },
     {
       semester: 2,
       // 2021/22: 114032 (replaces 114081) in sem 2; no 104038/104136 yet
-      courses: ['00440252','01040013','01040035','01140075'],
+      courses: ['00440252','01040013','01040035'],
       alternativeGroups: [
-        { courseIds: ['01140032','01140081'], defaultCourseId: '01140032' },
+        // 01140032 = Physics 3H; 01140020 = Physics 3 (full science) — ללא זיכוי נוסף pair
+        { courseIds: ['01140032','01140020','01140081'], defaultCourseId: '01140032', useDefaultCreditsForMandatory: true },
+        // 01140075 = Physics 3LH (lab for engineers); 01140076 = Physics 3L (full science) — ללא זיכוי נוסף pair
+        { courseIds: ['01140075','01140076'], defaultCourseId: '01140075', useDefaultCreditsForMandatory: true },
       ],
     },
     {
@@ -76,12 +83,19 @@ export const eeTrack: TrackDefinition = {
       semesterSchedule: [
         {
           semester: 1,
-          courses: ['00440102','01040036','01040016','01140071','02340117','03240033'],
+          courses: ['00440102','01040036','01040016','02340117','03240033'],
           alternativeGroups: [
-            { courseIds: ['01140032','01140081'], defaultCourseId: '01140032' },
+            { courseIds: ['01140071','01140074'], defaultCourseId: '01140071', useDefaultCreditsForMandatory: true },
+            { courseIds: ['01140032','01140020','01140081'], defaultCourseId: '01140032', useDefaultCreditsForMandatory: true },
           ],
         },
-        { semester: 2, courses: ['00440252','01040013','01040038','01040136','01140075'] },
+        {
+          semester: 2,
+          courses: ['00440252','01040013','01040038','01040136'],
+          alternativeGroups: [
+            { courseIds: ['01140075','01140076'], defaultCourseId: '01140075', useDefaultCreditsForMandatory: true },
+          ],
+        },
         { semester: 3, courses: ['00440105','00440268','00440157','01040214','01040215','01040220','01140073'] },
         { semester: 4, courses: ['00440127','00440131','00440140','01040034'] },
         { semester: 5, courses: ['00440137','00440148','00440202','00440158','00440124'] },
@@ -96,13 +110,20 @@ export const eeTrack: TrackDefinition = {
       semesterSchedule: [
         {
           semester: 1,
-          courses: ['00440102','01040012','01140071','02340117','03240033'],
+          courses: ['00440102','01040012','02340117','03240033'],
           alternativeGroups: [
             { courseIds: ['01040016','01040064'], defaultCourseId: '01040016' },
-            { courseIds: ['01140032','01140081'], defaultCourseId: '01140032' },
+            { courseIds: ['01140071','01140074'], defaultCourseId: '01140071', useDefaultCreditsForMandatory: true },
+            { courseIds: ['01140032','01140020','01140081'], defaultCourseId: '01140032', useDefaultCreditsForMandatory: true },
           ],
         },
-        { semester: 2, courses: ['00440252','01040013','01040038','01040136','01140075'] },
+        {
+          semester: 2,
+          courses: ['00440252','01040013','01040038','01040136'],
+          alternativeGroups: [
+            { courseIds: ['01140075','01140076'], defaultCourseId: '01140075', useDefaultCreditsForMandatory: true },
+          ],
+        },
         { semester: 3, courses: ['00440105','00440268','00440157','01040214','01040215','01040220','01140073'] },
         { semester: 4, courses: ['00440127','00440131','00440140','01040034'] },
         { semester: 5, courses: ['00440137','00440148','00440202','00440158','00440124'] },
@@ -116,8 +137,21 @@ export const eeTrack: TrackDefinition = {
     2025: {
       totalCreditsRequired: 157.5,
       semesterSchedule: [
-        { semester: 1, courses: ['00440102','01040012','01040064','01140071','01140032','02340117','03240033'] },
-        { semester: 2, courses: ['00440252','01040013','01040038','01040136','01140075'] },
+        {
+          semester: 1,
+          courses: ['00440102','01040012','01040064','01140071','01140032','02340117','03240033'],
+          alternativeGroups: [
+            { courseIds: ['01140071','01140074'], defaultCourseId: '01140071', useDefaultCreditsForMandatory: true },
+            { courseIds: ['01140032','01140020'], defaultCourseId: '01140032', useDefaultCreditsForMandatory: true },
+          ],
+        },
+        {
+          semester: 2,
+          courses: ['00440252','01040013','01040038','01040136'],
+          alternativeGroups: [
+            { courseIds: ['01140075','01140076'], defaultCourseId: '01140075', useDefaultCreditsForMandatory: true },
+          ],
+        },
         { semester: 3, courses: ['00440105','00440268','00440157','01040214','01040215','01040220','01140073'] },
         { semester: 4, courses: ['00440127','00440131','00440140','01040034'] },
         { semester: 5, courses: ['00440137','00440148','00440202','00440158','00440124'] },

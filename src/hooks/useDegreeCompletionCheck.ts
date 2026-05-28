@@ -53,6 +53,9 @@ export function useDegreeCompletionCheck(
     roboticsMinorEnabled: s.roboticsMinorEnabled ?? false,
     entrepreneurshipMinorEnabled: s.entrepreneurshipMinorEnabled ?? false,
     quantumComputingMinorEnabled: s.quantumComputingMinorEnabled ?? false,
+    newLabFormatEnabled: s.newLabFormatEnabled ?? false,
+    countOnlyCompletedCourses: s.countOnlyCompletedCourses ?? false,
+    electiveCreditAssignments: s.electiveCreditAssignments ?? {},
     // Scheduling context fields
     summerSemesters: s.summerSemesters,
     semesterTypeOverrides: s.semesterTypeOverrides ?? {},
@@ -63,7 +66,15 @@ export function useDegreeCompletionCheck(
   return useMemo(() => {
     if (!trackDef) return null;
 
-    const result = computeDegreeCompletionCheck(input, courses, trackDef, catalog, weightedAverage);
+    const result = computeDegreeCompletionCheck(
+      {
+        ...input,
+        countOnlyCompleted: input.countOnlyCompletedCourses,
+        electiveCreditAssignments: input.electiveCreditAssignments,
+        newLabFormatEnabled: input.newLabFormatEnabled,
+      },
+      courses, trackDef, catalog, weightedAverage,
+    );
 
     const optimizerInput = {
       completedCourses: input.completedCourses,
