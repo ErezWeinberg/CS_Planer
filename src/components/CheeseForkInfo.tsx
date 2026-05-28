@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  buildInstructorClusters,
   extractInstructorNames,
   fetchCheeseForkFeedback,
   formatCheeseForkDate,
   formatCheeseForkSemester,
-  normalizeInstructorName,
   peekCheeseForkFeedback,
   type CheeseForkFeedback,
   type CheeseForkPost,
@@ -70,9 +70,10 @@ function buildOptions(posts: ParsedPost[], pick: (p: ParsedPost) => string | nul
 }
 
 /**
- * Group raw names by normalized form. Surface clusters with ≥2 distinct raw
- * names that aren't already fully merged to one canonical, and haven't been
- * dismissed by the user.
+ * Group raw names into merge clusters using token-set equality plus
+ * one-direction strict-subset matching (so "ניר" can merge into "ניר קציר"
+ * when that's the only superset). Skips clusters the user already dismissed
+ * or already mapped to a single canonical name via aliases.
  */
 function buildSuggestions(
   posts: ParsedPost[],
@@ -86,28 +87,17 @@ function buildSuggestions(
     if (!raw) continue;
     rawCounts.set(raw, (rawCounts.get(raw) ?? 0) + 1);
   }
-  const clusters = new Map<string, Map<string, number>>();
-  for (const [raw, count] of rawCounts) {
-    const key = normalizeInstructorName(raw);
-    if (!key) continue;
-    if (!clusters.has(key)) clusters.set(key, new Map());
-    clusters.get(key)!.set(raw, count);
-  }
+  const clusters = buildInstructorClusters(rawCounts);
   const suggestions: MergeSuggestion[] = [];
-  for (const [clusterKey, members] of clusters) {
-    if (members.size < 2) continue;
-    if (dismissed.includes(clusterKey)) continue;
-    const canonicalNames = new Set(
-      Array.from(members.keys()).map((raw) => aliases[raw] ?? raw),
-    );
-    if (canonicalNames.size <= 1) continue; // already merged
-    const sorted = Array.from(members.entries()).sort((a, b) => {
-      if (b[1] !== a[1]) return b[1] - a[1];
-      return b[0].length - a[0].length;
+  for (const cluster of clusters) {
+    if (dismissed.includes(cluster.clusterKey)) continue;
+    const canonicalNames = new Set(cluster.rawNames.map((raw) => aliases[raw] ?? raw));
+    if (canonicalNames.size <= 1) continue; // already merged via aliases
+    suggestions.push({
+      clusterKey: cluster.clusterKey,
+      rawNames: cluster.rawNames,
+      canonicalName: cluster.canonicalName,
     });
-    const canonicalName = sorted[0][0];
-    const rawNames = sorted.map(([n]) => n);
-    suggestions.push({ clusterKey, rawNames, canonicalName });
   }
   return suggestions;
 }
@@ -154,8 +144,9 @@ function FilterChip({ label, active, open, onClick, onClear }: FilterChipProps) 
 
 interface FilterMenuPanelProps {
   options: NameOption[];
-  selected: string | null;
-  onSelect: (name: string | null) => void;
+  selected: Set<string>;
+  onToggle: (name: string) => void;
+  onClear: () => void;
   suggestions: MergeSuggestion[];
   onMerge: (s: MergeSuggestion) => void;
   onDismiss: (s: MergeSuggestion) => void;
@@ -163,15 +154,15 @@ interface FilterMenuPanelProps {
 }
 
 function FilterMenuPanel({
-  options, selected, onSelect, suggestions, onMerge, onDismiss, emptyLabel,
+  options, selected, onToggle, onClear, suggestions, onMerge, onDismiss, emptyLabel,
 }: FilterMenuPanelProps) {
   return (
     <div className="mt-1 mb-2 border border-gray-200 rounded-md bg-white p-1.5 text-xs">
       <button
         type="button"
-        onClick={() => onSelect(null)}
+        onClick={onClear}
         className={`block w-full text-start px-2 py-1 rounded ${
-          selected === null ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50'
+          selected.size === 0 ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50'
         }`}
       >
         הכל
@@ -179,19 +170,32 @@ function FilterMenuPanel({
       {options.length === 0 ? (
         <div className="px-2 py-1 text-gray-400 italic">{emptyLabel}</div>
       ) : (
-        options.map((opt) => (
-          <button
-            type="button"
-            key={opt.name}
-            onClick={() => onSelect(opt.name)}
-            className={`flex w-full items-center justify-between px-2 py-1 rounded ${
-              selected === opt.name ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <span className="truncate">{opt.name}</span>
-            <span className="text-gray-400 ms-2">{opt.count}</span>
-          </button>
-        ))
+        options.map((opt) => {
+          const isOn = selected.has(opt.name);
+          return (
+            <button
+              type="button"
+              key={opt.name}
+              onClick={() => onToggle(opt.name)}
+              className={`flex w-full items-center justify-between px-2 py-1 rounded ${
+                isOn ? 'bg-sky-50 text-sky-700' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <span className="flex items-center gap-1.5 min-w-0">
+                <span
+                  className={`inline-block w-3 h-3 border rounded-sm shrink-0 ${
+                    isOn ? 'bg-sky-600 border-sky-600 text-white' : 'border-gray-300'
+                  }`}
+                  aria-hidden
+                >
+                  {isOn && <span className="block text-[10px] leading-3 text-center">✓</span>}
+                </span>
+                <span className="truncate">{opt.name}</span>
+              </span>
+              <span className="text-gray-400 ms-2">{opt.count}</span>
+            </button>
+          );
+        })
       )}
       {suggestions.length > 0 && (
         <div className="mt-1.5 pt-1.5 border-t border-gray-100 space-y-1.5">
@@ -231,8 +235,8 @@ export function CheeseForkInfo({ courseId }: Props) {
     resolveCached(peekCheeseForkFeedback(courseId)),
   );
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedLecturer, setSelectedLecturer] = useState<string | null>(null);
-  const [selectedTA, setSelectedTA] = useState<string | null>(null);
+  const [selectedLecturers, setSelectedLecturers] = useState<Set<string>>(() => new Set());
+  const [selectedTAs, setSelectedTAs] = useState<Set<string>>(() => new Set());
   const [openMenu, setOpenMenu] = useState<Role | null>(null);
 
   const lecturerAliases = usePlanStore(
@@ -252,8 +256,8 @@ export function CheeseForkInfo({ courseId }: Props) {
     setTrackedId(courseId);
     setState(resolveCached(peekCheeseForkFeedback(courseId)));
     setCurrentIndex(0);
-    setSelectedLecturer(null);
-    setSelectedTA(null);
+    setSelectedLecturers(new Set());
+    setSelectedTAs(new Set());
     setOpenMenu(null);
   }
 
@@ -299,14 +303,20 @@ export function CheeseForkInfo({ courseId }: Props) {
 
   const filteredPosts = useMemo(() => {
     let arr = parsedPosts;
-    if (selectedLecturer) {
-      arr = arr.filter((p) => applyAlias(p.lecturerRaw, lecturerAliases) === selectedLecturer);
+    if (selectedLecturers.size > 0) {
+      arr = arr.filter((p) => {
+        const name = applyAlias(p.lecturerRaw, lecturerAliases);
+        return name !== null && selectedLecturers.has(name);
+      });
     }
-    if (selectedTA) {
-      arr = arr.filter((p) => applyAlias(p.taRaw, taAliases) === selectedTA);
+    if (selectedTAs.size > 0) {
+      arr = arr.filter((p) => {
+        const name = applyAlias(p.taRaw, taAliases);
+        return name !== null && selectedTAs.has(name);
+      });
     }
     return [...arr].sort((a, b) => b.post.timestamp - a.post.timestamp).map((p) => p.post);
-  }, [parsedPosts, selectedLecturer, selectedTA, lecturerAliases, taAliases]);
+  }, [parsedPosts, selectedLecturers, selectedTAs, lecturerAliases, taAliases]);
 
   if (state.status === 'hidden') return null;
 
@@ -324,7 +334,7 @@ export function CheeseForkInfo({ courseId }: Props) {
   const hasPosts = filteredPosts.length > 0;
   const canGoNewer = hasPosts && safeIndex > 0;
   const canGoOlder = hasPosts && safeIndex < filteredPosts.length - 1;
-  const hasFilter = selectedLecturer !== null || selectedTA !== null;
+  const hasFilter = selectedLecturers.size > 0 || selectedTAs.size > 0;
   const totalAvailable = posts.length;
   const showFilterRow =
     state.status === 'ready' &&
@@ -337,6 +347,21 @@ export function CheeseForkInfo({ courseId }: Props) {
       if (raw !== s.canonicalName) mapping[raw] = s.canonicalName;
     }
     mergeReviewLecturerAliases(courseId, mapping);
+    // Remap any active selections so the merge doesn't silently drop them.
+    setSelectedLecturers((prev) => {
+      if (prev.size === 0) return prev;
+      let changed = false;
+      const next = new Set<string>();
+      for (const name of prev) {
+        if (s.rawNames.includes(name) && name !== s.canonicalName) {
+          next.add(s.canonicalName);
+          changed = true;
+        } else {
+          next.add(name);
+        }
+      }
+      return changed ? next : prev;
+    });
     setCurrentIndex(0);
   };
   const handleMergeTA = (s: MergeSuggestion) => {
@@ -345,18 +370,57 @@ export function CheeseForkInfo({ courseId }: Props) {
       if (raw !== s.canonicalName) mapping[raw] = s.canonicalName;
     }
     mergeReviewTAAliases(courseId, mapping);
+    setSelectedTAs((prev) => {
+      if (prev.size === 0) return prev;
+      let changed = false;
+      const next = new Set<string>();
+      for (const name of prev) {
+        if (s.rawNames.includes(name) && name !== s.canonicalName) {
+          next.add(s.canonicalName);
+          changed = true;
+        } else {
+          next.add(name);
+        }
+      }
+      return changed ? next : prev;
+    });
     setCurrentIndex(0);
   };
-  const handleSelectLecturer = (name: string | null) => {
-    setSelectedLecturer(name);
+  const toggleLecturer = (name: string) => {
+    setSelectedLecturers((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
     setCurrentIndex(0);
-    setOpenMenu(null);
   };
-  const handleSelectTA = (name: string | null) => {
-    setSelectedTA(name);
+  const toggleTA = (name: string) => {
+    setSelectedTAs((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
     setCurrentIndex(0);
-    setOpenMenu(null);
   };
+  const clearLecturers = () => {
+    setSelectedLecturers(new Set());
+    setCurrentIndex(0);
+  };
+  const clearTAs = () => {
+    setSelectedTAs(new Set());
+    setCurrentIndex(0);
+  };
+
+  const lecturerChipLabel = selectedLecturers.size === 0
+    ? 'מרצה'
+    : selectedLecturers.size === 1
+      ? `מרצה: ${selectedLecturers.values().next().value}`
+      : `מרצה (${selectedLecturers.size})`;
+  const taChipLabel = selectedTAs.size === 0
+    ? 'מתרגל'
+    : selectedTAs.size === 1
+      ? `מתרגל: ${selectedTAs.values().next().value}`
+      : `מתרגל (${selectedTAs.size})`;
 
   return (
     <div className="mb-4 border border-gray-200 rounded-lg p-3">
@@ -397,18 +461,18 @@ export function CheeseForkInfo({ courseId }: Props) {
             <>
               <div className="flex flex-wrap gap-1.5 mb-1 items-center">
                 <FilterChip
-                  label={selectedLecturer ? `מרצה: ${selectedLecturer}` : 'מרצה'}
-                  active={selectedLecturer !== null}
+                  label={lecturerChipLabel}
+                  active={selectedLecturers.size > 0}
                   open={openMenu === 'lecturer'}
                   onClick={() => setOpenMenu(openMenu === 'lecturer' ? null : 'lecturer')}
-                  onClear={selectedLecturer ? () => handleSelectLecturer(null) : undefined}
+                  onClear={selectedLecturers.size > 0 ? clearLecturers : undefined}
                 />
                 <FilterChip
-                  label={selectedTA ? `מתרגל: ${selectedTA}` : 'מתרגל'}
-                  active={selectedTA !== null}
+                  label={taChipLabel}
+                  active={selectedTAs.size > 0}
                   open={openMenu === 'ta'}
                   onClick={() => setOpenMenu(openMenu === 'ta' ? null : 'ta')}
-                  onClear={selectedTA ? () => handleSelectTA(null) : undefined}
+                  onClear={selectedTAs.size > 0 ? clearTAs : undefined}
                 />
                 {hasFilter && (
                   <span className="text-xs text-gray-400">
@@ -420,8 +484,9 @@ export function CheeseForkInfo({ courseId }: Props) {
               {openMenu === 'lecturer' && (
                 <FilterMenuPanel
                   options={lecturerOptions}
-                  selected={selectedLecturer}
-                  onSelect={handleSelectLecturer}
+                  selected={selectedLecturers}
+                  onToggle={toggleLecturer}
+                  onClear={clearLecturers}
                   suggestions={lecturerSuggestions}
                   onMerge={handleMergeLecturer}
                   onDismiss={(s) => dismissReviewNameSuggestion(courseId, s.clusterKey)}
@@ -431,8 +496,9 @@ export function CheeseForkInfo({ courseId }: Props) {
               {openMenu === 'ta' && (
                 <FilterMenuPanel
                   options={taOptions}
-                  selected={selectedTA}
-                  onSelect={handleSelectTA}
+                  selected={selectedTAs}
+                  onToggle={toggleTA}
+                  onClear={clearTAs}
                   suggestions={taSuggestions}
                   onMerge={handleMergeTA}
                   onDismiss={(s) => dismissReviewNameSuggestion(courseId, s.clusterKey)}
