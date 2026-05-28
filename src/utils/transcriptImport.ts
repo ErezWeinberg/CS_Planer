@@ -67,6 +67,37 @@ export function gradesRecordFromTranscriptPayload(courses: unknown): Record<stri
   return out;
 }
 
+type SemesterParsed = { year: number; season: number }; // 0=Winter, 1=Spring, 2=Summer
+
+function parseSemesterLabel(label: string): SemesterParsed | null {
+  // Handles both Technion transcript formats:
+  //   New: "2021-2022 Winter"  (4-digit second year)
+  //   Old: "2021-22 Winter"    (2-digit second year, older PDF style)
+  // Also handles "Summer" — e.g. "2022-2023 Summer"
+  const m = label.match(/^(\d{4})-\d{2,4}\s+(Winter|Spring|Summer)$/i);
+  if (!m) return null;
+  const season = /winter/i.test(m[2]) ? 0 : /spring/i.test(m[2]) ? 1 : 2;
+  return { year: parseInt(m[1], 10), season };
+}
+
+/**
+ * Converts transcript semester labels (e.g. "2021-2022 Winter") into
+ * sequential slot numbers starting at 1, ordered chronologically.
+ * Unrecognised/null labels are not included — callers fall back to slot 0.
+ */
+export function transcriptSemesterToSlot(labels: Iterable<string | null>): Map<string, number> {
+  const unique = new Map<string, SemesterParsed>();
+  for (const label of labels) {
+    if (!label || unique.has(label)) continue;
+    const parsed = parseSemesterLabel(label);
+    if (parsed) unique.set(label, parsed);
+  }
+  const sorted = [...unique.entries()].sort(
+    ([, a], [, b]) => a.year !== b.year ? a.year - b.year : a.season - b.season,
+  );
+  return new Map(sorted.map(([label], i) => [label, i + 1]));
+}
+
 /** Converts a raw courses payload into a `courseId → {grade, semester}` map. */
 export function gradesWithSemesterFromTranscriptPayload(
   courses: unknown,
