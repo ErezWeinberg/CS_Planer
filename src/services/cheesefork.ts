@@ -153,3 +153,52 @@ export function formatCheeseForkDate(timestampMs: number): string {
   if (!timestampMs || isNaN(timestampMs)) return '';
   return dateFormatter.format(new Date(timestampMs));
 }
+
+const LECTURER_LABEL = /שם\s+המרצה\s*:\s*([^\n\r]+)/;
+const TA_LABEL = /שם\s+המתרגל(?:\/ת|ת)?\s*:\s*([^\n\r]+)/;
+const MAX_NAME_LEN = 80;
+
+function cleanExtractedName(raw: string | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  // Bound the captured tail so we don't accidentally grab a paragraph.
+  return trimmed.slice(0, MAX_NAME_LEN).trim() || null;
+}
+
+/**
+ * Extract a lecturer and/or TA name from a CheeseFork review body.
+ * Reviewers conventionally tag them as `שם המרצה: <name>` / `שם המתרגל/ת: <name>`.
+ * Returns null for fields that aren't tagged; matches are tail-trimmed to a single line.
+ */
+export function extractInstructorNames(
+  text: string,
+): { lecturer: string | null; ta: string | null } {
+  if (!text) return { lecturer: null, ta: null };
+  const lecMatch = LECTURER_LABEL.exec(text);
+  const taMatch = TA_LABEL.exec(text);
+  return {
+    lecturer: cleanExtractedName(lecMatch?.[1]),
+    ta: cleanExtractedName(taMatch?.[1]),
+  };
+}
+
+const HEBREW_FINAL_MAP: Record<string, string> = {
+  'ם': 'מ', 'ן': 'נ', 'ך': 'כ', 'ף': 'פ', 'ץ': 'צ',
+};
+// Hebrew diacritics (niqqud + cantillation) range, plus quote-like marks.
+const STRIP_CHARS = /[֑-ׇ\s_.\-־׳״"'`]/g;
+
+/**
+ * Collapse a raw instructor name into a grouping key for deduplication.
+ * Strips whitespace, underscores, hyphens, punctuation, Hebrew diacritics, and
+ * folds final letter forms (ם→מ etc). Output is for clustering only, not display.
+ */
+export function normalizeInstructorName(name: string): string {
+  if (!name) return '';
+  let out = '';
+  for (const ch of name) {
+    out += HEBREW_FINAL_MAP[ch] ?? ch;
+  }
+  return out.replace(STRIP_CHARS, '').toLowerCase();
+}

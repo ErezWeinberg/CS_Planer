@@ -314,4 +314,7 @@ export interface StudentPlan {
   targetGraduationSemesterId?: number | null;  // semesterId from semesterOrder the student wants to graduate in
   loadProfile?: 'working' | 'fulltime';  // student's load preference for smart scheduling
   countOnlyCompletedCourses?: boolean;  // when true, only completed/graded courses count toward requirements
+  reviewLecturerAliases?: Record<string, Record<string, string>>;  // courseId → { rawLecturerName → canonicalName } for CheeseFork review filtering
+  reviewTAAliases?: Record<string, Record<string, string>>;  // courseId → { rawTAName → canonicalName }
+  reviewDismissedNameSuggestions?: Record<string, string[]>;  // courseId → normalized cluster keys the user declined to merge
 }

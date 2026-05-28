@@ -74,6 +74,9 @@ interface PlanState extends StudentPlan {
   setCourseChainAssignment: (courseId: string, chainGroupId: string | null) => void;
   setElectiveCreditAssignment: (courseId: string, area: ElectiveCreditArea | null) => void;
   setNoAdditionalCreditOverride: (pairKey: string, courseId: string | null) => void;
+  mergeReviewLecturerAliases: (courseId: string, mapping: Record<string, string>) => void;
+  mergeReviewTAAliases: (courseId: string, mapping: Record<string, string>) => void;
+  dismissReviewNameSuggestion: (courseId: string, clusterKey: string) => void;
   toggleRoboticsMinor: () => void;
   toggleEntrepreneurshipMinor: () => void;
   toggleQuantumComputingMinor: () => void;
@@ -1030,6 +1033,50 @@ export const usePlanStore = create<PlanState>()(
             return { noAdditionalCreditOverrides: rest };
           }
           return { noAdditionalCreditOverrides: { ...current, [pairKey]: courseId } };
+        }),
+
+      mergeReviewLecturerAliases: (courseId, mapping) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          const all = state.reviewLecturerAliases ?? {};
+          const next = { ...(all[courseId] ?? {}) };
+          for (const [raw, canonical] of Object.entries(mapping)) {
+            if (!canonical || raw === canonical) {
+              delete next[raw];
+            } else {
+              next[raw] = canonical;
+            }
+          }
+          return { reviewLecturerAliases: { ...all, [courseId]: next } };
+        }),
+
+      mergeReviewTAAliases: (courseId, mapping) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          const all = state.reviewTAAliases ?? {};
+          const next = { ...(all[courseId] ?? {}) };
+          for (const [raw, canonical] of Object.entries(mapping)) {
+            if (!canonical || raw === canonical) {
+              delete next[raw];
+            } else {
+              next[raw] = canonical;
+            }
+          }
+          return { reviewTAAliases: { ...all, [courseId]: next } };
+        }),
+
+      dismissReviewNameSuggestion: (courseId, clusterKey) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          const all = state.reviewDismissedNameSuggestions ?? {};
+          const existing = all[courseId] ?? [];
+          if (existing.includes(clusterKey)) return state;
+          return {
+            reviewDismissedNameSuggestions: {
+              ...all,
+              [courseId]: [...existing, clusterKey],
+            },
+          };
         }),
 
       toggleRoboticsMinor: () =>
