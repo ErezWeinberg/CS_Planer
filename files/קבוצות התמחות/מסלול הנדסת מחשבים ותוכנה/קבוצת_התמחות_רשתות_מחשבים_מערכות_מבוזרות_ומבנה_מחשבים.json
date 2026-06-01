@@ -19,6 +19,11 @@
       "category": "elective"
     },
     {
+      "course_number": "00460007",
+      "course_name": "נושאים נבחרים ברשתות מחשבים למערכות למידה",
+      "category": "elective"
+    },
+    {
       "course_number": "00460205",
       "course_name": "מבוא לתורת הקידוד בתקשורת",
       "category": "elective"
@@ -182,6 +187,10 @@
         {
           "course_number": "02360350",
           "course_name": "הגנה ברשתות"
+        },
+        {
+          "course_number": "00460007",
+          "course_name": "נושאים נבחרים ברשתות מחשבים למערכות למידה"
         }
       ]
     },

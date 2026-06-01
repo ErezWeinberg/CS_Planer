@@ -29,6 +29,11 @@
       "category": "elective"
     },
     {
+      "course_number": "00460007",
+      "course_name": "נושאים נבחרים ברשתות מחשבים למערכות למידה",
+      "category": "elective"
+    },
+    {
       "course_number": "00460237",
       "course_name": "מעגלים משולבים - מבוא ל-VLSI",
       "category": "elective"
@@ -263,6 +268,10 @@
         {
           "course_number": "00460881",
           "course_name": "אימות פורמלי לחומרה"
+        },
+        {
+          "course_number": "00460007",
+          "course_name": "נושאים נבחרים ברשתות מחשבים למערכות למידה"
         }
       ]
     },
