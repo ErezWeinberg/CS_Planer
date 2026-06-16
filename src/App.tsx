@@ -113,6 +113,35 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     addSemester: state.addSemester,
     maxSemester: state.maxSemester,
   })));
+
+  // Dark mode — stored in a dedicated localStorage key, not in Zustand,
+  // so it doesn't pull the store into the entry bundle via Root.tsx.
+  type DarkModeValue = 'light' | 'dark' | 'system';
+  const DARK_MODE_KEY = 'ee-dark-mode';
+  const [darkMode, setDarkModeState] = useState<DarkModeValue>(() => {
+    const stored = localStorage.getItem(DARK_MODE_KEY);
+    return (stored === 'dark' || stored === 'light' || stored === 'system') ? stored : 'system';
+  });
+  const setDarkMode = useCallback((mode: DarkModeValue) => {
+    localStorage.setItem(DARK_MODE_KEY, mode);
+    setDarkModeState(mode);
+    const html = document.documentElement;
+    if (mode === 'dark') html.classList.add('dark');
+    else if (mode === 'light') html.classList.remove('dark');
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) html.classList.add('dark');
+    else html.classList.remove('dark');
+  }, []);
+  useEffect(() => {
+    if (darkMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [darkMode]);
+
   const specializationCatalog = getTrackSpecializationCatalog(trackDef.id, catalogYear);
   const specs = specializationCatalog.groups;
   const weightedAverage = useWeightedAverage(courses);
@@ -647,10 +676,10 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
         <div
           className={`sticky top-0 z-20 px-4 py-2 text-xs text-center flex flex-wrap items-center justify-center gap-3 ${
             shareMode.isShareReview
-              ? 'bg-indigo-50 border-b border-indigo-200 text-indigo-800'
+              ? 'bg-indigo-50 dark:bg-indigo-950 border-b border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200'
               : shareMode.canEdit
-                ? 'bg-amber-50 border-b border-amber-200 text-amber-800'
-                : 'bg-blue-50 border-b border-blue-200 text-blue-800'
+                ? 'bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+                : 'bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
           }`}
           dir="rtl"
         >
@@ -741,6 +770,15 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
                   )}
                 </button>
               )}
+              <button
+                onClick={() => setDarkMode(darkMode === 'dark' ? 'light' : darkMode === 'light' ? 'system' : 'dark')}
+                className="text-sm border px-2 py-1.5 rounded-lg transition-colors"
+                style={{ color: 'rgba(255,255,255,0.75)', borderColor: 'rgba(255,255,255,0.2)' }}
+                title={darkMode === 'dark' ? 'מצב כהה — לחץ למצב בהיר' : darkMode === 'light' ? 'מצב בהיר — לחץ למצב אוטומטי' : 'אוטומטי — לחץ למצב כהה'}
+                aria-label="החלף מצב תאורה"
+              >
+                {darkMode === 'dark' ? '🌙' : darkMode === 'light' ? '☀️' : '🌓'}
+              </button>
               <button
                 onClick={undo}
                 disabled={_history.length === 0}
