@@ -6,7 +6,7 @@ export const eeTrack: TrackDefinition = {
   description: 'המסלול הרחב ביותר בפקולטה. מאפשר התמחות בכל תחומי הנדסת החשמל והאלקטרוניקה',
   // Base = entry year 2021/22
   totalCreditsRequired: 159,
-  mandatoryCredits: 106,
+  mandatoryCredits: 107,
   electiveCreditsRequired: 39.5,
   generalCreditsRequired: 12,
   specializationGroupsRequired: 3,
@@ -74,12 +74,13 @@ export const eeTrack: TrackDefinition = {
 
   yearVariants: {
     // 2021/22: base schedule (no overrides)
-    2021: {},
+    2021: { mandatoryCredits: 107 },
 
     // 2022/23: Calculus 1M = 104036; 114032 moves to sem 1;
     //          sem 2 gains 104038 + 104136 (drops 104035); sem 3 → 104214/104215/104220
     2022: {
       totalCreditsRequired: 159.5,
+      mandatoryCredits: 107.5,
       semesterSchedule: [
         {
           semester: 1,
@@ -107,6 +108,7 @@ export const eeTrack: TrackDefinition = {
     // 2023/24: Calculus 1M = 104012; 104016 replaces 104064; 114032 replaces 114081 (still in alt group)
     2023: {
       totalCreditsRequired: 157.5,
+      mandatoryCredits: 104,
       semesterSchedule: [
         {
           semester: 1,
@@ -136,6 +138,7 @@ export const eeTrack: TrackDefinition = {
     //          sem 6/7 simplified (440159 and 440166 dropped)
     2025: {
       totalCreditsRequired: 157.5,
+      mandatoryCredits: 106,
       semesterSchedule: [
         {
           semester: 1,
