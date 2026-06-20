@@ -3,11 +3,15 @@ import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
 import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';
 import type { ContainingSubstitution } from '../domain/containingCourse';
+import { getDownstreamDependents, isCourseRelevantToTrack } from '../domain/downstreamDependents';
 import { usePlanStore, gradeKey } from '../store/planStore';
 import { getTrackSpecializationCatalog } from '../domain/specializations';
 import { CheeseForkInfo } from './CheeseForkInfo';
 import { CourseGradeStats } from './CourseGradeStats';
 import { getTrackDefinition } from '../data/tracks';
+import { getVisibleMandatoryCourseIds } from '../data/tracks/semesterSchedule';
+
+const INDIRECT_DISPLAY_CAP = 15;
 
 interface Props {
   course: SapCourse;
@@ -63,10 +67,24 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
       }));
   }, [trackId, course.id]);
 
+  const trackDef = useMemo(() => getTrackDefinition(trackId), [trackId]);
+
   const isCoreCandidate = useMemo(() => {
-    const trackDef = getTrackDefinition(trackId);
     return trackDef?.coreRequirement?.courses.includes(course.id) ?? false;
-  }, [trackId, course.id]);
+  }, [trackDef, course.id]);
+
+  const mandatoryIds = useMemo(
+    () => (trackDef ? getVisibleMandatoryCourseIds(trackDef, courses) : new Set<string>()),
+    [trackDef, courses],
+  );
+  const specializationIds = useMemo(
+    () => new Set(
+      trackId
+        ? getTrackSpecializationCatalog(trackId).groups.flatMap((g) => [...g.mandatoryCourses, ...g.electiveCourses])
+        : [],
+    ),
+    [trackId],
+  );
 
   const effectiveId = instanceKey ?? course.id;
   const gKey = gradeKey(effectiveId, semester);
@@ -77,13 +95,44 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
   const [gradeInput, setGradeInput] = useState(currentGrade !== undefined ? String(currentGrade) : '');
   const [subSearch, setSubSearch] = useState('');
   const [customSearch, setCustomSearch] = useState('');
+  const [downstreamOpen, setDownstreamOpen] = useState(false);
+  const [prereqOpen, setPrereqOpen] = useState(false);
   const deferredSubSearch = useDeferredValue(subSearch);
   const deferredCustomSearch = useDeferredValue(customSearch);
+
+  const rawDownstream = useMemo(
+    () => getDownstreamDependents(course.id, courses),
+    [course.id, courses],
+  );
 
   const allInPlan = useMemo(
     () => new Set([...completedCourses, ...Object.values(semesters).flat()]),
     [completedCourses, semesters]
   );
+
+  const relevanceContext = useMemo(
+    () => ({ mandatoryIds, specializationIds, trackDef: trackDef ?? null }),
+    [mandatoryIds, specializationIds, trackDef],
+  );
+
+  const downstreamDirect = useMemo(() => {
+    return rawDownstream.direct
+      .filter((c) => allInPlan.has(c.id) || isCourseRelevantToTrack(c, relevanceContext))
+      .sort((a, b) =>
+        Number(allInPlan.has(b.id)) - Number(allInPlan.has(a.id)) || a.name.localeCompare(b.name, 'he'));
+  }, [rawDownstream.direct, allInPlan, relevanceContext]);
+
+  const downstreamIndirectAll = useMemo(() => {
+    return rawDownstream.indirect
+      .filter((d) => allInPlan.has(d.course.id) || isCourseRelevantToTrack(d.course, relevanceContext))
+      .sort((a, b) =>
+        Number(allInPlan.has(b.course.id)) - Number(allInPlan.has(a.course.id)) ||
+        a.course.name.localeCompare(b.course.name, 'he'));
+  }, [rawDownstream.indirect, allInPlan, relevanceContext]);
+
+  const downstreamIndirect = downstreamIndirectAll.slice(0, INDIRECT_DISPLAY_CAP);
+  const downstreamIndirectTruncated = Math.max(0, downstreamIndirectAll.length - INDIRECT_DISPLAY_CAP);
+  const downstreamTotal = downstreamDirect.length + downstreamIndirectAll.length;
   const searchableCourses = useMemo(
     () => Array.from(courses.values()).map((candidate) => ({
       course: candidate,
@@ -276,16 +325,51 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
           </div>
         )}
 
-        {/* Prerequisites section */}
+        {/* Prerequisites + substitution section */}
         <div className="mb-4 border border-gray-200 rounded-lg p-3">
-          <p className="text-xs font-semibold text-gray-700 mb-2">תנאי קדם</p>
+          {prereqs.length === 0 && !subTargetCourse && (
+            <>
+              <p className="text-xs font-semibold text-gray-700 mb-2">תנאי קדם</p>
+              <p className="text-xs text-gray-400 italic">אין תנאי קדם</p>
+            </>
+          )}
 
-          {prereqs.length === 0 && (
-            <p className="text-xs text-gray-400 italic">אין תנאי קדם</p>
+          {prereqs.length === 0 && subTargetCourse && (
+            <button
+              onClick={() => setPrereqOpen((o) => !o)}
+              className="w-full flex items-center justify-between text-xs text-gray-700 hover:text-gray-900"
+            >
+              <span className="font-semibold">
+                תנאי קדם <span className="text-gray-400 font-normal">— מוחלף ע״י {subTargetCourse.name}</span>
+              </span>
+              <span className="text-gray-400">{prereqOpen ? '▴' : '▾'}</span>
+            </button>
           )}
 
           {prereqs.length > 0 && (
-            <div className="space-y-1">
+            <button
+              onClick={() => setPrereqOpen((o) => !o)}
+              className="w-full flex items-center justify-between text-xs text-gray-700 hover:text-gray-900"
+            >
+              <span className="font-semibold">
+                תנאי קדם{' '}
+                <span className="text-gray-400 font-normal">
+                  —{' '}
+                  {subTargetCourse
+                    ? `מוחלף ע״י ${subTargetCourse.name}`
+                    : mode === 'auto'
+                    ? 'אוטומטי'
+                    : mode === 'custom'
+                    ? 'הרכב מותאם'
+                    : `אפשרות ${mode + 1} נבחרה`}
+                </span>
+              </span>
+              <span className="text-gray-400">{prereqOpen ? '▴' : '▾'}</span>
+            </button>
+          )}
+
+          {prereqOpen && prereqs.length > 0 && (
+            <div className="space-y-1 mt-2">
               {/* אוטומטי */}
               <label className="flex items-start gap-2 p-1.5 rounded cursor-pointer hover:bg-gray-50">
                 <input
@@ -405,6 +489,136 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               )}
             </div>
           )}
+
+          {prereqOpen && (
+            <>
+              <hr className="my-2 border-gray-100" />
+              <p className="text-xs font-medium text-gray-500 mb-2">מחליף קדם</p>
+              <p className="text-xs text-gray-400 mb-2 leading-relaxed">
+                אם קורס זה שקול לקורס אחר בטכניון, בחר אותו כדי שיתפוס את מקומו בבדיקת קדמים.
+              </p>
+              {subTargetCourse ? (
+                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                  <div>
+                    <p className="text-xs font-medium text-blue-800">{subTargetCourse.name}</p>
+                    <p className="text-xs text-blue-500">{subTargetCourse.id}</p>
+                  </div>
+                  <button
+                    onClick={() => setSubstitution(course.id, null)}
+                    className="text-blue-400 hover:text-red-500 text-sm font-bold mr-1 transition-colors"
+                  >✕</button>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    type="text"
+                    value={subSearch}
+                    onChange={(e) => setSubSearch(e.target.value)}
+                    placeholder="חפש קורס לפי שם או מספר..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400 text-right"
+                  />
+                  {subResults.length > 0 && (
+                    <ul className="mt-1.5 border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
+                      {subResults.map((c) => (
+                        <li key={c.id}>
+                          <button
+                            className="w-full text-right px-3 py-2 text-xs hover:bg-blue-50 transition-colors"
+                            onClick={() => { setSubstitution(course.id, c.id); setSubSearch(''); }}
+                          >
+                            <span className="font-medium text-gray-800">{c.name}</span>
+                            <span className="text-gray-400 mr-1"> ({c.id})</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Downstream dependents section */}
+        <div className="mb-4 border border-gray-200 rounded-lg p-3">
+          <p className="text-xs font-semibold text-gray-700 mb-2">מה תלוי בקורס זה</p>
+
+          {downstreamTotal === 0 && (
+            <p className="text-xs text-gray-400 italic">אין קורסים שתלויים בקורס זה</p>
+          )}
+
+          {downstreamTotal > 0 && (
+            <div>
+              <button
+                onClick={() => setDownstreamOpen((o) => !o)}
+                className="w-full flex items-center justify-between text-xs text-gray-600 hover:text-gray-800"
+              >
+                <span>
+                  {downstreamTotal} קורסים תלויים בקורס זה
+                  {' '}
+                  ({downstreamDirect.length} ישירות, {downstreamIndirectAll.length} בעקיפין)
+                </span>
+                <span className="text-gray-400">{downstreamOpen ? '▴' : '▾'}</span>
+              </button>
+
+              {downstreamOpen && (
+                <div className="mt-2 space-y-3">
+                  {downstreamDirect.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-1">תלות ישירה</p>
+                      <ul className="space-y-1">
+                        {downstreamDirect.map((dep) => {
+                          const inPlan = allInPlan.has(dep.id);
+                          return (
+                            <li
+                              key={dep.id}
+                              className={`flex items-center justify-between gap-2 text-xs px-2 py-1 rounded border ${
+                                inPlan ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                              }`}
+                            >
+                              <span className={inPlan ? 'text-green-700' : 'text-gray-700'}>{dep.name}</span>
+                              {inPlan && (
+                                <span className="text-xs font-medium text-green-600 shrink-0">✓ בתכנית</span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  {downstreamIndirect.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-1">תלות בעקיפין</p>
+                      <ul className="space-y-1">
+                        {downstreamIndirect.map(({ course: dep, viaName }) => {
+                          const inPlan = allInPlan.has(dep.id);
+                          return (
+                            <li
+                              key={dep.id}
+                              className={`flex items-center justify-between gap-2 text-xs px-2 py-1 rounded border border-dashed ${
+                                inPlan ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <p className={inPlan ? 'text-green-700' : 'text-gray-700'}>{dep.name}</p>
+                                <p className="text-xs text-gray-400">via {viaName}</p>
+                              </div>
+                              {inPlan && (
+                                <span className="text-xs font-medium text-green-600 shrink-0">✓ בתכנית</span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      {downstreamIndirectTruncated > 0 && (
+                        <p className="text-xs text-gray-400 mt-1">ועוד {downstreamIndirectTruncated} קורסים נוספים</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {noAdditionalCreditConflicts.length > 0 && (
@@ -463,51 +677,6 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
             </p>
           </div>
         )}
-
-        {/* Substitution section */}
-        <div className="mb-4 border border-gray-200 rounded-lg p-3">
-          <p className="text-xs font-semibold text-gray-700 mb-2">מחליף קדם</p>
-          <p className="text-xs text-gray-400 mb-2 leading-relaxed">
-            אם קורס זה שקול לקורס אחר בטכניון, בחר אותו כדי שיתפוס את מקומו בבדיקת קדמים.
-          </p>
-          {subTargetCourse ? (
-            <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-              <div>
-                <p className="text-xs font-medium text-blue-800">{subTargetCourse.name}</p>
-                <p className="text-xs text-blue-500">{subTargetCourse.id}</p>
-              </div>
-              <button
-                onClick={() => setSubstitution(course.id, null)}
-                className="text-blue-400 hover:text-red-500 text-sm font-bold mr-1 transition-colors"
-              >✕</button>
-            </div>
-          ) : (
-            <div>
-              <input
-                type="text"
-                value={subSearch}
-                onChange={(e) => setSubSearch(e.target.value)}
-                placeholder="חפש קורס לפי שם או מספר..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400 text-right"
-              />
-              {subResults.length > 0 && (
-                <ul className="mt-1.5 border border-gray-200 rounded-lg overflow-hidden divide-y divide-gray-100">
-                  {subResults.map((c) => (
-                    <li key={c.id}>
-                      <button
-                        className="w-full text-right px-3 py-2 text-xs hover:bg-blue-50 transition-colors"
-                        onClick={() => { setSubstitution(course.id, c.id); setSubSearch(''); }}
-                      >
-                        <span className="font-medium text-gray-800">{c.name}</span>
-                        <span className="text-gray-400 mr-1"> ({c.id})</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
 
         {/* Grade */}
         <div className="mb-4">

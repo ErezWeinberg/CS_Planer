@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useState } from 'react';
+import { lazy, memo, Suspense, useMemo, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
@@ -6,6 +6,7 @@ import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';
 import type { ContainingSubstitution } from '../domain/containingCourse';
 import type { ResolvedStatistic } from '../domain/gradeStatistics/types';
 import { formatSemester } from '../domain/gradeStatistics/semester';
+import { getPostponeSlack, hasPlannedDownstreamDependent } from '../domain/downstreamDependents';
 import { usePlanStore, gradeKey, REPEATABLE_COURSES } from '../store/planStore';
 import { getFacultyStyle } from '../utils/faculty';
 import { getTeachingSemesterBadge } from '../utils/teachingSemester';
@@ -84,6 +85,9 @@ export const CourseCard = memo(function CourseCard({
     isCompletedViaStore,
     facultyColorOverrides,
     englishTaughtCourses,
+    completedCourses,
+    semesters,
+    semesterOrder,
   } = usePlanStore(useShallow((state) => ({
     toggleFavorite: state.toggleFavorite,
     toggleCompleted: state.toggleCompleted,
@@ -96,6 +100,9 @@ export const CourseCard = memo(function CourseCard({
       : false,
     facultyColorOverrides: state.facultyColorOverrides ?? {},
     englishTaughtCourses: state.englishTaughtCourses ?? [],
+    completedCourses: state.completedCourses,
+    semesters: state.semesters,
+    semesterOrder: state.semesterOrder,
   })));
   const isRepeatable = REPEATABLE_COURSES.has(course.id);
   const effectiveIsCompleted = isRepeatable && instanceKey
@@ -133,6 +140,27 @@ export const CourseCard = memo(function CourseCard({
     ? getFacultyStyle(course.faculty, course.id, facultyColorOverrides)
     : null;
   const seasonBadge = getTeachingSemesterBadge(course.teachingSemester);
+
+  const plannedSet = useMemo(
+    () => new Set([...completedCourses, ...Object.values(semesters).flat()]),
+    [completedCourses, semesters],
+  );
+  const hasPlannedDownstream = useMemo(
+    () => hasPlannedDownstreamDependent(course.id, courses, plannedSet),
+    [course.id, courses, plannedSet],
+  );
+  const courseSemesterMap = useMemo(
+    () => new Map(
+      Object.entries(semesters).flatMap(([sid, ids]) => ids.map((id) => [id, Number(sid)] as const)),
+    ),
+    [semesters],
+  );
+  const postponeSlack = useMemo(
+    () => (hasPlannedDownstream && semester !== undefined
+      ? getPostponeSlack(course.id, semester, courses, courseSemesterMap, semesterOrder)
+      : null),
+    [hasPlannedDownstream, semester, course.id, courses, courseSemesterMap, semesterOrder],
+  );
 
   return (
     <>
@@ -301,6 +329,18 @@ export const CourseCard = memo(function CourseCard({
                 className="text-xs"
                 title={hasNoAdditionalCreditWarning ? 'ללא זיכוי נוסף' : 'קדמים חסרים'}
               >⚠️</span>
+            )}
+            {hasPlannedDownstream && (
+              <span
+                className="text-xs relative"
+                title={postponeSlack && postponeSlack > 0
+                  ? `ניתן לדחות עד ${postponeSlack} סמסטרים לפני שזה יתנגש עם קורס מתוכנן`
+                  : 'קורסים שתלויים בקורס זה משובצים בתכנית — דחייה עלולה להשפיע עליהם'}
+              >
+                🔗{postponeSlack !== null && postponeSlack > 0 && (
+                  <sup className="text-[9px]">{postponeSlack}</sup>
+                )}
+              </span>
             )}
             <span
               className={`text-xs font-bold ${displayedCredits === 0 && course.credits > 0 ? 'text-orange-600 line-through decoration-orange-500' : 'text-gray-600 dark:text-gray-400'}`}
