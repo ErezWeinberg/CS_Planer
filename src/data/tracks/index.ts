@@ -10,6 +10,8 @@ import { cs4YearTrack } from './cs_4_year';
 import { seTrack } from './se';
 import { mathCsTrack } from './math_cs';
 import { csMathTrack } from './cs_math';
+import { csPhysicsTrack } from './cs_physics';
+import { csCyberTrack } from './cs_cyber';
 
 const TRACK_MAP: Record<TrackId, TrackDefinition> = {
   ee: eeTrack,
@@ -23,6 +25,8 @@ const TRACK_MAP: Record<TrackId, TrackDefinition> = {
   se: seTrack,
   math_cs: mathCsTrack,
   cs_math: csMathTrack,
+  cs_physics: csPhysicsTrack,
+  cs_cyber: csCyberTrack,
 };
 
 export function getTrackDefinition(trackId: TrackId | null | undefined): TrackDefinition | undefined {

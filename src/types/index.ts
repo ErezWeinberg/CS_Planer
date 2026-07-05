@@ -1,4 +1,4 @@
-export type TrackId = 'ee' | 'cs' | 'ee_math' | 'ee_physics' | 'ee_combined' | 'ce' | 'cs_3_year' | 'cs_4_year' | 'se' | 'math_cs' | 'cs_math';
+export type TrackId = 'ee' | 'cs' | 'ee_math' | 'ee_physics' | 'ee_combined' | 'ce' | 'cs_3_year' | 'cs_4_year' | 'se' | 'math_cs' | 'cs_math' | 'cs_physics' | 'cs_cyber';
 
 export type CourseFacultyArea =
   | 'ee'

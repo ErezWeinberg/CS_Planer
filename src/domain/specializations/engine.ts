@@ -30,6 +30,8 @@ export const TRACK_SPECIALIZATION_FOLDERS: Record<TrackId, string> = {
   se: 'מדעי המחשב',
   math_cs: 'מדעי המחשב',
   cs_math: 'מדעי המחשב',
+  cs_physics: 'מדעי המחשב',
+  cs_cyber: 'מדעי המחשב',
 };
 
 const FORCED_SINGLE_ONLY_TRACKS = new Set<TrackId>(['ee_math', 'cs', 'ce']);
@@ -765,6 +767,8 @@ export function buildTrackSpecializationCatalogs(
     se: buildTrackCatalog('se', sources.se ?? []),
     math_cs: buildTrackCatalog('math_cs', sources.math_cs ?? []),
     cs_math: buildTrackCatalog('cs_math', sources.cs_math ?? []),
+    cs_physics: buildTrackCatalog('cs_physics', sources.cs_physics ?? []),
+    cs_cyber: buildTrackCatalog('cs_cyber', sources.cs_cyber ?? []),
   };
 }
 

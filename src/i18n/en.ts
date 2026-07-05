@@ -18,7 +18,9 @@ export const en: Translations = {
     se: 'Software Engineering - focuses on developing, designing, and maintaining large software systems.',
     ce: 'Computer Engineering - joint track with Electrical Engineering combining software and hardware.',
     math_cs: 'A 3-year joint program in Mathematics with Computer Science.',
-    cs_math: 'A joint BSc program in Computer Science and Mathematics.'
+    cs_math: 'A joint BSc program in Computer Science and Mathematics.',
+    cs_physics: 'A joint BSc program in Computer Science and Physics.',
+    cs_cyber: 'Cyber and Secure Computer Systems track.'
   },
 
   coursesToAssign: 'Unassigned Courses',

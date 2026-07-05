@@ -10,6 +10,8 @@ const TRACK_ICONS: Record<string, string> = {
   ce: '🔌',
   math_cs: '🧮',
   cs_math: '🧮',
+  cs_physics: '⚛️',
+  cs_cyber: '🛡️',
 };
 
 // function formatYear(year: number): string {

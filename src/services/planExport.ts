@@ -122,6 +122,8 @@ const TRACK_NAMES: Record<TrackId, string> = {
   se: 'הנדסת תוכנה',
   math_cs: 'מתמטיקה ומדעי המחשב',
   cs_math: 'מדעי המחשב ובמתמטיקה',
+  cs_physics: 'מדעי המחשב ובפיזיקה',
+  cs_cyber: 'מגמת סייבר ואבטחת מערכות ממוחשבות',
 };
 
 function seasonLabel(
