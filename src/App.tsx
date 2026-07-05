@@ -27,6 +27,8 @@ import { ceTrack } from './data/tracks/ce';
 import { cs3YearTrack } from './data/tracks/cs_3_year';
 import { cs4YearTrack } from './data/tracks/cs_4_year';
 import { seTrack } from './data/tracks/se';
+import { mathCsTrack } from './data/tracks/math_cs';
+import { csMathTrack } from './data/tracks/cs_math';
 import type { SapCourse, TrackDefinition, VersionedPlanEnvelope } from './types';
 import { useRequirementsProgress, useWeightedAverage } from './hooks/usePlan';
 import { useDegreeCompletionCheck } from './hooks/useDegreeCompletionCheck';
@@ -45,7 +47,7 @@ const SAVE_DEBOUNCE_MS = 2000;
 const TRACK_SWITCH_DEBOUNCE_MS = 800;
 const SYNC_RETRY_DELAY_MS = 5000;
 
-const ALL_TRACKS: TrackDefinition[] = [cs3YearTrack, cs4YearTrack, seTrack, ceTrack];
+const ALL_TRACKS: TrackDefinition[] = [cs3YearTrack, cs4YearTrack, seTrack, ceTrack, mathCsTrack, csMathTrack];
 
 function extractEnvelope(
   state: ReturnType<typeof usePlanStore.getState>,
