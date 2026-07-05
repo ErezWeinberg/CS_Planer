@@ -25,6 +25,9 @@ export const TRACK_SPECIALIZATION_FOLDERS: Record<TrackId, string> = {
   ee_physics: 'מסלול הנדסת חשמל ופיזיקה',
   ee_combined: 'מסלול משולב-חשמל-פיסיקה(178 נקז)',
   ce: 'מסלול הנדסת מחשבים',
+  cs_3_year: 'מדעי המחשב',
+  cs_4_year: 'מדעי המחשב',
+  se: 'מדעי המחשב',
 };
 
 const FORCED_SINGLE_ONLY_TRACKS = new Set<TrackId>(['ee_math', 'cs', 'ce']);

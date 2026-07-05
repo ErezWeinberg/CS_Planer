@@ -1,0 +1,59 @@
+{
+  "title": "המגמה ללמידה וניתוח מידע",
+  "specialization_group_name": "המגמה ללמידה וניתוח מידע",
+  "type": "specialization_group",
+  "courses": [
+    {
+      "course_number": "02360343",
+      "course_name": "מבוא ללמידה חישובית",
+      "category": "mandatory_core"
+    },
+    {
+      "course_number": "02360267",
+      "course_name": "למידה עמוקה",
+      "category": "mandatory_core"
+    },
+    {
+      "course_number": "02360506",
+      "course_name": "ניתוח ואפיון נתוני עתק",
+      "category": "elective"
+    },
+    {
+      "course_number": "02360490",
+      "course_name": "בינה מלאכותית",
+      "category": "elective"
+    }
+  ],
+  "requirements": {
+    "total_courses_required_for_group": 4,
+    "mandatory_courses": [
+      {
+        "course_number": "02360343",
+        "course_name": "מבוא ללמידה חישובית"
+      },
+      {
+        "course_number": "02360267",
+        "course_name": "למידה עמוקה"
+      }
+    ],
+    "additional_courses_required": 2,
+    "additional_course_selection_rule": {
+      "type": "choose_from_list",
+      "options": [
+        {
+          "course_number": "02360506",
+          "course_name": "ניתוח ואפיון נתוני עתק"
+        },
+        {
+          "course_number": "02360490",
+          "course_name": "בינה מלאכותית"
+        }
+      ]
+    },
+    "logical_expression": "02360343 AND 02360267 AND 2_FROM_ELECTIVES"
+  },
+  "notes": [
+    "המגמה ללמידה וניתוח מידע",
+    "נדרשים שני קורסי חובה ועוד 2 מקצועות בחירה"
+  ]
+}

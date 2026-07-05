@@ -1,0 +1,59 @@
+{
+  "title": "מגמת סייבר ואבטחת מערכות ממוחשבות",
+  "specialization_group_name": "מגמת סייבר ואבטחת מערכות ממוחשבות",
+  "type": "specialization_group",
+  "courses": [
+    {
+      "course_number": "02360251",
+      "course_name": "מבוא למחשוב אמין ואבטחת מידע",
+      "category": "mandatory_core"
+    },
+    {
+      "course_number": "02360351",
+      "course_name": "תורת ההצפנה הקלאסית והמודרנית",
+      "category": "elective"
+    },
+    {
+      "course_number": "02360352",
+      "course_name": "אבטחת תקשורת מחשבים מתקדמת",
+      "category": "elective"
+    },
+    {
+      "course_number": "02360353",
+      "course_name": "אבטחת מערכות מחשב",
+      "category": "elective"
+    }
+  ],
+  "requirements": {
+    "total_courses_required_for_group": 4,
+    "mandatory_courses": [
+      {
+        "course_number": "02360251",
+        "course_name": "מבוא למחשוב אמין ואבטחת מידע"
+      }
+    ],
+    "additional_courses_required": 3,
+    "additional_course_selection_rule": {
+      "type": "choose_from_list",
+      "options": [
+        {
+          "course_number": "02360351",
+          "course_name": "תורת ההצפנה הקלאסית והמודרנית"
+        },
+        {
+          "course_number": "02360352",
+          "course_name": "אבטחת תקשורת מחשבים מתקדמת"
+        },
+        {
+          "course_number": "02360353",
+          "course_name": "אבטחת מערכות מחשב"
+        }
+      ]
+    },
+    "logical_expression": "02360251 AND 3_FROM_ELECTIVES"
+  },
+  "notes": [
+    "מגמת סייבר ואבטחת מערכות ממוחשבות",
+    "נדרש קורס חובה ועוד 3 מקצועות בחירה"
+  ]
+}

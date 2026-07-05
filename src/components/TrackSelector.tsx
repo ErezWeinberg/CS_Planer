@@ -3,10 +3,10 @@ import { usePlanStore } from '../store/planStore';
 import { getAvailableYears } from '../domain/resolveTrack';
 
 const TRACK_ICONS: Record<string, string> = {
-  ee: '⚡',
-  cs: '💻',
-  ee_math: '📐',
-  ee_physics: '🔬',
+  cs_3_year: '💻',
+  cs_4_year: '🖥️',
+  se: '⚙️',
+  ce: '🔌',
 };
 
 // function formatYear(year: number): string {
@@ -35,7 +35,7 @@ export function TrackSelector({ tracks }: { tracks: TrackDefinition[] }) {
             <span className="text-3xl">🎓</span>
           </div>
           <h1 className="text-5xl font-black text-white mb-4 tracking-tight">מתכנן לימודים</h1>
-          <p className="text-xl font-light" style={{ color: 'rgba(147,197,253,0.9)' }}>הפקולטה להנדסת חשמל ומחשבים - הטכניון</p>
+          <p className="text-xl font-light" style={{ color: 'rgba(147,197,253,0.9)' }}>הפקולטה למדעי המחשב - הטכניון</p>
           <p className="text-sm mt-2" style={{ color: 'rgba(147,197,253,0.6)' }}>תכנית לימודים 2025/2026</p>
         </div>
 
