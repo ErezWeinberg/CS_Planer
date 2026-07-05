@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { parseShareHash } from './services/shareRouting'
 import { AuthProvider } from './context/AuthContext'
 
+import { LanguageProvider } from './context/LanguageContext'
+
 const App = lazy(() => import('./App'));
 const ShareModeWrapper = lazy(() => import('./components/ShareModeWrapper'));
 
@@ -17,10 +19,12 @@ export default function Root() {
   }, []);
 
   return (
-    <AuthProvider>
-      <Suspense fallback={null}>
-        {shareRoute ? <ShareModeWrapper shareId={shareRoute.shareId} /> : <App />}
-      </Suspense>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <Suspense fallback={null}>
+          {shareRoute ? <ShareModeWrapper shareId={shareRoute.shareId} /> : <App />}
+        </Suspense>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

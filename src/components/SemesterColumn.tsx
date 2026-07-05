@@ -8,9 +8,10 @@ import { bareId } from '../utils/occurrenceId';
 import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';
 import { getRecognizedCredits } from '../domain/noAdditionalCredit';
 import type { ContainingSubstitution } from '../domain/containingCourse';
+import { useLanguage } from '../context/LanguageContext';
 
-const SEM_LABELS = [
-  'לא משובץ',
+const SEM_LABELS_HE = [
+  '',
   'א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ז׳',
   'ח׳', 'ט׳', 'י׳', 'יא׳', 'יב׳', 'יג׳', 'יד׳', 'טו׳', 'טז׳',
 ];
@@ -81,6 +82,7 @@ export const SemesterColumn = memo(function SemesterColumn({
   } = useSortable({ id: `col-${semester}`, disabled: readOnly || semester === 0 });
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
+  const { t, language } = useLanguage();
 
   const totalCredits = courseIds.reduce((s, id) => s + getRecognizedCredits(courses.get(bareId(id)), noAdditionalCreditCourseIds), 0);
   const columnStyle = getColumnStyle(isOver, !!(isDraggingActive && semester > 0), isSummer, isCurrent, isPast, isFuture);
@@ -91,11 +93,16 @@ export const SemesterColumn = memo(function SemesterColumn({
     }
   };
 
-  const semesterLabel = semester === 0
-    ? 'לא משובץ'
-    : isSummer
-      ? `קיץ ${SEM_LABELS[summerIndex ?? semester]}`
-      : `סמסטר ${SEM_LABELS[regularIndex ?? semester]}`;
+  const getSemesterLabel = () => {
+    if (semester === 0) return t('coursesToAssign');
+    if (isSummer) {
+      const num = summerIndex ?? semester;
+      return language === 'he' ? `קיץ ${SEM_LABELS_HE[num]}` : `Summer ${num}`;
+    }
+    const num = regularIndex ?? semester;
+    return language === 'he' ? `סמסטר ${SEM_LABELS_HE[num]}` : `Semester ${num}`;
+  };
+  const semesterLabel = getSemesterLabel();
 
   // Filter for search in the unassigned column
   const filteredIds = useMemo(() => {
@@ -205,14 +212,14 @@ export const SemesterColumn = memo(function SemesterColumn({
         {/* Search input for unassigned column */}
         {semester === 0 && (
           <div className="mt-1.5 relative">
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">🔍</span>
+            <span className={`absolute ${language === 'he' ? 'right-2' : 'left-2'} top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none`}>🔍</span>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="חפש קורס..."
+              placeholder={t('searchCourse')}
               onPointerDown={(e) => e.stopPropagation()}
-              className="w-full text-xs pr-6 pl-2 py-1 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-300"
+              className={`w-full text-xs py-1 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-300 ${language === 'he' ? 'pr-6 pl-2' : 'pl-6 pr-2'}`}
             />
           </div>
         )}
@@ -289,7 +296,7 @@ export const SemesterColumn = memo(function SemesterColumn({
         {filteredIds.length === 0 && !isOver && (
           <p className="text-xs text-gray-400 dark:text-slate-600 text-center py-6 italic">
             {semester === 0
-              ? (search.trim() ? 'אין קורסים תואמים' : 'כל הקורסים משובצים')
+              ? (search.trim() ? t('courseNotFound') : t('noUnassignedCourses'))
               : isDraggingActive ? '' : 'גרור קורסים לכאן'}
           </p>
         )}

@@ -21,6 +21,7 @@ import { Toast } from './components/Toast';
 import { MobileSidebarDrawer } from './components/MobileSidebarDrawer';
 import { ExportShareModal } from './components/ExportShareModal';
 import { PrintView } from './components/PrintView';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { resolveTrackForYear, getAvailableYears } from './domain/resolveTrack';
 import { ceTrack } from './data/tracks/ce';
 import { cs3YearTrack } from './data/tracks/cs_3_year';
@@ -768,6 +769,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
                   )}
                 </button>
               )}
+              <LanguageSwitcher />
               <button
                 onClick={() => setDarkMode(darkMode === 'dark' ? 'light' : darkMode === 'light' ? 'system' : 'dark')}
                 className="text-sm border px-2 py-1.5 rounded-lg transition-colors"
