@@ -1,4 +1,4 @@
-# Technion Planner EE
+# Technion Planner CS
 
 ![React 19](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
@@ -6,9 +6,9 @@
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-ffca28?logo=firebase&logoColor=black)
 ![License](https://img.shields.io/badge/License-Private-lightgrey)
 
-An interactive degree-planning app for Technion students, focused on Electrical Engineering and related tracks.
+An interactive degree-planning app for Technion students, focused on the Faculty of Computer Science tracks.
 
-Technion Planner EE turns a static curriculum sheet into a working planning environment: students can build semester plans with drag and drop, track degree progress in real time, compare multiple plan versions, and keep everything synced across devices with Firebase. The product UI is primarily in Hebrew, while the codebase and documentation are maintained in English.
+Technion Planner CS turns a static curriculum sheet into a working planning environment: students can build semester plans with drag and drop, track degree progress in real time, compare multiple plan versions, and keep everything synced across devices with Firebase. The product UI is primarily in Hebrew, while the codebase and documentation are maintained in English.
 
 ## Features
 
@@ -19,19 +19,16 @@ Technion Planner EE turns a static curriculum sheet into a working planning envi
 - Course detail modal with prerequisites, manual prerequisite-path selection, course substitutions, grades, binary pass/fail, SAP deep links, and CheeseFork review summaries.
 - Real-time degree tracking for mandatory credits, faculty electives, total credits, labs, sport/PE, general electives, free electives, and English requirements.
 - Weighted average calculation from entered grades, including support for binary courses that should not affect the GPA.
-- Track-specific specialization catalogs, completion progress, double specialization support, and recommendation hints based on the current plan.
-- Support for the robotics minor and the entrepreneurship minor, including eligibility and progress feedback.
+- Track-specific specialization catalogs (מגמות), completion progress, double specialization support, and recommendation hints based on the current plan.
 - Up to 4 named plan versions with side-by-side comparison and an option to show only the differences.
 - Google and Microsoft sign-in with Firebase Auth.
 - Real-time cloud sync with Firestore, including payload sanitization, migration handling, and conflict-safe hydration.
 
 ## Supported Tracks
 
-- Electrical Engineering
-- Computer Science
-- Electrical Engineering + Mathematics
-- Electrical Engineering + Physics
-- Combined Electrical Engineering
+- Computer Science (3-Year General Track)
+- Computer Science (4-Year General Track)
+- Software Engineering
 - Computer Engineering
 
 ## Stack
