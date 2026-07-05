@@ -1,4 +1,5 @@
 import { lazy, memo, Suspense, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
@@ -377,10 +378,9 @@ export const CourseCard = memo(function CourseCard({
               </>
             )}
           </div>
-        )}
       </div>
 
-      {modalOpen && (
+      {modalOpen && createPortal(
         <Suspense
           fallback={(
             <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -388,17 +388,23 @@ export const CourseCard = memo(function CourseCard({
             </div>
           )}
         >
-          <LazyCourseDetailModal
-            course={course}
-            courses={courses}
-            semester={semester}
-            instanceKey={instanceKey}
-            noAdditionalCreditConflicts={noAdditionalCreditConflicts}
-            containingSubstitution={containingSubstitution}
-            isCoreLocked={isCoreLocked}
-            onClose={() => setModalOpen(false)}
-          />
-        </Suspense>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+            <div className="absolute inset-0 bg-black/40" onClick={() => setModalOpen(false)} />
+            <div className="relative z-50 w-full max-w-lg max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
+              <LazyCourseDetailModal
+                course={course}
+                courses={courses}
+                semester={semester}
+                instanceKey={instanceKey}
+                noAdditionalCreditConflicts={noAdditionalCreditConflicts}
+                containingSubstitution={containingSubstitution}
+                isCoreLocked={isCoreLocked}
+                onClose={() => setModalOpen(false)}
+              />
+            </div>
+          </div>
+        </Suspense>,
+        document.body
       )}
     </>
   );
