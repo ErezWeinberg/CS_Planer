@@ -378,6 +378,7 @@ export const CourseCard = memo(function CourseCard({
               </>
             )}
           </div>
+        )}
       </div>
 
       {modalOpen && createPortal(
