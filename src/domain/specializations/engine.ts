@@ -758,6 +758,9 @@ export function buildTrackSpecializationCatalogs(
     ee_physics: buildTrackCatalog('ee_physics', sources.ee_physics ?? []),
     ee_combined: buildTrackCatalog('ee_combined', sources.ee_combined ?? []),
     ce: buildTrackCatalog('ce', sources.ce ?? []),
+    cs_3_year: buildTrackCatalog('cs_3_year', sources.cs_3_year ?? []),
+    cs_4_year: buildTrackCatalog('cs_4_year', sources.cs_4_year ?? []),
+    se: buildTrackCatalog('se', sources.se ?? []),
   };
 }
 

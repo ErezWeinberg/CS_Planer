@@ -117,6 +117,9 @@ const TRACK_NAMES: Record<TrackId, string> = {
   ee_physics: 'חשמל + פיזיקה',
   ee_combined: 'חשמל משולב',
   ce: 'הנדסת מחשבים',
+  cs_3_year: 'מדעי המחשב - 3 שנים',
+  cs_4_year: 'מדעי המחשב - 4 שנים',
+  se: 'הנדסת תוכנה',
 };
 
 function seasonLabel(

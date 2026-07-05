@@ -11,20 +11,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-export let app: FirebaseApp | undefined;
-export let auth: Auth | undefined;
-export let db: Firestore | undefined;
-
-if (firebaseConfig.apiKey) {
-  try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = initializeFirestore(app, {
-      ignoreUndefinedProperties: true,
-    });
-  } catch (error) {
-    console.error("Firebase initialization failed", error);
-  }
-} else {
-  console.warn("Firebase configuration is missing. Cloud sync and auth will be disabled.");
-}
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+});
