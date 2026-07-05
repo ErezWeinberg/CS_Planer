@@ -16,7 +16,9 @@ export const en: Translations = {
     cs_3_year: 'The main track for a BSc in Computer Science, providing extensive theoretical and practical knowledge.',
     cs_4_year: 'An in-depth program allowing broader specialization and large-scale projects.',
     se: 'Software Engineering - focuses on developing, designing, and maintaining large software systems.',
-    ce: 'Computer Engineering - joint track with Electrical Engineering combining software and hardware.'
+    ce: 'Computer Engineering - joint track with Electrical Engineering combining software and hardware.',
+    math_cs: 'A 3-year joint program in Mathematics with Computer Science.',
+    cs_math: 'A joint BSc program in Computer Science and Mathematics.'
   },
 
   coursesToAssign: 'Unassigned Courses',

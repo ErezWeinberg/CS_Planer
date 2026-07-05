@@ -8,6 +8,8 @@ const TRACK_ICONS: Record<string, string> = {
   cs_4_year: '🖥️',
   se: '⚙️',
   ce: '🔌',
+  math_cs: '🧮',
+  cs_math: '🧮',
 };
 
 // function formatYear(year: number): string {
