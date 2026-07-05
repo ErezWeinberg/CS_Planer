@@ -6,7 +6,7 @@ import { en } from '../i18n/en';
 interface LanguageContextValue {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: keyof Translations) => string;
+  t: (key: keyof Translations) => any;
 }
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
@@ -28,7 +28,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
   }, [language]);
 
-  const t = (key: keyof Translations): string => {
+  const t = (key: keyof Translations): any => {
     return translations[language][key] || key;
   };
 

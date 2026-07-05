@@ -28,6 +28,8 @@ export const TRACK_SPECIALIZATION_FOLDERS: Record<TrackId, string> = {
   cs_3_year: 'מדעי המחשב',
   cs_4_year: 'מדעי המחשב',
   se: 'מדעי המחשב',
+  math_cs: 'מדעי המחשב',
+  cs_math: 'מדעי המחשב',
 };
 
 const FORCED_SINGLE_ONLY_TRACKS = new Set<TrackId>(['ee_math', 'cs', 'ce']);
@@ -761,6 +763,8 @@ export function buildTrackSpecializationCatalogs(
     cs_3_year: buildTrackCatalog('cs_3_year', sources.cs_3_year ?? []),
     cs_4_year: buildTrackCatalog('cs_4_year', sources.cs_4_year ?? []),
     se: buildTrackCatalog('se', sources.se ?? []),
+    math_cs: buildTrackCatalog('math_cs', sources.math_cs ?? []),
+    cs_math: buildTrackCatalog('cs_math', sources.cs_math ?? []),
   };
 }
 
