@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { initializeFirestore } from 'firebase/firestore';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { initializeFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,8 +11,20 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = initializeFirestore(app, {
-  ignoreUndefinedProperties: true,
-});
+export let app: FirebaseApp | undefined;
+export let auth: Auth | undefined;
+export let db: Firestore | undefined;
+
+if (firebaseConfig.apiKey) {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = initializeFirestore(app, {
+      ignoreUndefinedProperties: true,
+    });
+  } catch (error) {
+    console.error("Firebase initialization failed", error);
+  }
+} else {
+  console.warn("Firebase configuration is missing. Cloud sync and auth will be disabled.");
+}
