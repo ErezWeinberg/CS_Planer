@@ -184,7 +184,7 @@ export const CourseCard = memo(function CourseCard({
         `}
       >
         {showCardActions && (
-          <div dir="ltr" className="absolute top-0 left-0 flex items-center">
+          <div dir="ltr" className="absolute top-0 left-0 flex items-center z-10">
           <button
             onPointerDown={(e) => {
               e.stopPropagation();
@@ -226,7 +226,7 @@ export const CourseCard = memo(function CourseCard({
               e.stopPropagation();
               toggleCompleted(effectiveId);
             }}
-            className={`absolute top-0 right-0 w-11 h-11 flex items-center justify-center text-sm leading-none font-bold transition-colors ${effectiveIsCompleted ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600 hover:text-emerald-400'}`}
+            className={`absolute top-0 right-0 w-11 h-11 flex items-center justify-center text-sm leading-none font-bold transition-colors z-10 ${effectiveIsCompleted ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600 hover:text-emerald-400'}`}
             title={effectiveIsCompleted ? 'סמן כלא הושלם' : 'סמן כהושלם'}
           >
             {effectiveIsCompleted ? '✓' : '○'}
