@@ -12,6 +12,7 @@ import { sanitizeEnvelope } from './planValidation';
 import { computeRequirementsProgress } from '../hooks/usePlan';
 import { computeWeightedAverage, gradeKey } from '../utils/courseGrades';
 import { ELECTIVE_AREA_LABELS } from '../domain/electives';
+import { getTrackDefinition } from '../data/tracks';
 import {
   computeNoAdditionalCreditConflicts,
   getNoAdditionalCreditCourseIds,
@@ -110,22 +111,6 @@ function csvRow(cells: unknown[]): string {
   return cells.map(csvCell).join(',');
 }
 
-const TRACK_NAMES: Record<TrackId, string> = {
-  ee: 'חשמל',
-  cs: 'מחשבים',
-  ee_math: 'חשמל + מתמטיקה',
-  ee_physics: 'חשמל + פיזיקה',
-  ee_combined: 'חשמל משולב',
-  ce: 'הנדסת מחשבים',
-  cs_3_year: 'מדעי המחשב - 3 שנים',
-  cs_4_year: 'מדעי המחשב - 4 שנים',
-  se: 'הנדסת תוכנה',
-  math_cs: 'מתמטיקה ומדעי המחשב',
-  cs_math: 'מדעי המחשב ובמתמטיקה',
-  cs_physics: 'מדעי המחשב ובפיזיקה',
-  cs_cyber: 'מגמת סייבר ואבטחת מערכות ממוחשבות',
-};
-
 function seasonLabel(
   semester: number,
   summerSemesters: number[],
@@ -190,7 +175,7 @@ function buildMetadataRows(ctx: CsvBuildContext): string[] {
     );
   }
 
-  const trackName = plan?.trackId ? TRACK_NAMES[plan.trackId] : '';
+  const trackName = plan?.trackId ? getTrackDefinition(plan.trackId)?.name ?? '' : '';
   const rows: string[] = [];
   rows.push(csvRow(['# מטא-נתונים']));
   rows.push(csvRow(['מפתח', 'ערך']));
