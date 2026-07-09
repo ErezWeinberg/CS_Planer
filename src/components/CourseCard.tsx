@@ -233,7 +233,7 @@ export const CourseCard = memo(function CourseCard({
           </button>
         )}
 
-        <p className={`text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug pt-0.5 ${showCardActions ? 'pr-11 pl-28' : ''}`}>{course.name}</p>
+        <p className={`text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug pt-0.5 break-words ${showCardActions ? 'pr-11 pl-28' : ''}`}>{course.name}</p>
 
         {wrongSemesterType && (
           <p className="text-xs text-red-500 mt-0.5 px-4 leading-tight">
@@ -273,7 +273,7 @@ export const CourseCard = memo(function CourseCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-1.5 gap-1">
+        <div className="flex flex-wrap items-center justify-between mt-1.5 gap-1">
           <div className="flex items-center gap-1 min-w-0">
             <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">{course.id}</span>
             {facultyStyle && (
@@ -283,7 +283,7 @@ export const CourseCard = memo(function CourseCard({
               />
             )}
           </div>
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex flex-wrap items-center gap-1 shrink-0">
             {seasonBadge && (
               <span className="text-xs leading-none" title={seasonBadge.title}>
                 {seasonBadge.emoji}

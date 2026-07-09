@@ -68,42 +68,45 @@ export function ChainRecommendations({ catalog, courses, trackDef }: Props) {
                 </span>
                 {/* Chain name with hover tooltip */}
                 <div
-                  className="relative flex-1 text-right"
+                  className="flex-1 text-right"
                   onClick={() => setExpandedGroup(expandedGroup === group.id ? null : group.id)}
                 >
-                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-100 cursor-pointer">{group.name}</span>
-                  {expandedGroup === group.id && (
-                    <div className="absolute z-50 top-full right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl p-3 w-64 max-w-[calc(100vw-2rem)] text-right">
-                      <p className="text-xs font-bold text-gray-700 dark:text-gray-200 mb-1.5">{group.name}</p>
-                      {group.mandatoryCourses.length > 0 && (
-                        <div className="mb-2">
-                          <p className="text-xs font-semibold text-blue-700 mb-1">חובה:</p>
-                          <ul className="space-y-0.5">
-                            {group.mandatoryCourses.map((id) => (
-                              <li key={id} className={`text-xs flex items-center gap-1 ${allPlaced.has(id) ? 'text-green-700' : 'text-gray-500 dark:text-gray-400'}`}>
-                                <span>{allPlaced.has(id) ? '✓' : '○'}</span>
-                                <span>{courses.get(id)?.name ?? id}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">בחירה ({group.electiveCourses.length}):</p>
-                        <ul className="space-y-0.5 max-h-40 overflow-y-auto">
-                          {group.electiveCourses.map((id) => (
-                            <li key={id} className={`text-xs flex items-center gap-1 ${allPlaced.has(id) ? 'text-green-700' : 'text-gray-400 dark:text-gray-500'}`}>
-                              <span>{allPlaced.has(id) ? '✓' : '○'}</span>
-                              <span>{courses.get(id)?.name ?? id}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 border-t dark:border-slate-700 pt-1.5">נדרש: {group.minCoursesToComplete} קורסים</p>
-                    </div>
-                  )}
+                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-100 cursor-pointer flex items-center justify-end gap-1">
+                    {expandedGroup === group.id ? '▴' : '▾'} {group.name}
+                  </span>
                 </div>
               </div>
+              
+              {expandedGroup === group.id && (
+                <div className="mt-2 mb-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-3 w-full text-right">
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-200 mb-1.5">{group.name}</p>
+                  {group.mandatoryCourses.length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-blue-700 mb-1">חובה:</p>
+                      <ul className="space-y-0.5">
+                        {group.mandatoryCourses.map((id) => (
+                          <li key={id} className={`text-xs flex items-center gap-1 ${allPlaced.has(id) ? 'text-green-700' : 'text-gray-500 dark:text-gray-400'}`}>
+                            <span>{allPlaced.has(id) ? '✓' : '○'}</span>
+                            <span>{courses.get(id)?.name ?? id}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">בחירה ({group.electiveCourses.length}):</p>
+                    <ul className="space-y-0.5 max-h-40 overflow-y-auto pr-1">
+                      {group.electiveCourses.map((id) => (
+                        <li key={id} className={`text-xs flex items-center gap-1 ${allPlaced.has(id) ? 'text-green-700' : 'text-gray-400 dark:text-gray-500'}`}>
+                          <span>{allPlaced.has(id) ? '✓' : '○'}</span>
+                          <span>{courses.get(id)?.name ?? id}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 border-t dark:border-slate-700 pt-1.5">נדרש: {group.minCoursesToComplete} קורסים</p>
+                </div>
+              )}
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                 {matchingCourses.length} קורסים מתוכניתך מתאימים
               </p>

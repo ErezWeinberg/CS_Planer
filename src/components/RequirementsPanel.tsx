@@ -764,7 +764,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
           +
         </button>
         {isPickerOpen && (
-          <div className="absolute start-0 top-full mt-0.5 z-[60] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1 min-w-[130px]">
+          <div className="absolute start-0 rtl:end-0 rtl:start-auto top-full mt-0.5 z-[60] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1 min-w-[130px] max-h-56 overflow-y-auto">
             {semesterOptions.map(({ label, value }) => (
               <button
                 key={value}
