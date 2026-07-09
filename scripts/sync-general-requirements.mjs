@@ -78,7 +78,7 @@ function renderCourseList(name, courses) {
 async function fetchHtml(url) {
   const response = await fetch(url, {
     headers: {
-      'user-agent': 'technion-ee-planner-sync/1.0',
+      'user-agent': 'technion-cs-planner-sync/1.0',
     },
   });
 

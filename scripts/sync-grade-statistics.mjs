@@ -29,7 +29,7 @@ const OUTPUT_PATH = path.resolve(rootDir, '../public/grade-statistics.json');
 const DEFAULT_BASE =
   process.env.GRADE_STATS_BASE ||
   'https://raw.githubusercontent.com/michael-maltsev/technion-histograms/gh-pages';
-const USER_AGENT = 'technion-ee-planner-grade-sync/1.0';
+const USER_AGENT = 'technion-cs-planner-grade-sync/1.0';
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RETRIES = 4;
 

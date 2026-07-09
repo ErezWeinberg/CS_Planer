@@ -568,7 +568,7 @@ export function buildExportFilename(
 ): string {
   const iso = date.toISOString().slice(0, 10);
   const slug = trackId ?? 'plan';
-  return `ee-planner_${slug}_${iso}.${kind}`;
+  return `cs-planer_${slug}_${iso}.${kind}`;
 }
 
 export function downloadTextFile(

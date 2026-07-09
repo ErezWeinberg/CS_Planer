@@ -9,7 +9,7 @@ import type { ShareDoc } from '../types/share';
 import type { VersionedPlanEnvelope } from '../types';
 import App from '../App';
 
-const PLANNER_STORAGE_KEY = 'technion-ee-planner';
+const PLANNER_STORAGE_KEY = 'technion-cs-planer';
 
 type ShareLoadState =
   | { status: 'loading' }

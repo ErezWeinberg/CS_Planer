@@ -1494,7 +1494,7 @@ export const usePlanStore = create<PlanState>()(
         }),
     }),
     {
-      name: 'technion-ee-planner',
+      name: 'technion-cs-planer',
       version: 2,
       migrate: (persistedState, fromVersion) => {
         const s = persistedState as PlanState;
