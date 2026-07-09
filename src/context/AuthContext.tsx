@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>(null!);
 
-function mapFirebaseError(code: string): string | null {
+function mapFirebaseError(code: string, err: unknown): string | null {
   switch (code) {
     case 'auth/popup-closed-by-user':
     case 'auth/cancelled-popup-request':
@@ -34,8 +34,14 @@ function mapFirebaseError(code: string): string | null {
       return 'יותר מדי ניסיונות. המתן מספר דקות ונסה שנית.';
     case 'auth/user-disabled':
       return 'החשבון הזה מושבת. צור קשר עם מנהל המערכת.';
+    case 'auth/invalid-api-key':
+      return 'מפתח ה-API חסר או שגוי. יש להגדיר קובץ .env.local עם פרטי Firebase.';
+    case 'auth/operation-not-allowed':
+      return 'התחברות דרך גוגל אינה מופעלת בפרויקט ה-Firebase שלך (Sign-in provider disabled).';
     default:
-      return 'אירעה שגיאה בהתחברות. נסה שנית.';
+      console.error('Unhandled Firebase Auth Error:', code, err);
+      const errMsg = (err as Error).message || String(err);
+      return `שגיאה: ${code} - ${errMsg}`;
   }
 }
 
@@ -63,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signInWithPopup(auth, provider);
     } catch (err: unknown) {
       const code = (err as { code?: string }).code ?? '';
-      const message = mapFirebaseError(code);
+      const message = mapFirebaseError(code, err);
       if (message) setError(message);
     }
   }
