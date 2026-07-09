@@ -8,14 +8,6 @@ import ts from 'typescript';
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const filesRoot = join(repoRoot, 'files', 'קבוצות התמחות');
 const enginePath = join(repoRoot, 'src', 'domain', 'specializations', 'engine.ts');
-const TRACK_SPECIALIZATION_FOLDERS = {
-  ee: 'מסלול הנדסת חשמל',
-  cs: 'מסלול הנדסת מחשבים ותוכנה',
-  ee_math: 'מסלול הנדסת חשמל ומתמטיקה',
-  ee_physics: 'מסלול הנדסת חשמל ופיזיקה',
-  ee_combined: 'מסלול משולב-חשמל-פיסיקה(178 נקז)',
-  ce: 'מסלול הנדסת מחשבים',
-};
 
 const engineSource = readFileSync(enginePath, 'utf8');
 const transpiledEngine = ts.transpileModule(engineSource, {
@@ -28,6 +20,7 @@ const engineModuleUrl = `data:text/javascript;base64,${Buffer.from(transpiledEng
 const {
   buildTrackSpecializationCatalogs,
   evaluateSpecializationGroup,
+  TRACK_SPECIALIZATION_FOLDERS,
 } = await import(engineModuleUrl);
 
 function buildSourcesFromFiles() {
@@ -258,5 +251,4 @@ test('track-specific specialization catalogs load and validate correctly', () =>
     'Missing track folder diagnostic should be reported',
   );
 });
-
 
