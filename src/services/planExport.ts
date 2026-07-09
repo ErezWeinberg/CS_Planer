@@ -17,6 +17,7 @@ import {
   getNoAdditionalCreditCourseIds,
   getRecognizedCredits,
 } from '../domain/noAdditionalCredit';
+import { getTrackDefinition } from '../data/tracks';
 
 export interface ExportOptions {
   includeGrades: boolean;
@@ -110,22 +111,6 @@ function csvRow(cells: unknown[]): string {
   return cells.map(csvCell).join(',');
 }
 
-const TRACK_NAMES: Record<TrackId, string> = {
-  ee: 'חשמל',
-  cs: 'מחשבים',
-  ee_math: 'חשמל + מתמטיקה',
-  ee_physics: 'חשמל + פיזיקה',
-  ee_combined: 'חשמל משולב',
-  ce: 'הנדסת מחשבים',
-  cs_3_year: 'מדעי המחשב - 3 שנים',
-  cs_4_year: 'מדעי המחשב - 4 שנים',
-  se: 'הנדסת תוכנה',
-  math_cs: 'מתמטיקה ומדעי המחשב',
-  cs_math: 'מדעי המחשב ובמתמטיקה',
-  cs_physics: 'מדעי המחשב ובפיזיקה',
-  cs_cyber: 'מגמת סייבר ואבטחת מערכות ממוחשבות',
-};
-
 function seasonLabel(
   semester: number,
   summerSemesters: number[],
@@ -190,13 +175,13 @@ function buildMetadataRows(ctx: CsvBuildContext): string[] {
     );
   }
 
-  const trackName = plan?.trackId ? TRACK_NAMES[plan.trackId] : '';
+  const trackName = trackDef?.name ?? (plan?.trackId ? getTrackDefinition(plan.trackId)?.name ?? '' : '');
   const rows: string[] = [];
   rows.push(csvRow(['# מטא-נתונים']));
   rows.push(csvRow(['מפתח', 'ערך']));
   rows.push(csvRow(['תאריך יצוא', new Date().toISOString().slice(0, 10)]));
   rows.push(csvRow(['מסלול (קוד)', plan?.trackId ?? '']));
-  rows.push(csvRow(['מסלול (שם)', trackDef?.name ?? trackName]));
+  rows.push(csvRow(['מסלול (שם)', trackName]));
   rows.push(csvRow(['גרסה פעילה', active?.name ?? '']));
   rows.push(csvRow(['סה"כ גרסאות ביצוא', envelope.versions.length]));
   rows.push(csvRow(['סה"כ נ"ז מתוכננות', totalCredits]));
