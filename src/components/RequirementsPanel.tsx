@@ -14,6 +14,7 @@ import type {
   EnglishRequirementItem,
   CoreSlot,
 } from '../hooks/usePlan';
+import { useLanguage } from '../context/LanguageContext';
 import type { RoboticsMinorProgress } from '../hooks/useRoboticsMinor';
 import { ELECTIVE_AREA_LABELS } from '../domain/electives';
 import {
@@ -38,6 +39,7 @@ import {
   QUANTUM_MINOR_MIN_GPA,
   QUANTUM_MINOR_MIN_TOTAL_CREDITS,
 } from '../data/quantumComputingMinor';
+import { getScienceChainCatalog } from '../data/scienceChains';
 
 const SEM_LABELS = [
   "א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ז'",
@@ -215,21 +217,21 @@ interface CompactRequirementRowProps {
   englishRequirementItems?: EnglishRequirementItem[];
 }
 
-function getRequirementDisplayLabel(req: GeneralRequirementProgress): string {
+function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: string) => string): string {
   switch (req.requirementId) {
     case 'general_electives':
-      return 'קורסי בחירה כלל טכניוניים';
+      return t('generalElectivesLabel');
     case 'english':
-      return 'קורסים באנגלית';
+      return t('englishCoursesLabel');
     case 'labs':
-      return 'מעבדות';
+      return t('labsLabel');
     default:
       return req.title;
   }
 }
 
-function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number): string {
-  const unit = req.targetUnit === 'credits' ? 'נק"ז' : 'קורסים';
+function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: (key: string) => string): string {
+  const unit = req.targetUnit === 'credits' ? t('creditsLabel') : t('coursesLabel');
   const completed = req.completedValue % 1 === 0 ? req.completedValue : req.completedValue.toFixed(1);
   return `${completed} / ${targetValue} ${unit}`;
 }
@@ -282,9 +284,10 @@ function GeneralElectivesRow({
   const pct = total.target > 0 ? Math.min(100, (total.recognized / total.target) * 100) : 0;
   const isDone = total.target > 0 && total.recognized >= total.target;
   const missing = Math.max(0, total.target - total.recognized);
+  const { t } = useLanguage();
   const missingText = missing > 0
-    ? `${formatCredits(missing)} נק"ז חסרים`
-    : 'הושלם';
+    ? `${formatCredits(missing)}${t('missingCredits')}`
+    : t('completedLabel');
 
   const c = breakdown.contributors;
   const hasAnyDetail =
@@ -308,13 +311,13 @@ function GeneralElectivesRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req)}</span>
-            {isDone && <span className="text-xs font-semibold text-green-600">הושלם</span>}
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t)}</span>
+            {isDone && <span className="text-xs font-semibold text-green-600">{t('completedLabel')}</span>}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{missingText}</p>
         </div>
         <span className={`text-xs font-semibold shrink-0 ${isDone ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
-          {formatCredits(total.recognized)} / {formatCredits(total.target)} נק"ז
+          {formatCredits(total.recognized)} / {formatCredits(total.target)} {t('creditsLabel')}
         </span>
       </div>
 
@@ -326,9 +329,9 @@ function GeneralElectivesRow({
       </div>
 
       <div className="mt-2.5 ms-2 space-y-1.5 border-s-2 border-gray-200 ps-2.5">
-        <SubBar label='ספורט (חובה)' recognized={breakdown.sportFloor.recognized} target={breakdown.sportFloor.target} />
-        <SubBar label='מקצועות העשרה / מל"ג' recognized={breakdown.enrichmentFloor.recognized} target={breakdown.enrichmentFloor.target} />
-        <SubBar label='בחירה חופשית' recognized={breakdown.freeChoice.recognized} target={breakdown.freeChoice.target} />
+        <SubBar label={t('sportFloorLabel')} recognized={breakdown.sportFloor.recognized} target={breakdown.sportFloor.target} />
+        <SubBar label={t('enrichmentFloorLabel')} recognized={breakdown.enrichmentFloor.recognized} target={breakdown.enrichmentFloor.target} />
+        <SubBar label={t('freeChoiceLabel')} recognized={breakdown.freeChoice.recognized} target={breakdown.freeChoice.target} />
       </div>
 
       {hasAnyDetail && (
@@ -463,24 +466,25 @@ function CompactRequirementRow({
   onSetEnglishScore,
   englishRequirementItems,
 }: CompactRequirementRowProps) {
+  const { t } = useLanguage();
   const pct = Math.min(100, targetValue > 0 ? (req.completedValue / targetValue) * 100 : 0);
   const isDone = req.completedValue >= targetValue;
   const missingText = missingValue > 0
-    ? `${missingValue % 1 === 0 ? missingValue : missingValue.toFixed(1)} ${req.targetUnit === 'credits' ? 'נק"ז' : 'קורסים'} חסרים`
-    : 'הושלם';
+    ? `${missingValue % 1 === 0 ? missingValue : missingValue.toFixed(1)}${req.targetUnit === 'credits' ? t('missingCredits') : t('missingCourses')}`
+    : t('completedLabel');
 
   return (
     <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 px-3 py-2.5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req)}</span>
-            {isDone && <span className="text-xs font-semibold text-green-600">הושלם</span>}
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t)}</span>
+            {isDone && <span className="text-xs font-semibold text-green-600">{t('completedLabel')}</span>}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{missingText}</p>
         </div>
         <span className={`text-xs font-semibold shrink-0 ${isDone ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
-          {formatRequirementValue(req, targetValue)}
+          {formatRequirementValue(req, targetValue, t)}
         </span>
       </div>
 
@@ -640,6 +644,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     setEnglishScore,
     toggleEnglishTaughtCourse,
     setCoreToChainOverrides,
+    setScienceChain,
     toggleRoboticsMinor,
     toggleEntrepreneurshipMinor,
     toggleQuantumComputingMinor,
@@ -649,6 +654,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     miluimCredits,
     englishTaughtCourses,
     coreToChainOverrides,
+    selectedScienceChain,
     roboticsMinorEnabled,
     entrepreneurshipMinorEnabled,
     quantumComputingMinorEnabled,
@@ -665,6 +671,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     setEnglishScore: state.setEnglishScore,
     toggleEnglishTaughtCourse: state.toggleEnglishTaughtCourse,
     setCoreToChainOverrides: state.setCoreToChainOverrides,
+    setScienceChain: state.setScienceChain,
     toggleRoboticsMinor: state.toggleRoboticsMinor,
     toggleEntrepreneurshipMinor: state.toggleEntrepreneurshipMinor,
     toggleQuantumComputingMinor: state.toggleQuantumComputingMinor,
@@ -674,6 +681,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     miluimCredits: state.miluimCredits,
     englishTaughtCourses: state.englishTaughtCourses ?? [],
     coreToChainOverrides: state.coreToChainOverrides ?? [],
+    selectedScienceChain: state.selectedScienceChain,
     roboticsMinorEnabled: state.roboticsMinorEnabled ?? false,
     entrepreneurshipMinorEnabled: state.entrepreneurshipMinorEnabled ?? false,
     quantumComputingMinorEnabled: state.quantumComputingMinorEnabled ?? false,
@@ -735,6 +743,8 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     ))
   ), [progress?.generalRequirements]);
 
+  const scienceChainCatalog = trackId ? getScienceChainCatalog(trackId) : null;
+
   const generalElectivesManualEnglishCourseIds = useMemo(() => {
     const generalElectives = compactRequirements.find((req) => req.requirementId === 'general_electives');
     if (!generalElectives) return [];
@@ -787,9 +797,11 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
   const isMiluim = miluimCredits !== undefined;
   const shouldShowCoreAddButton = trackId === 'ce' || trackId === 'cs';
 
+  const { t } = useLanguage();
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sidebar-panel">
-      <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-3 tracking-tight">מעקב דרישות</h2>
+      <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-3 tracking-tight">{t('degreeProgress')}</h2>
 
       <div className="mb-4 flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden text-xs">
         <button
@@ -802,7 +814,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
           }`}
           style={!countOnlyCompletedCourses ? { background: '#1e4d93' } : {}}
         >
-          כל הקורסים
+          {t('allCourses')}
         </button>
         <button
           type="button"
@@ -814,20 +826,20 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
           }`}
           style={countOnlyCompletedCourses ? { background: '#1e4d93' } : {}}
         >
-          הושלמו בלבד ✓
+          {t('completedOnly')}
         </button>
       </div>
 
       {progress.isReady && (
         <div className="bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3 mb-4 text-center">
-          <p className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm">עמדת בכל הדרישות!</p>
+          <p className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm">{t('allRequirementsMet')}</p>
         </div>
       )}
 
-      <ProgressRow label='נק"ז שהושלמו ✓' earned={progress.completedCredits} required={progress.total.required} color="progress-green" />
-      <ProgressRow label={'סה"כ נקודות'} earned={progress.total.earned} required={progress.total.required} color="progress-gray" />
-      <ProgressRow label="קורסי חובה" earned={progress.mandatory.earned} required={progress.mandatory.required} color="progress-blue" />
-      <ProgressRow label="קורסי בחירה פקולטית" earned={progress.elective.earned} required={progress.elective.required} color="progress-purple" />
+      <ProgressRow label={t('completedCreditsCheck')} earned={progress.completedCredits} required={progress.total.required} color="progress-green" />
+      <ProgressRow label={t('totalCredits')} earned={progress.total.earned} required={progress.total.required} color="progress-gray" />
+      <ProgressRow label={t('mandatoryCourses')} earned={progress.mandatory.earned} required={progress.mandatory.required} color="progress-blue" />
+      <ProgressRow label={t('facultyElectives')} earned={progress.elective.earned} required={progress.elective.required} color="progress-purple" />
       <ElectiveBreakdown
         areaRequirements={progress.electiveBreakdown.areaRequirements}
         assignmentChoices={progress.electiveBreakdown.assignmentChoices}
@@ -842,9 +854,9 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
         return (
           <div className="mb-3 rounded-xl border border-slate-200/70 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-700/50 px-3 py-2.5">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">קורסי ליבה</span>
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{t('coreCourses')}</span>
               <span className={`text-sm font-bold ${done ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
-                {completed} / {required} {done ? 'קורסים ✓' : 'קורסים'}
+                {completed} / {required} {done ? t('coursesCheck') : t('coursesLabel')}
               </span>
             </div>
             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-2 overflow-hidden">
@@ -873,7 +885,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                             <div key={id} className="flex items-center gap-1.5">
                               <span className={rowTextColor}>
                                 {slot.names[index]}
-                                {slot.ids.length > 1 && index === slot.ids.length - 1 && ' (אחד מהשניים)'}
+                                {slot.ids.length > 1 && index === slot.ids.length - 1 && t('oneOfTwo')}
                               </span>
                               {canAdd && renderMinorAddButton(id)}
                             </div>
@@ -883,7 +895,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                     ) : (
                       <span className={slot.done ? 'text-green-700' : slot.released ? 'text-purple-600' : 'text-gray-500'}>
                         {slot.ids.length > 1
-                          ? `${slot.names.join(' / ')} (אחד מהשניים)`
+                          ? `${slot.names.join(' / ')}${t('oneOfTwo')}`
                           : slot.names[0]}
                       </span>
                     )}
@@ -893,7 +905,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
             </div>
             {canRelease.length > 0 && (
               <div className="mt-2.5 pt-2 border-t border-gray-200 dark:border-slate-700">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">שחרור עודף לשרשרת:</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('releaseSurplusToChain')}</p>
                 <div className="space-y-1">
                   {canRelease.map((id) => {
                     const isReleased = coreToChainOverrides.includes(id);
@@ -913,7 +925,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                           }}
                           className="rounded"
                         />
-                        <span>{name} → לשרשרת</span>
+                        <span>{name}{t('toChain')}</span>
                       </label>
                     );
                   })}
@@ -938,7 +950,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
             }}
             className="rounded"
           />
-          מילואים
+          {t('miluim')}
         </label>
         {isMiluim && (
           <div className="flex items-center gap-1">
@@ -955,7 +967,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               className="w-14 text-xs border border-gray-300 dark:border-slate-600 rounded px-1.5 py-0.5 text-center dark:bg-slate-700 dark:text-gray-200"
               placeholder="0-10"
             />
-            <span className="text-xs text-gray-400">נק"ז</span>
+            <span className="text-xs text-gray-400">{t('creditsLabel')}</span>
           </div>
         )}
       </div>
@@ -1271,8 +1283,51 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
       })()}
 
       <div className="border-t dark:border-slate-700 pt-3 mt-1 space-y-2">
+        {progress.scienceChainProgress && (
+          <div className="mb-3 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-700 dark:text-gray-300">שרשרת מדעית</span>
+              <span className={`text-sm font-bold ${
+                progress.scienceChainProgress.completed >= progress.scienceChainProgress.required
+                  ? 'text-green-600'
+                  : 'text-gray-600'
+              }`}>
+                {progress.scienceChainProgress.completed} / {progress.scienceChainProgress.required}
+                {progress.scienceChainProgress.completed >= progress.scienceChainProgress.required ? ' הושלם' : ''}
+              </span>
+            </div>
+            {progress.scienceChainDetails && (
+              <div className="space-y-1 pr-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={progress.scienceChainDetails.name}>{progress.scienceChainDetails.name}</span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className={`text-xs font-medium ${progress.scienceChainDetails.done >= progress.scienceChainDetails.min ? 'text-green-600' : 'text-gray-500'}`}>
+                      {progress.scienceChainDetails.done}/{progress.scienceChainDetails.min}{progress.scienceChainDetails.done >= progress.scienceChainDetails.min ? ' הושלם' : ''}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {scienceChainCatalog && (
+          <div className="mb-3 space-y-1">
+            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">{t('selectScienceChain')}</label>
+            <select
+              className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded p-1 text-xs"
+              value={selectedScienceChain || ''}
+              onChange={(e) => setScienceChain(e.target.value || undefined)}
+            >
+              <option value="">{t('noSelection')}</option>
+              {scienceChainCatalog.groups.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-700 dark:text-gray-300">קבוצות התמחות</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('specializationGroups')}</span>
           <span className={`text-sm font-bold ${
             progress.specializationGroups.unavailable
               ? 'text-amber-700'
@@ -1281,12 +1336,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                 : 'text-gray-600'
           }`}>
             {progress.specializationGroups.unavailable ? 'לא זמין' : `${progress.specializationGroups.completed} / ${progress.specializationGroups.required}`}
-            {progress.specializationGroups.completed >= progress.specializationGroups.required ? ' הושלם' : ''}
+            {progress.specializationGroups.completed >= progress.specializationGroups.required ? ` ${t('completedLabel')}` : ''}
           </span>
         </div>
         {progress.specializationGroups.unavailable && (
           <p className="text-xs text-amber-700">
-            קבצי ההתמחויות למסלול הזה אינם תקינים כרגע ולכן ההתקדמות בהתמחויות לא מחושבת.
+            {t('unavailableGroups')}
           </p>
         )}
         {progress.groupDetails.length > 0 && (
@@ -1296,9 +1351,9 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={group.name}>{group.name}</span>
                   <div className="flex items-center gap-1 shrink-0">
-                    {group.isDouble && <span className="text-xs bg-purple-100 text-purple-600 px-1 rounded font-medium">כפול</span>}
+                    {group.isDouble && <span className="text-xs bg-purple-100 text-purple-600 px-1 rounded font-medium">{t('doubleGroup')}</span>}
                     <span className={`text-xs font-medium ${group.done >= group.min ? 'text-green-600' : 'text-gray-500'}`}>
-                      {group.done}/{group.min}{group.done >= group.min ? ' הושלם' : ''}
+                      {group.done}/{group.min}{group.done >= group.min ? ` ${t('completedLabel')}` : ''}
                     </span>
                   </div>
                 </div>
@@ -1308,7 +1363,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
         )}
 
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-700 dark:text-gray-300">ממוצע משוקלל</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('weightedAverage')}</span>
           <span className="text-sm font-bold text-gray-800 dark:text-gray-100">
             {weightedAverage !== null ? weightedAverage.toFixed(1) : '—'}
           </span>

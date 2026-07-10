@@ -11,6 +11,7 @@ import type { RequirementsInput } from '../domain/degreeCompletion/types';
 export type { RequirementsInput };
 import type { GeneralRequirementProgress } from '../domain/generalRequirements/types';
 import { buildEffectiveChainAssignments, evaluateSpecializationGroup } from '../domain/specializations/engine';
+import { getScienceChainCatalog } from '../data/scienceChains';
 import { buildGeneralRequirementsProgress } from './useGeneralRequirements';
 import { computeRoboticsMinorProgress } from './useRoboticsMinor';
 import type { RoboticsMinorProgress } from './useRoboticsMinor';
@@ -391,6 +392,7 @@ export function computeRequirementsProgress(
     binaryPass: inputBinaryPass,
     selectedSpecializations,
     doubleSpecializations,
+    selectedScienceChain,
     hasEnglishExemption,
     miluimCredits,
     englishScore,
@@ -406,6 +408,8 @@ export function computeRequirementsProgress(
     newLabFormatEnabled,
     countOnlyCompleted,
   } = input;
+
+  const scienceChainCatalog = trackDef ? getScienceChainCatalog(trackDef.id) : null;
 
   if (!trackDef) return null;
 
@@ -745,6 +749,34 @@ export function computeRequirementsProgress(
         0,
       );
 
+    let scienceChainDetails = null;
+    let scienceChainComplete = false;
+    if (scienceChainCatalog && selectedScienceChain) {
+      const group = scienceChainCatalog.groups.find(g => g.id === selectedScienceChain);
+      if (group) {
+        const evaluation = evaluateSpecializationGroup(group, chainEligibleCourseIds, 'single', effectiveChainAssignments);
+        scienceChainComplete = evaluation.complete;
+        scienceChainDetails = {
+          id: group.id,
+          name: group.name,
+          done: evaluation.ruleBlocks.reduce(
+            (sum, block) => sum + Math.min(block.satisfiedCount, block.requiredCount),
+            0,
+          ),
+          min: evaluation.ruleBlocks.reduce((sum, block) => sum + block.requiredCount, 0),
+          isDouble: false,
+          complete: evaluation.complete,
+          summaries: evaluation.ruleBlocks.map((block) => ({
+            id: block.id,
+            label: block.title,
+            done: block.satisfiedCount,
+            required: block.requiredCount,
+          })),
+          issues: evaluation.issues,
+        };
+      }
+    }
+
     const totalCredits = getCountedTotalCredits(
       completedCourses,
       effectiveSemesters,
@@ -984,6 +1016,11 @@ export function computeRequirementsProgress(
         diagnostics: specializationCatalog.diagnostics,
       },
       groupDetails,
+      scienceChainDetails,
+      scienceChainProgress: trackDef.scienceChainsRequired ? {
+        completed: scienceChainComplete ? 1 : 0,
+        required: trackDef.scienceChainsRequired,
+      } : null,
       general: {
         earned: generalElectivesRequirement?.completedValue ?? 0,
         required: generalElectivesRequirement?.targetValue ?? generalRequired,
@@ -1019,7 +1056,8 @@ export function computeRequirementsProgress(
           ? false
           : completedCount >= trackDef.specializationGroupsRequired) &&
         totalCredits >= trackDef.totalCreditsRequired &&
-        (!coreProgress || coreProgress.completed >= coreProgress.required),
+        (!coreProgress || coreProgress.completed >= coreProgress.required) &&
+        (!trackDef.scienceChainsRequired || scienceChainComplete),
     };
 }
 
@@ -1036,6 +1074,7 @@ export function useRequirementsProgress(
   const binaryPass = usePlanStore((s) => s.binaryPass ?? {});
   const selectedSpecializations = usePlanStore((s) => s.selectedSpecializations);
   const doubleSpecializations = usePlanStore((s) => s.doubleSpecializations ?? []);
+  const selectedScienceChain = usePlanStore((s) => s.selectedScienceChain);
   const hasEnglishExemption = usePlanStore((s) => s.hasEnglishExemption ?? false);
   const miluimCredits = usePlanStore((s) => s.miluimCredits ?? 0);
   const englishScore = usePlanStore((s) => s.englishScore);
@@ -1062,6 +1101,7 @@ export function useRequirementsProgress(
           binaryPass,
           selectedSpecializations,
           doubleSpecializations,
+          selectedScienceChain,
           hasEnglishExemption,
           miluimCredits,
           englishScore,
@@ -1082,7 +1122,7 @@ export function useRequirementsProgress(
         specializationCatalog,
         weightedAverage,
       ),
-    [semesters, completedCourses, completedInstances, grades, binaryPass, courses, trackDef, specializationCatalog, selectedSpecializations, doubleSpecializations, hasEnglishExemption, miluimCredits, englishScore, englishTaughtCourses, semesterOrder, coreToChainOverrides, courseChainAssignments, electiveCreditAssignments, noAdditionalCreditOverrides, roboticsMinorEnabled, entrepreneurshipMinorEnabled, quantumComputingMinorEnabled, newLabFormatEnabled, countOnlyCompletedCourses, weightedAverage],
+    [semesters, completedCourses, completedInstances, grades, binaryPass, courses, trackDef, specializationCatalog, selectedSpecializations, doubleSpecializations, selectedScienceChain, hasEnglishExemption, miluimCredits, englishScore, englishTaughtCourses, semesterOrder, coreToChainOverrides, courseChainAssignments, electiveCreditAssignments, noAdditionalCreditOverrides, roboticsMinorEnabled, entrepreneurshipMinorEnabled, quantumComputingMinorEnabled, newLabFormatEnabled, countOnlyCompletedCourses, weightedAverage],
   );
 }
 

@@ -78,6 +78,7 @@ export interface TrackDefinition {
   generalCreditsRequired: number;
   semesterSchedule: SemesterScheduleEntry[];
   specializationGroupsRequired: number;
+  scienceChainsRequired?: number;
   description: string;
   electivePolicy?: TrackElectivePolicy;
   externalFacultyElectiveEnabled?: boolean;
@@ -282,6 +283,7 @@ export interface StudentPlan {
   semesters: Record<number, string[]>;
   completedCourses: string[];
   selectedSpecializations: string[];
+  selectedScienceChain?: string;
   favorites: string[];
   grades: Record<string, number>;
   substitutions: Record<string, string>;

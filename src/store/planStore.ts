@@ -54,6 +54,7 @@ interface PlanState extends StudentPlan {
   toggleCompleted: (courseId: string) => void;
   toggleCompletedInstance: (instanceKey: string) => void;
   toggleSpecialization: (groupId: string) => void;
+  setScienceChain: (chainId: string | undefined) => void;
   toggleFavorite: (courseId: string) => void;
   setGrade: (courseId: string, grade: number | null, semester?: number) => void;
   setSubstitution: (fromId: string, toId: string | null) => void;
@@ -745,6 +746,12 @@ export const usePlanStore = create<PlanState>()(
               ? list.filter((k) => k !== instanceKey)
               : [...list, instanceKey],
           };
+        }),
+
+      setScienceChain: (chainId) =>
+        set((state) => {
+          if (isShareReviewReadOnly(state)) return state;
+          return { selectedScienceChain: chainId };
         }),
 
       toggleSpecialization: (groupId) =>

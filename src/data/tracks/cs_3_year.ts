@@ -9,6 +9,7 @@ export const cs3YearTrack: TrackDefinition = {
   electiveCreditsRequired: 24.5,
   generalCreditsRequired: 10.0,
   specializationGroupsRequired: 3,
+  scienceChainsRequired: 1,
   externalFacultyElectiveEnabled: false,
   electivePolicy: {
     facultyCourseAreas: ['cs'],

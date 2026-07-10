@@ -8,6 +8,7 @@ export interface RequirementsInput {
   binaryPass: Record<string, boolean>;
   selectedSpecializations: string[];
   doubleSpecializations: string[];
+  selectedScienceChain?: string;
   hasEnglishExemption: boolean;
   miluimCredits: number;
   englishScore: number | undefined;

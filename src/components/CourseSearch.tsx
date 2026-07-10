@@ -20,6 +20,7 @@ import {
   matchesSubjects,
 } from '../domain/gradeStatistics/filters';
 import type { ResolvedStatistic } from '../domain/gradeStatistics/types';
+import { useLanguage } from '../context/LanguageContext';
 
 const RATING_FETCH_BATCH_SIZE = 25;
 const RATING_FETCH_CANDIDATE_CAP = 50;
@@ -83,6 +84,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
     englishTaughtCourses: state.englishTaughtCourses ?? [],
   })));
 
+  const { t, language } = useLanguage();
   const { data: statsData, status: statsStatus } = useGradeStatistics();
 
   const updateFilters = useCallback((partial: Partial<CourseFilters>) => {
@@ -287,8 +289,8 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
     { label: 'ללא שיבוץ', value: 0 },
     ...semesterOrder.map((sem) => ({
       label: summerSemesters.includes(sem)
-        ? 'סמסטר קיץ'
-        : `סמסטר ${SEM_LABELS[sem - 1] ?? sem}`,
+        ? t('summerSemester')
+        : `${t('semester')} ${language === 'he' ? SEM_LABELS[sem - 1] ?? sem : sem}`,
       value: sem,
     })),
   ], [semesterOrder, summerSemesters]);
@@ -305,10 +307,10 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
     if (onCourseAdded) {
       const course = courses.get(courseId);
       const semLabel = semValue === 0
-        ? 'ללא שיבוץ'
+        ? t('noUnassignedCourses')
         : summerSemesters.includes(semValue)
-          ? 'סמסטר קיץ'
-          : `סמסטר ${SEM_LABELS[semValue - 1] ?? semValue}`;
+          ? t('summerSemester')
+          : `${t('semester')} ${language === 'he' ? SEM_LABELS[semValue - 1] ?? semValue : semValue}`;
       onCourseAdded(course?.name ?? courseId, semLabel);
     }
   }
@@ -393,9 +395,9 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
             setPickerPosition(null);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="חפש קורס לפי שם או מספר..."
+          placeholder={t('searchCourse')}
           className="flex-1 text-sm outline-none bg-transparent text-right text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          dir="rtl"
+          dir={language === 'he' ? 'rtl' : 'ltr'}
         />
         <button
           onClick={() => {
@@ -446,10 +448,10 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
           ) : (
             <div className="p-3">
               {filters.minRating > 0 && ratingLoading && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-1.5">טוען דירוגים…</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-1.5">{t('loading')}</p>
               )}
               {searchResults.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">לא נמצאו קורסים</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">{t('courseNotFound')}</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {searchResults.map((course) => (

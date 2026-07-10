@@ -158,7 +158,7 @@ export const SemesterColumn = memo(function SemesterColumn({
             <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm tracking-tight">{semesterLabel}</span>
             {isCurrent && (
               <span className="text-xs text-white px-2 py-0.5 rounded-full font-semibold" style={{ background: '#2c61ad' }}>
-                נוכחי
+                {t('currentSemester')}
               </span>
             )}
           </div>
@@ -172,16 +172,16 @@ export const SemesterColumn = memo(function SemesterColumn({
                     ? 'text-green-600 dark:text-green-400 border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950 hover:bg-green-100'
                     : 'text-gray-300 dark:text-slate-600 border-gray-200 dark:border-slate-700 hover:text-green-500'
                 }`}
-                title={courseIds.every((id) => completedCourses.has(id)) ? 'בטל סימון הושלם' : 'סמן הכל כהושלם'}
+                title={courseIds.every((id) => completedCourses.has(id)) ? t('unmarkCompleted') : t('markAllCompleted')}
               >✓</button>
             )}
             {semester > 0 && (
               <span className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-medium tabular-nums">
-                {totalCredits.toFixed(1)} נ״ז
+                {totalCredits.toFixed(1)} {t('creditsLabel')}
               </span>
             )}
             {semester > 0 && semesterAverage !== null && semesterAverage !== undefined && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold tabular-nums" style={{ background: '#eff4fb', color: '#1e4d93' }} title="ממוצע סמסטר משוקלל">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold tabular-nums" style={{ background: '#eff4fb', color: '#1e4d93' }} title={t('semesterAverageTooltip')}>
                 ∅ {semesterAverage.toFixed(1)}
               </span>
             )}
@@ -190,7 +190,7 @@ export const SemesterColumn = memo(function SemesterColumn({
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); onToggleWarnings?.(); }}
                 className={`text-xs px-1 py-0.5 rounded border transition-colors ${warningsIgnored ? 'text-gray-300 border-gray-200 hover:text-amber-400' : 'text-amber-500 border-amber-200 bg-amber-50 hover:bg-amber-100'}`}
-                title={warningsIgnored ? 'הצג אזהרות עונה' : 'התעלם מאזהרות עונה'}
+                title={warningsIgnored ? t('showSeasonWarnings') : t('ignoreSeasonWarnings')}
               >⚠️</button>
             )}
             {semester > 0 && !readOnly && (
@@ -201,7 +201,7 @@ export const SemesterColumn = memo(function SemesterColumn({
                   onSetCurrentSemester(isCurrent ? null : semester);
                 }}
                 className={`text-base leading-none transition-colors ${isCurrent ? 'text-blue-500' : 'text-gray-300 hover:text-blue-400'}`}
-                title={isCurrent ? 'בטל סמסטר נוכחי' : 'הגדר כסמסטר נוכחי'}
+                title={isCurrent ? t('unsetCurrentSemester') : t('setCurrentSemester')}
               >
                 📍
               </button>
@@ -297,17 +297,17 @@ export const SemesterColumn = memo(function SemesterColumn({
           <p className="text-xs text-gray-400 dark:text-slate-600 text-center py-6 italic">
             {semester === 0
               ? (search.trim() ? t('courseNotFound') : t('noUnassignedCourses'))
-              : isDraggingActive ? '' : 'גרור קורסים לכאן'}
+              : isDraggingActive ? '' : t('dragCoursesHere')}
           </p>
         )}
         {isDraggingActive && isOver && (
           <div className="mt-1 mb-1 flex items-center justify-center gap-1.5 text-blue-600 text-xs font-semibold py-2 bg-blue-100 dark:bg-blue-900 rounded-lg border-2 border-blue-400 dark:border-blue-600 border-dashed">
             <span>📥</span>
-            <span>שחרר כאן</span>
+            <span>{t('dropHere')}</span>
           </div>
         )}
         {isDraggingActive && !isOver && semester > 0 && filteredIds.length === 0 && (
-          <p className="text-xs text-blue-400 text-center py-6 italic">גרור לכאן</p>
+          <p className="text-xs text-blue-400 text-center py-6 italic">{t('dragHere')}</p>
         )}
       </div>
     </div>

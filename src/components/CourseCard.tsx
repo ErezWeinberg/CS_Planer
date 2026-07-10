@@ -13,6 +13,7 @@ import { getFacultyStyle } from '../utils/faculty';
 import { getTeachingSemesterBadge } from '../utils/teachingSemester';
 import { isCourseTaughtInEnglish, isFreeElectiveCourseId } from '../data/generalRequirements/courseClassification';
 import { useShareMode } from '../context/ShareModeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   course: SapCourse;
@@ -68,6 +69,7 @@ export const CourseCard = memo(function CourseCard({
 }: Props) {
   const shareMode = useShareMode();
   const isReadOnly = shareMode?.isShareReview ?? false;
+  const { t } = useLanguage();
   const effectiveDraggable = draggable && !isReadOnly;
   const draggableId = instanceKey ?? course.id;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -194,7 +196,7 @@ export const CourseCard = memo(function CourseCard({
               toggleFavorite(course.id);
             }}
             className={`w-14 h-14 flex items-center justify-center text-sm leading-none transition-colors ${isFavorite ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'}`}
-            title={isFavorite ? 'הסר ממועדפים' : 'הוסף למועדפים'}
+            title={isFavorite ? t('removeFromFavorites') : t('addToFavorites')}
           >
             {isFavorite ? '★' : '☆'}
           </button>
@@ -208,8 +210,8 @@ export const CourseCard = memo(function CourseCard({
                 removeCourseFromSemester(effectiveId, semester);
               }}
               className="w-14 h-14 flex items-center justify-center text-xl leading-none font-semibold text-gray-300 dark:text-slate-600 hover:text-red-500 transition-colors"
-              title={semester === 0 ? 'הסר מהתכנית' : 'הסר מהסמסטר'}
-              aria-label={semester === 0 ? 'הסר מהתכנית' : 'הסר מהסמסטר'}
+              title={semester === 0 ? t('removeFromPlan') : t('removeFromSemester')}
+              aria-label={semester === 0 ? t('removeFromPlan') : t('removeFromSemester')}
             >
               ×
             </button>
@@ -227,7 +229,7 @@ export const CourseCard = memo(function CourseCard({
               toggleCompleted(effectiveId);
             }}
             className={`absolute top-0 right-0 w-11 h-11 flex items-center justify-center text-sm leading-none font-bold transition-colors z-10 ${effectiveIsCompleted ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-600 hover:text-emerald-400'}`}
-            title={effectiveIsCompleted ? 'סמן כלא הושלם' : 'סמן כהושלם'}
+            title={effectiveIsCompleted ? t('markUncompleted') : t('markCompleted')}
           >
             {effectiveIsCompleted ? '✓' : '○'}
           </button>
@@ -237,14 +239,14 @@ export const CourseCard = memo(function CourseCard({
 
         {wrongSemesterType && (
           <p className="text-xs text-red-500 mt-0.5 px-4 leading-tight">
-            {course.teachingSemester === 'winter' ? '❄️ קורס חורף בלבד' : '🌸 קורס אביב בלבד'}
+            {course.teachingSemester === 'winter' ? t('winterCourseOnly') : t('springCourseOnly')}
           </p>
         )}
 
         {missingPrereqGroups.length > 0 && bestGroup.length > 0 && (
           <div className="mt-1 px-4 space-y-0.5">
             {displayedNames.map((name, index) => (
-              <p key={index} className="text-xs text-orange-500 leading-tight">נותר: {name}</p>
+              <p key={index} className="text-xs text-orange-500 leading-tight">{t('remainingPrereq')}{name}</p>
             ))}
             {hasMoreInGroup && <p className="text-xs text-orange-400 leading-tight">...</p>}
           </div>
@@ -256,7 +258,7 @@ export const CourseCard = memo(function CourseCard({
               const conflictingCourse = courses.get(conflict.conflictingCourseId);
               return (
                 <p key={conflict.pairKey} className="text-xs text-orange-500 leading-tight">
-                  ללא זיכוי נוסף: {conflictingCourse?.name ?? conflict.conflictingCourseId}
+                  {t('noAdditionalCreditPrefix')}{conflictingCourse?.name ?? conflict.conflictingCourseId}
                 </p>
               );
             })}
@@ -267,8 +269,8 @@ export const CourseCard = memo(function CourseCard({
         {containingSubstitution && (
           <div className="mt-1 px-4">
             <p className="text-xs text-teal-600 dark:text-teal-400 leading-tight">
-              מכיל את {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId}: {containingSubstitution.mandatoryCredits} נק"ז נספרות כחובה
-              {containingSubstitution.excessCredits > 0 && <>, {containingSubstitution.excessCredits} נק"ז לבחירה חופשית</>}
+              {t('containsCourse')} {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId}: {containingSubstitution.mandatoryCredits} {t('mandatoryCreditsCounted')}
+              {containingSubstitution.excessCredits > 0 && <>, {containingSubstitution.excessCredits} {t('freeElectiveCreditsCounted')}</>}
             </p>
           </div>
         )}
@@ -290,22 +292,22 @@ export const CourseCard = memo(function CourseCard({
               </span>
             )}
             {showsEnglishBadge && (
-              <span className="text-xs bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-1 py-0.5 rounded font-semibold leading-none" title="קורס באנגלית">
+              <span className="text-xs bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 px-1 py-0.5 rounded font-semibold leading-none" title={t('englishCourseTooltip')}>
                 EN
               </span>
             )}
             {showsFreeElectiveBadge && (
-              <span className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 px-1 py-0.5 rounded font-semibold leading-none" title="בחירה חופשית">
-                ב"ח
+              <span className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 px-1 py-0.5 rounded font-semibold leading-none" title={t('freeElectiveTooltip')}>
+                FE
               </span>
             )}
             {!isCoreLocked && !isMandatory && chainName === 'לא שובץ' ? (
               <>
-                <span className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 px-1 py-0.5 rounded font-medium leading-none" title="קורס שייך למספר שרשראות — יש לשבץ ידנית">
-                  לא שובץ
+                <span className="text-xs bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 px-1 py-0.5 rounded font-medium leading-none" title={t('notAssignedTooltip')}>
+                  {t('notAssignedLabel')}
                 </span>
                 <span className="text-xs bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400 px-1 py-0.5 rounded font-medium leading-none">
-                  בחירה
+                  {t('electiveLabel')}
                 </span>
               </>
             ) : (
@@ -316,13 +318,13 @@ export const CourseCard = memo(function CourseCard({
                   : chainName ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
                   : 'bg-teal-50 dark:bg-teal-950 text-teal-600 dark:text-teal-400'
                 }`}
-                title={isCoreLocked ? 'קורס נספר כליבה' : (!isMandatory && chainName ? chainName : undefined)}
+                title={isCoreLocked ? t('coreTooltip') : (!isMandatory && chainName ? chainName : undefined)}
               >
-                {isCoreLocked ? 'ליבה' : isMandatory ? 'חובה' : (chainName ?? 'בחירה')}
+                {isCoreLocked ? t('coreLabel') : isMandatory ? t('mandatoryLabel') : (chainName ?? t('electiveLabel'))}
               </span>
             )}
             {isBinaryPass && (
-              <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded-full font-medium">עובר</span>
+              <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded-full font-medium">{t('passLabel')}</span>
             )}
             {grade !== undefined && !isBinaryPass && (
               <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded-full font-medium">{grade}</span>
@@ -333,15 +335,15 @@ export const CourseCard = memo(function CourseCard({
             {(hasPrereqWarning || hasNoAdditionalCreditWarning) && (
               <span
                 className="text-xs"
-                title={hasNoAdditionalCreditWarning ? 'ללא זיכוי נוסף' : 'קדמים חסרים'}
+                title={hasNoAdditionalCreditWarning ? t('noAdditionalCreditPrefix') : t('missingPrereqsTooltip')}
               >⚠️</span>
             )}
             {hasPlannedDownstream && (
               <span
                 className="text-xs relative"
                 title={postponeSlack && postponeSlack > 0
-                  ? `ניתן לדחות עד ${postponeSlack} סמסטרים לפני שזה יתנגש עם קורס מתוכנן`
-                  : 'קורסים שתלויים בקורס זה משובצים בתכנית — דחייה עלולה להשפיע עליהם'}
+                  ? `${t('postponeSlackPrefix')}${postponeSlack}${t('postponeSlackSuffix')}`
+                  : t('downstreamWarningTooltip')}
               >
                 🔗{postponeSlack !== null && postponeSlack > 0 && (
                   <sup className="text-[9px]">{postponeSlack}</sup>
@@ -350,9 +352,9 @@ export const CourseCard = memo(function CourseCard({
             )}
             <span
               className={`text-xs font-bold ${displayedCredits === 0 && course.credits > 0 ? 'text-orange-600 line-through decoration-orange-500' : 'text-gray-600 dark:text-gray-400'}`}
-              title={displayedCredits === 0 && course.credits > 0 ? `${course.credits} נק"ז מקוריות, 0 נק"ז מוכרות` : undefined}
+              title={displayedCredits === 0 && course.credits > 0 ? `${course.credits} ${t('originalCreditsZeroRecognized')}` : undefined}
             >
-              {displayedCredits} נק"ז
+              {displayedCredits} {t('creditsLabelShort')}
             </span>
           </div>
         </div>
@@ -360,11 +362,11 @@ export const CourseCard = memo(function CourseCard({
         {gradeStat && (gradeStat.average !== null || gradeStat.median !== null) && (
           <div
             className="flex items-center flex-wrap gap-x-1.5 mt-1 text-[11px] text-slate-400 dark:text-slate-500 leading-tight"
-            title="נתוני ציונים היסטוריים מ-CheeseFork — אינדיקציה בלבד, משתנה לפי סמסטר ומועד"
+            title={t('historicalGradesTooltip')}
           >
-            {gradeStat.average !== null && <span>{gradeStat.kind === 'general' ? 'ממוצע כללי' : 'ממוצע'} {formatGrade(gradeStat.average)}</span>}
+            {gradeStat.average !== null && <span>{gradeStat.kind === 'general' ? t('generalAverage') : t('average')} {formatGrade(gradeStat.average)}</span>}
             {gradeStat.average !== null && gradeStat.median !== null && <span aria-hidden>·</span>}
-            {gradeStat.median !== null && <span>{gradeStat.kind === 'general' ? 'חציון כללי' : 'חציון'} {formatGrade(gradeStat.median)}</span>}
+            {gradeStat.median !== null && <span>{gradeStat.kind === 'general' ? t('generalMedian') : t('median')} {formatGrade(gradeStat.median)}</span>}
             {gradeStat.kind === 'semester' && gradeStat.semester && (
               <>
                 <span aria-hidden>·</span>
@@ -374,7 +376,7 @@ export const CourseCard = memo(function CourseCard({
             {gradeStat.students !== null && (
               <>
                 <span aria-hidden>·</span>
-                <span>{gradeStat.students} נבחנים</span>
+                <span>{gradeStat.students} {t('examinees')}</span>
               </>
             )}
           </div>

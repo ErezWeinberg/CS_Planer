@@ -9,7 +9,9 @@ import { getTrackSpecializationCatalog } from '../domain/specializations';
 import { CheeseForkInfo } from './CheeseForkInfo';
 import { CourseGradeStats } from './CourseGradeStats';
 import { getTrackDefinition } from '../data/tracks';
+import { getTrackDefinition } from '../data/tracks';
 import { getVisibleMandatoryCourseIds } from '../data/tracks/semesterSchedule';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface Props {
   course: SapCourse;
@@ -54,6 +56,8 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
     courseNotes: state.courseNotes,
     setCourseNote: state.setCourseNote,
   })));
+
+  const { t } = useLanguage();
 
   const chainMemberships = useMemo(() => {
     const allSpecs = trackId ? getTrackSpecializationCatalog(trackId).groups : [];
@@ -641,13 +645,13 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
 
         {/* Note */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">הערה</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('noteLabel')}</label>
           <textarea
             dir="auto"
             value={noteInput}
             onChange={(e) => setNoteInput(e.target.value)}
             onBlur={() => setCourseNote(effectiveId, noteInput)}
-            placeholder="הוסף הערה אישית לקורס..."
+            placeholder={t('notePlaceholder')}
             rows={3}
             maxLength={4000}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 transition-colors resize-none"
@@ -656,7 +660,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
 
         {/* Grade */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">ציון</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('gradeLabel')}</label>
 
           {/* Binary pass toggle */}
           <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
@@ -669,14 +673,14 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               }}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-gray-700">עובר בינארי</span>
-            <span className="text-xs text-gray-400">(לא נכנס לממוצע)</span>
+            <span className="text-sm text-gray-700">{t('binaryPassLabel')}</span>
+            <span className="text-xs text-gray-400">{t('notInAverage')}</span>
           </label>
 
           {isBinaryMode ? (
             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
               <span className="text-green-600 text-sm font-bold">✓</span>
-              <span className="text-sm text-green-700">הקורס יסומן כעובר בינארי</span>
+              <span className="text-sm text-green-700">{t('binaryPassDesc')}</span>
             </div>
           ) : (
             <>
@@ -687,11 +691,11 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                 value={gradeInput}
                 onChange={(e) => setGradeInput(e.target.value)}
                 onWheel={(e) => e.currentTarget.blur()}
-                placeholder="הזן ציון (0–100)..."
+                placeholder={t('gradePlaceholder')}
                 className={`w-full border rounded-lg px-3 py-2 text-sm outline-none transition-colors text-right
                   ${isValid ? 'border-gray-300 focus:border-blue-400' : 'border-red-400'}`}
               />
-              {!isValid && <p className="text-xs text-red-500 mt-1">ציון חייב להיות בין 0 ל-100</p>}
+              {!isValid && <p className="text-xs text-red-500 mt-1">{t('gradeError')}</p>}
             </>
           )}
         </div>
@@ -703,7 +707,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               onClick={() => { removeCourseFromSemester(effectiveId, semester); handleClose(); }}
               className="w-full text-sm text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-400 px-4 py-2 rounded-lg transition-colors font-medium"
             >
-              {semester === 0 ? '✕ הסר מהתכנית' : '✕ הסר מהסמסטר'}
+              {semester === 0 ? t('removeFromPlan') : t('removeFromSemester')}
             </button>
           )}
           <div className="flex gap-2">
@@ -712,21 +716,21 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               disabled={!isBinaryMode && (!isValid || gradeInput === '')}
               className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
-              {isBinaryMode ? 'שמור עובר' : 'שמור ציון'}
+              {isBinaryMode ? t('savePass') : t('saveGrade')}
             </button>
             {(currentGrade !== undefined || isBinaryPass) && (
               <button
                 onClick={() => { setGrade(course.id, null, semester); setBinaryPass(course.id, null); handleClose(); }}
                 className="text-sm text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-3 py-2 rounded-lg transition-colors"
               >
-                מחק ציון
+                {t('deleteGrade')}
               </button>
             )}
             <button
               onClick={handleClose}
               className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-2 rounded-lg transition-colors"
             >
-              סגור
+              {t('closeButton')}
             </button>
           </div>
         </div>
