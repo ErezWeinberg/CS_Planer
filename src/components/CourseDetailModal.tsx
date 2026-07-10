@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState, useCallback } from 'react';
+﻿import { useDeferredValue, useEffect, useMemo, useState, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
 import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';
@@ -294,7 +294,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                           <button
                             onClick={() => setCourseChainAssignment(course.id, null)}
                             className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600 transition-colors"
-                            title={isCoreCandidate ? 'בטל הקצאה — יחזור לספירת ליבה' : 'בטל הקצאה — יחזור לספור בכל השרשראות'}
+                            title={t('cancelAssignment')}
                           >
                             ✓ מוקצה
                           </button>
@@ -737,3 +737,4 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
     </div>
   );
 }
+

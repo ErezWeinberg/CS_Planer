@@ -110,7 +110,7 @@ function VersionColumn({
       {/* Header */}
       <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
         <div className="font-semibold text-gray-800 text-sm truncate">{version.name}</div>
-        {trackDef && <div className="text-xs text-gray-500">{trackDef.name}</div>}
+        {trackDef && <div className="text-xs text-gray-500">{t('dataDict')(trackDef.name)}</div>}
         {weightedAverage !== null && (
           <div className="text-xs text-gray-500">ממוצע: {weightedAverage.toFixed(2)}</div>
         )}

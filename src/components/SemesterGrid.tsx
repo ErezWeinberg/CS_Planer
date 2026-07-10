@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+﻿import { memo, useMemo, useState } from 'react';
 import {
   DndContext, DragOverlay, closestCenter, closestCorners, pointerWithin, rectIntersection,
   PointerSensor, TouchSensor, KeyboardSensor,
@@ -452,9 +452,9 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
         {/* 3-way segmented view toggle */}
         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden text-sm">
           {([
-            { mode: 'grid' as const, icon: '⊞', label: 'גריד' },
-            { mode: 'rows' as const, icon: '☰', label: 'שורות' },
-            { mode: 'buckets' as const, icon: '📋', label: 'חובה/בחירה' },
+            { mode: 'grid' as const, icon: '⊞', label: t('viewGrid') },
+            { mode: 'rows' as const, icon: '☰', label: t('viewRows') },
+            { mode: 'buckets' as const, icon: '📋', label: t('viewBuckets') },
           ] as const).map(({ mode, icon, label }) => (
             <button
               key={mode}
@@ -636,3 +636,4 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
 });
 
 SemesterGrid.displayName = 'SemesterGrid';
+

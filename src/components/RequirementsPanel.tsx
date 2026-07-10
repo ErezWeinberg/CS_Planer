@@ -132,7 +132,7 @@ function ElectiveBreakdown({
                 const course = courses.get(id);
                 return (
                   <li key={id} className="flex justify-between items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <span className="truncate">{course?.name ?? id}</span>
+                    <span className="truncate">{course?.name ? dataDict(course.name) : id}</span>
                     <span className="shrink-0 font-medium text-purple-700">
                       {formatCredits(course?.credits ?? 0)} נק"ז
                     </span>
@@ -227,7 +227,7 @@ function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: st
     case 'labs':
       return t('labsLabel');
     default:
-      return req.title;
+      return t('dataDict' as any)(req.title);
   }
 }
 
@@ -403,7 +403,7 @@ function GeneralElectivesRow({
         for (const course of req.countedCourses) {
           const entry = grouped.get(course.courseId);
           if (entry) entry.count++;
-          else grouped.set(course.courseId, { name: course.name, count: 1 });
+          else grouped.set(course.courseId, { name: dataDict(course.name), count: 1 });
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -429,7 +429,7 @@ function GeneralElectivesRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{course.name} נלמד באנגלית</span>
+                <span>{dataDict(course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -540,7 +540,7 @@ function CompactRequirementRow({
         for (const course of req.countedCourses) {
           const entry = grouped.get(course.courseId);
           if (entry) { entry.count++; }
-          else { grouped.set(course.courseId, { name: course.name, count: 1 }); }
+          else { grouped.set(course.courseId, { name: dataDict(course.name), count: 1 }); }
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -567,7 +567,7 @@ function CompactRequirementRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{course.name} נלמד באנגלית</span>
+                <span>{dataDict(course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -887,7 +887,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                           return (
                             <div key={id} className="flex items-center gap-1.5">
                               <span className={rowTextColor}>
-                                {slot.names[index]}
+                                {dataDict(slot.names[index])}
                                 {slot.ids.length > 1 && index === slot.ids.length - 1 && t('oneOfTwo')}
                               </span>
                               {canAdd && renderMinorAddButton(id)}
@@ -899,7 +899,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                       <span className={slot.done ? 'text-green-700' : slot.released ? 'text-purple-600' : 'text-gray-500'}>
                         {slot.ids.length > 1
                           ? `${slot.names.join(' / ')}${t('oneOfTwo')}`
-                          : slot.names[0]}
+                          : dataDict(slot.names[0])}
                       </span>
                     )}
                   </div>
@@ -913,7 +913,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                   {canRelease.map((id) => {
                     const isReleased = coreToChainOverrides.includes(id);
                     const slot = slots.find((s) => s.ids.includes(id));
-                    const name = slot?.names[slot.ids.indexOf(id)] ?? id;
+                    const name = slot?.names[slot.ids.indexOf(id)] ? dataDict(slot.names[slot.ids.indexOf(id)]) ?? id;
                     return (
                       <label key={id} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                         <input
@@ -1038,7 +1038,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {course.name}
+                                {dataDict(course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1140,7 +1140,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {course.name}
+                                {dataDict(course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1172,7 +1172,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                               {placed ? '✓' : '○'}
                             </span>
                             <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                              {course.name}
+                              {dataDict(course.name)}
                             </span>
                             {!placed && renderMinorAddButton(course.id)}
                           </div>
@@ -1247,12 +1247,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {mandatoryCourses.map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={course.name} className="flex items-center gap-1.5 text-xs">
+                  <div key={dataDict(course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {course.name}
+                      {dataDict(course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}
@@ -1268,12 +1268,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {ENTREPRENEURSHIP_COURSES.filter((c) => !c.mandatory).map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={course.name} className="flex items-center gap-1.5 text-xs">
+                  <div key={dataDict(course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {course.name}
+                      {dataDict(course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}
@@ -1302,7 +1302,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
             {progress.scienceChainDetails && (
               <div className="space-y-1 pr-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={progress.scienceChainDetails.name}>{progress.scienceChainDetails.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={dataDict(progress.scienceChainDetails.name)}>{dataDict(progress.scienceChainDetails.name)}</span>
                   <div className="flex items-center gap-1 shrink-0">
                     <span className={`text-xs font-medium ${progress.scienceChainDetails.done >= progress.scienceChainDetails.min ? 'text-green-600' : 'text-gray-500'}`}>
                       {progress.scienceChainDetails.done}/{progress.scienceChainDetails.min}{progress.scienceChainDetails.done >= progress.scienceChainDetails.min ? ' הושלם' : ''}
@@ -1352,7 +1352,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
             {progress.groupDetails.map((group) => (
               <div key={group.id}>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={group.name}>{group.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]" title={dataDict(group.name)}>{dataDict(group.name)}</span>
                   <div className="flex items-center gap-1 shrink-0">
                     {group.isDouble && <span className="text-xs bg-purple-100 text-purple-600 px-1 rounded font-medium">{t('doubleGroup')}</span>}
                     <span className={`text-xs font-medium ${group.done >= group.min ? 'text-green-600' : 'text-gray-500'}`}>

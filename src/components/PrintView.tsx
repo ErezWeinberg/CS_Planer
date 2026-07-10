@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import { usePlanStore } from '../store/planStore';
 import type { SapCourse, StudentPlan, TrackDefinition, TrackSpecializationCatalog } from '../types';
 import { getFacultyStyle } from '../utils/faculty';
@@ -133,7 +134,7 @@ function PrintPlanSection({ plan, courses, trackDef, catalog, includeGrades, ver
       <header className="print-header">
         <div>
           <h1 className="print-title">מתכנן לימודים – הטכניון</h1>
-          {trackDef && <p className="print-subtitle">{trackDef.name}</p>}
+          {trackDef && <p className="print-subtitle">{t('dataDict')(trackDef.name)}</p>}
           {versionName && <p className="print-subtitle">{versionName}</p>}
         </div>
         <div className="print-meta">
@@ -269,6 +270,7 @@ function PrintPlanSection({ plan, courses, trackDef, catalog, includeGrades, ver
 }
 
 export function PrintView({ courses, trackDef, catalog, includeGrades = true, versionIds }: Props) {
+  const { t } = useLanguage();
   const storeVersions = usePlanStore((s) => s.versions);
 
   // Capture all active-version fields for the default (no versionIds) path

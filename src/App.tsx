@@ -451,7 +451,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
     };
 
     const handleSaveError = (error: unknown, onSuccess?: () => void) => {
-      const message = error instanceof Error ? error.message : 'שגיאת שמירה';
+      const message = error instanceof Error ? error.message : t('saveError');
       if (isRetryableSyncError(error)) {
         setSyncStatus('error');
         setSyncErrorMessage(`${message}. ננסה שוב אוטומטית.`);
@@ -743,7 +743,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
             <div>
               <h1 className="text-lg font-bold text-white tracking-tight">{t('appTitle')}</h1>
               <p className="text-sm font-light" style={{ color: 'rgba(147,197,253,0.8)' }}>
-                {t('trackDescriptions')[trackDef.id] ? trackDef.name : trackDef.name}
+                {t('dataDict')(trackDef.name)}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 justify-end">
@@ -809,9 +809,9 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
                 disabled={_history.length === 0}
                 className="text-sm border px-3 py-1.5 rounded-lg transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
                 style={{ color: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.18)' }}
-                title={_history.length > 0 ? `בטל פעולה אחרונה (${_history.length})` : 'אין פעולות לביטול'}
+                title={_history.length > 0 ? t('undoActionCount').replace('{count}', _history.length.toString()) : t('noUndoAction')}
               >
-                <span>↩</span><span className="hidden sm:inline"> בטל</span>
+                <span>↩</span><span className="hidden sm:inline"> {t('undoAction')}</span>
               </button>
               <DegreePlanningMenu
                 onInitializeRecommended={handleInitializeRecommended}
@@ -825,10 +825,10 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
                     ? 'text-emerald-300 border-emerald-400/40 bg-emerald-400/10'
                     : 'text-violet-300 border-violet-400/40 hover:bg-violet-400/10'
                 }`}
-                title="בדיקת גמר תואר והמלצות"
+                title={t('degreeCheckDesc')}
               >
                 <span className="hidden sm:inline">
-                  {degreeCompletion?.result.isComplete ? '✓ גמר תואר' : 'גמר תואר'}
+                  {degreeCompletion?.result.isComplete ? '✓ ' + t('degreeCompletionCheck') : t('degreeCompletionCheck')}
                 </span>
                 <span className="sm:hidden">
                   {degreeCompletion?.result.isComplete ? '✓' : '🎓'}
@@ -853,7 +853,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
                 className="text-sm border px-3 py-1.5 rounded-lg transition-colors"
                 style={{ color: 'rgba(252,165,165,0.9)', borderColor: 'rgba(252,165,165,0.3)' }}
               >
-                <span className="hidden sm:inline">החלף מסלול</span><span className="sm:hidden">מסלול</span>
+                <span className="hidden sm:inline">{t('changeTrack')}</span><span className="sm:hidden">{t('changeTrack')}</span>
               </button>
             </div>
           </div>
@@ -1008,3 +1008,4 @@ function AppInner() {
 export default function App() {
   return <AppInner />;
 }
+

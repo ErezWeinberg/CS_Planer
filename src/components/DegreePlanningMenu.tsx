@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   onInitializeRecommended: () => void;
@@ -22,6 +23,7 @@ const MENU_ITEMS = [
 ] as const;
 
 export function DegreePlanningMenu({ onInitializeRecommended, onPlanFromScratch, readOnly = false }: Props) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -57,9 +59,9 @@ export function DegreePlanningMenu({ onInitializeRecommended, onPlanFromScratch,
         onClick={() => setOpen((v) => !v)}
         className="text-sm border px-3 py-1.5 rounded-lg transition-colors"
         style={{ color: 'rgba(147,197,253,0.9)', borderColor: 'rgba(147,197,253,0.3)' }}
-        title="אתחול מערכת"
+        title={t('resetSystem')}
       >
-        <span className="hidden sm:inline">אתחול מערכת </span>▾
+        <span className="hidden sm:inline">{t('resetSystem')} </span>▾
       </button>
 
       {open && (
@@ -86,3 +88,4 @@ export function DegreePlanningMenu({ onInitializeRecommended, onPlanFromScratch,
     </div>
   );
 }
+

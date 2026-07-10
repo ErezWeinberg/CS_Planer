@@ -1,5 +1,6 @@
-﻿import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { useLanguage } from '../context/LanguageContext';
 import type { SpecializationGroup, SpecializationRuleBlock, SapCourse, TrackSpecializationCatalog } from '../types';
 import { buildEffectiveChainAssignments, evaluateSpecializationGroup } from '../domain/specializations';
 import { usePlanStore } from '../store/planStore';
@@ -33,6 +34,7 @@ function summarizeRuleBlock(block: SpecializationRuleBlock): string {
 }
 
 export function SpecializationPanel({ catalog, courses }: Props) {
+  const { t } = useLanguage();
   const {
     selectedSpecializations, semesters, completedCourses,
     toggleSpecialization, doubleSpecializations, toggleDoubleSpecialization,
@@ -91,8 +93,8 @@ export function SpecializationPanel({ catalog, courses }: Props) {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sidebar-panel">
-        <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-1 tracking-tight">התמחויות</h2>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">לחץ לפתיחת פרטי הקבוצה</p>
+        <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-1 tracking-tight">{t('specializationsTitle')}</h2>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Click to open group details</p>
         {catalog.diagnostics.length > 0 && (
           <div className={`mb-3 rounded-lg border px-3 py-2 text-xs ${
             interactionDisabled
@@ -100,8 +102,8 @@ export function SpecializationPanel({ catalog, courses }: Props) {
               : 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 text-gray-600 dark:text-gray-400'
           }`}>
             {interactionDisabled
-              ? 'קבצי ההתמחויות למסלול הזה מכילים שגיאות. הבחירה והחישוב הושבתו עד לתיקון.'
-              : 'נמצאו אזהרות בקבצי ההתמחויות למסלול זה.'}
+              ? t('specFilesError')
+              : t('specFilesWarnings')}
           </div>
         )}
         <div className="flex flex-col gap-2">
@@ -153,7 +155,7 @@ export function SpecializationPanel({ catalog, courses }: Props) {
                           ? 'bg-blue-500 border-blue-500 text-white'
                           : 'border-gray-300 dark:border-slate-600 text-transparent hover:border-blue-400'
                       } ${interactionDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                      title={isSelected ? 'בטל בחירה' : 'בחר קבוצה'}
+                      title={isSelected ? t('deselect') : t('selectGroup')}
                     >
                       ✓
                     </button>
@@ -167,7 +169,7 @@ export function SpecializationPanel({ catalog, courses }: Props) {
                             ? 'bg-purple-500 border-purple-500 text-white'
                             : 'border-gray-300 dark:border-slate-600 text-gray-400 dark:text-slate-500 hover:border-purple-400 hover:text-purple-500'
                         } ${interactionDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
-                        title={isDouble ? 'בטל התמחות כפולה' : 'הגדר כהתמחות כפולה'}
+                        title={isDouble ? t('cancelDoubleSpec') : t('setDoubleSpec')}
                       >
                         כפ
                       </button>
@@ -222,3 +224,4 @@ export function SpecializationPanel({ catalog, courses }: Props) {
     </>
   );
 }
+

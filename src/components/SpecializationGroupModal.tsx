@@ -1,5 +1,6 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLanguage } from '../context/LanguageContext';
 import { useShallow } from 'zustand/react/shallow';
 import type { SpecializationCourseReference, SpecializationGroup, SpecializationRuleBlock, SapCourse } from '../types';
 import { buildEffectiveChainAssignments, evaluateSpecializationGroup } from '../domain/specializations';
@@ -28,6 +29,7 @@ function summarizeBlock(block: SpecializationRuleBlock): string {
 }
 
 export function SpecializationGroupModal({ group, courses, onClose }: Props) {
+  const { t } = useLanguage();
   const {
     favorites,
     toggleFavorite,
@@ -179,7 +181,7 @@ export function SpecializationGroupModal({ group, courses, onClose }: Props) {
               <button
                 onClick={() => setCourseChainAssignment(id, null)}
                 className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600 transition-colors leading-none"
-                title="בטל הקצאה"
+                title={t('cancelAssignment')}
               >
                 ✓ מוקצה
               </button>
@@ -346,3 +348,4 @@ export function SpecializationGroupModal({ group, courses, onClose }: Props) {
     document.body,
   );
 }
+

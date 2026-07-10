@@ -119,8 +119,10 @@ function ChipPopover({
 }
 
 function SubjectsChip({ filters, onChange }: Pick<Props, 'filters' | 'onChange'>) {
+  const { t } = useLanguage();
   const selected = filters.subjects;
-  const label = selected.length === 0 ? 'מקצועות' : `מקצועות (${selected.length})`;
+  const coursesFilterBtn = t('dataDict')('מקצועות');
+  const label = selected.length === 0 ? coursesFilterBtn : `${coursesFilterBtn} (${selected.length})`;
 
   function toggle(id: SubjectId) {
     onChange({ subjects: selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id] });
@@ -137,7 +139,7 @@ function SubjectsChip({ filters, onChange }: Pick<Props, 'filters' | 'onChange'>
         <button type="button" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" onClick={() => onChange({ subjects: SUBJECT_OPTIONS.map((o) => o.id) })}>בחר הכל</button>
         <button type="button" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={() => onChange({ subjects: [] })}>נקה</button>
       </div>
-      <div role="group" aria-label="מקצועות">
+      <div role="group" aria-label={coursesFilterBtn}>
         {SUBJECT_OPTIONS.map((opt) => {
           const isOn = selected.includes(opt.id);
           return (
@@ -179,13 +181,14 @@ function MinInput({ label, value, max, onChange }: { label: string; value: numbe
 function GradeStatsChip({
   filters, onChange, availableSemesters, statsAvailable, statsLoading,
 }: Pick<Props, 'filters' | 'onChange' | 'availableSemesters' | 'statsAvailable' | 'statsLoading'>) {
+  const { t } = useLanguage();
   const mode = filters.statisticsSemester;
   const active = mode !== 'general' || filters.averageMin !== null || filters.medianMin !== null || filters.minStudents !== null;
   const modeLabel = mode === 'general' ? 'כללי' : mode === 'latest' ? 'האחרון' : formatSemester(mode);
 
   return (
     <ChipPopover
-      label={`ציונים: ${modeLabel}`}
+      label={`${t('dataDict')('ציונים')}: ${t('dataDict')(modeLabel)}`}
       active={active}
       activeClass="bg-emerald-100 text-emerald-700 border-emerald-300"
       onClear={() => onChange({ statisticsSemester: 'general', averageMin: null, medianMin: null, minStudents: null })}
@@ -196,7 +199,7 @@ function GradeStatsChip({
       ) : (
         <div className="space-y-2">
           <label className="flex items-center justify-between gap-2">
-            <span className="text-gray-600 dark:text-gray-400">סטטיסטיקה</span>
+            <span className="text-gray-600 dark:text-gray-400">{t('dataDict')('סטטיסטיקה')}</span>
             <select
               value={mode}
               onChange={(e) => onChange({ statisticsSemester: e.target.value })}
@@ -204,8 +207,8 @@ function GradeStatsChip({
               aria-label="מצב סטטיסטיקת ציונים"
               className="text-xs border border-gray-200 dark:border-slate-600 rounded-md px-2 py-1 cursor-pointer focus:border-blue-400 outline-none max-w-36 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200"
             >
-              <option value="general">כללי</option>
-              <option value="latest">האחרון הזמין</option>
+              <option value="general">{t('dataDict')('כללי')}</option>
+              <option value="latest">{t('dataDict')('האחרון הזמין')}</option>
               {availableSemesters.map((s) => <option key={s} value={s}>{formatSemester(s)}</option>)}
             </select>
           </label>
@@ -219,10 +222,10 @@ function GradeStatsChip({
           </p>
 
           <div className="border-t border-gray-100 dark:border-slate-700 pt-2 space-y-1.5">
-            <MinInput label="ממוצע מינ׳" value={filters.averageMin} max={100} onChange={(raw) => onChange({ averageMin: clampGrade(raw) })} />
-            <MinInput label="חציון מינ׳" value={filters.medianMin} max={100} onChange={(raw) => onChange({ medianMin: clampGrade(raw) })} />
+            <MinInput label={t('dataDict')('ממוצע מינ׳')} value={filters.averageMin} max={100} onChange={(raw) => onChange({ averageMin: clampGrade(raw) })} />
+            <MinInput label={t('dataDict')('חציון מינ׳')} value={filters.medianMin} max={100} onChange={(raw) => onChange({ medianMin: clampGrade(raw) })} />
             <MinInput
-              label="תלמידים מינ׳"
+              label={t('dataDict')('תלמידים מינ׳')}
               value={filters.minStudents}
               onChange={(raw) => {
                 const s = raw.trim();
@@ -243,6 +246,7 @@ function GradeStatsChip({
 export function CourseFilterPanel({
   filters, onChange, onReset, availableSemesters, statsAvailable, statsLoading, ratingLoading,
 }: Props) {
+  const { t } = useLanguage();
   const activeCount =
     filters.subjects.length +
     TOGGLE_FILTERS.filter((t) => filters[t.key]).length +
