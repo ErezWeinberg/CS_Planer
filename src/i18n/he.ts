@@ -231,6 +231,6 @@ export const he: Translations = {
   advancedBtn: 'תארים מתקדמים',
   winterBtn: 'חורף',
   springBtn: 'אביב',
-  dataDict: (key: string) => key,,
+  dataDict: (key: string) => key,
   courseNames: {}
 };

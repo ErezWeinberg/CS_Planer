@@ -1,4 +1,4 @@
-﻿import { useDeferredValue, useEffect, useMemo, useState, useCallback } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
 import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';
@@ -384,7 +384,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                   className="mt-0.5 shrink-0"
                 />
                 <span className="text-xs text-gray-600 font-medium">
-                  {t('auto')} <span className="text-gray-400 font-normal">({t('autoDefault').split('(')[1]}
+                  {t('auto')} <span className="text-gray-400 font-normal">({t('autoDefault').split('(')[1]}</span>
                 </span>
               </label>
 

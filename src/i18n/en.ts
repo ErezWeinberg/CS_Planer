@@ -296,7 +296,7 @@ export const en: Translations = {
       'קורסי אביב וחורף': 'Winter & Spring Courses',
     };
     return dict[key] || key;
-  },,
+  },
   courseNames: {
     '01040031': 'Calculus 1M',
     '01040032': 'Calculus 2M',
