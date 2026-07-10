@@ -663,11 +663,12 @@ export function sanitizeEnvelope(value: unknown): VersionedPlanEnvelope | null {
     return null;
   }
 
-  const hasActive = versions.some((v) => v.id === value.activeVersionId);
+  let finalActiveVersionId = value.activeVersionId as string;
+  const hasActive = versions.some((v) => v.id === finalActiveVersionId);
   if (!hasActive) {
-    console.warn('sanitizeEnvelope: activeVersionId not found, falling back to first version', value.activeVersionId);
-    value.activeVersionId = versions[0].id;
+    console.warn('sanitizeEnvelope: activeVersionId not found, falling back to first version', finalActiveVersionId);
+    finalActiveVersionId = versions[0].id;
   }
 
-  return { schemaVersion: 2, versions, activeVersionId: value.activeVersionId as string };
+  return { schemaVersion: 2, versions, activeVersionId: finalActiveVersionId };
 }
