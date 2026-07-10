@@ -85,7 +85,6 @@ export const he: Translations = {
 
   myPlan: 'התוכנית שלי',
   login: 'התחברות',
-  logout: 'התנתק',
   language: 'שפה (Language)',
 
   appTitle: 'מתכנן לימודים – הטכניון',
@@ -193,7 +192,6 @@ export const he: Translations = {
   undoAction: 'בטל',
   undoActionCount: 'בטל פעולה אחרונה ({count})',
   noUndoAction: 'אין פעולות לביטול',
-  saveError: 'שגיאת שמירה',
   degreeCheckDesc: 'בדיקת גמר תואר והמלצות',
   importConfirm: 'הפעולה תחליף את התוכנית האישית שלך במצב הנוכחי של השיתוף. לא ניתן לבטל את הפעולה. להמשיך?',
   specializationsTitle: 'התמחויות',

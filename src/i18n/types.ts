@@ -108,8 +108,6 @@ export interface Translations {
   // Semesters
   semester: string;
   summerSemester: string;
-  mandatory: string;
-  elective: string;
 
   // Course Details
   courseDetails: string;
@@ -123,7 +121,6 @@ export interface Translations {
   // Topbar
   myPlan: string;
   login: string;
-  logout: string;
   language: string;
 
   // App Layout
@@ -159,8 +156,6 @@ export interface Translations {
   springCourseOnly: string;
   remainingPrereq: string;
   noAdditionalCreditPrefix: string;
-  containsCourse: string;
-  mandatoryCreditsCounted: string;
   freeElectiveCreditsCounted: string;
   englishCourseTooltip: string;
   freeElectiveTooltip: string;
@@ -236,7 +231,6 @@ export interface Translations {
   undoAction: string;
   undoActionCount: string;
   noUndoAction: string;
-  saveError: string;
   degreeCheckDesc: string;
   importConfirm: string;
   specializationsTitle: string;

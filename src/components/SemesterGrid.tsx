@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo, useState } from 'react';
 import {
   DndContext, DragOverlay, closestCenter, closestCorners, pointerWithin, rectIntersection,
   PointerSensor, TouchSensor, KeyboardSensor,

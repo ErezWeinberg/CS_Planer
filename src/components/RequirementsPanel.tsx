@@ -98,6 +98,8 @@ function ElectiveBreakdown({
   courses,
   onSelectAssignment,
 }: ElectiveBreakdownProps) {
+  const { t } = useLanguage();
+
   const [externalExpanded, setExternalExpanded] = useState(false);
   const showExternalFaculty = externalFaculty.limit > 0 && (externalFaculty.earned > 0 || externalFaculty.courseIds.length > 0);
   if (areaRequirements.length === 0 && assignmentChoices.length === 0 && !showExternalFaculty) {
@@ -132,7 +134,7 @@ function ElectiveBreakdown({
                 const course = courses.get(id);
                 return (
                   <li key={id} className="flex justify-between items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <span className="truncate">{course?.name ? dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name) : id}</span>
+                    <span className="truncate">{course?.name ? (dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name) : id}</span>
                     <span className="shrink-0 font-medium text-purple-700">
                       {formatCredits(course?.credits ?? 0)} נק"ז
                     </span>
@@ -227,7 +229,7 @@ function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: st
     case 'labs':
       return t('labsLabel');
     default:
-      return t('dataDict' as any)(req.title);
+      return (t('dataDict') as any)(req.title);
   }
 }
 
@@ -402,9 +404,9 @@ function GeneralElectivesRow({
       {req.countedCourses.length > 0 && (() => {
         const grouped = new Map<string, { name: string; count: number }>();
         for (const course of req.countedCourses) {
-          const entry = grouped.get(course.courseId);
+          const entry = grouped.get(course.id);
           if (entry) entry.count++;
-          else grouped.set(course.courseId, { name: dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 });
+          else grouped.set(course.id, { name: (dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name), count: 1 });
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -430,7 +432,7 @@ function GeneralElectivesRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
+                <span>{(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -540,9 +542,9 @@ function CompactRequirementRow({
       {req.countedCourses.length > 0 && req.requirementId !== 'english' && (() => {
         const grouped = new Map<string, { name: string; count: number }>();
         for (const course of req.countedCourses) {
-          const entry = grouped.get(course.courseId);
+          const entry = grouped.get(course.id);
           if (entry) { entry.count++; }
-          else { grouped.set(course.courseId, { name: dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 }); }
+          else { grouped.set(course.id, { name: (dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name), count: 1 }); }
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -569,7 +571,7 @@ function CompactRequirementRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
+                <span>{(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -757,8 +759,8 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     const generalElectives = compactRequirements.find((req) => req.requirementId === 'general_electives');
     if (!generalElectives) return [];
     return generalElectives.countedCourses
-      .filter((course) => isManualEnglishEligible(course.courseId))
-      .map((course) => course.courseId);
+      .filter((course) => isManualEnglishEligible(course.id))
+      .map((course) => course.id);
   }, [compactRequirements]);
 
   if (!progress) return null;
@@ -1041,7 +1043,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
+                                {(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1143,7 +1145,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
+                                {(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1175,7 +1177,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                               {placed ? '✓' : '○'}
                             </span>
                             <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                              {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
+                              {(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)}
                             </span>
                             {!placed && renderMinorAddButton(course.id)}
                           </div>
@@ -1250,12 +1252,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {mandatoryCourses.map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} className="flex items-center gap-1.5 text-xs">
+                  <div key={(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
+                      {(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}
@@ -1271,12 +1273,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {ENTREPRENEURSHIP_COURSES.filter((c) => !c.mandatory).map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} className="flex items-center gap-1.5 text-xs">
+                  <div key={(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
+                      {(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}

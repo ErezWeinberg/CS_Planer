@@ -85,7 +85,6 @@ export const en: Translations = {
 
   myPlan: 'My Plan',
   login: 'Sign In',
-  logout: 'Logout',
   language: 'Language (שפה)',
 
   appTitle: 'CS Planner – Technion',
@@ -193,7 +192,6 @@ export const en: Translations = {
   undoAction: 'Undo',
   undoActionCount: 'Undo last action ({count})',
   noUndoAction: 'Nothing to undo',
-  saveError: 'Save Error',
   degreeCheckDesc: 'Degree check and recommendations',
   importConfirm: 'This will replace your personal plan with the shared one. This cannot be undone. Continue?',
   specializationsTitle: 'Specializations',
