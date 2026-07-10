@@ -209,6 +209,7 @@ export interface SpecializationGroup {
   requirementsByMode: Record<SpecializationMode, SpecializationRequirementSet | null>;
   mutualExclusionRules: SpecializationMutualExclusionRule[];
   replacementRules: SpecializationReplacementRule[];
+  yearVariants?: Record<number, SpecializationGroupYearVariant>;
   diagnostics: SpecializationDiagnostic[];
 }
 

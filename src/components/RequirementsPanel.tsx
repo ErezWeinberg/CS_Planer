@@ -99,6 +99,7 @@ function ElectiveBreakdown({
   onSelectAssignment,
 }: ElectiveBreakdownProps) {
   const { t } = useLanguage();
+  const dataDict = t('dataDict') as any;
 
   const [externalExpanded, setExternalExpanded] = useState(false);
   const showExternalFaculty = externalFaculty.limit > 0 && (externalFaculty.earned > 0 || externalFaculty.courseIds.length > 0);
@@ -404,9 +405,9 @@ function GeneralElectivesRow({
       {req.countedCourses.length > 0 && (() => {
         const grouped = new Map<string, { name: string; count: number }>();
         for (const course of req.countedCourses) {
-          const entry = grouped.get(course.id);
+          const entry = grouped.get(course.courseId);
           if (entry) entry.count++;
-          else grouped.set(course.id, { name: (dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name), count: 1 });
+          else grouped.set(course.courseId, { name: (dataDict as any)((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 });
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -432,7 +433,7 @@ function GeneralElectivesRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} נלמד באנגלית</span>
+                <span>{(dataDict as any)((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -759,7 +760,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     const generalElectives = compactRequirements.find((req) => req.requirementId === 'general_electives');
     if (!generalElectives) return [];
     return generalElectives.countedCourses
-      .filter((course) => isManualEnglishEligible(course.id))
+      .filter((course) => isManualEnglishEligible(course.courseId))
       .map((course) => course.id);
   }, [compactRequirements]);
 

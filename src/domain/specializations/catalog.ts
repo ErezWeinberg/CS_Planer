@@ -50,15 +50,20 @@ export function getTrackSpecializationCatalog(
   if (!catalogYear) return catalog;
 
   const trackVariants = TRACK_SPECIALIZATION_YEAR_VARIANTS[trackId];
-  if (!trackVariants) return catalog;
 
   return {
     ...catalog,
     groups: catalog.groups.map((group) => {
-      const groupVariants = trackVariants[group.name];
-      if (!groupVariants) return group;
-      const variant = groupVariants[catalogYear];
-      if (!variant) return group;
+      const parsedVariant = group.yearVariants?.[catalogYear];
+      const hardcodedVariant = trackVariants?.[group.name]?.[catalogYear];
+      
+      if (!parsedVariant && !hardcodedVariant) return group;
+
+      const variant: SpecializationGroupYearVariant = {
+        ...parsedVariant,
+        ...hardcodedVariant,
+      };
+
       return applySpecializationGroupYearVariant(group, variant);
     }),
   };

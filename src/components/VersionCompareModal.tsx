@@ -40,6 +40,7 @@ function VersionColumn({
   showOnlyDifferentCourses,
   differingCourseIds,
 }: VersionColumnProps) {
+  const { t } = useLanguage();
   const plan = version.plan;
   const trackDef = trackDefs.find((t) => t.id === plan.trackId) ?? null;
   const catalog = plan.trackId ? getTrackSpecializationCatalog(plan.trackId, plan.catalogYear) : null;

@@ -389,6 +389,82 @@ function parseMutualExclusionRules(
   });
 }
 
+function parseYearVariants(
+  value: unknown,
+  diagnostics: SpecializationDiagnostic[],
+  context: { trackId: TrackId; filePath: string; specializationName: string },
+): Record<number, SpecializationGroupYearVariant> | undefined {
+  if (value === undefined) return undefined;
+  if (!isPlainObject(value)) {
+    diagnostics.push(makeDiagnostic(
+      'error',
+      'invalid-year-variants',
+      'השדה year_variants חייב להיות אובייקט.',
+      context,
+    ));
+    return undefined;
+  }
+
+  const variants: Record<number, SpecializationGroupYearVariant> = {};
+
+  for (const [yearStr, variantObj] of Object.entries(value)) {
+    const year = Number(yearStr);
+    if (isNaN(year)) {
+      diagnostics.push(makeDiagnostic(
+        'error',
+        'invalid-year-variant-key',
+        `המפתח ${yearStr} ב-year_variants חייב להיות מספר.`,
+        context,
+      ));
+      continue;
+    }
+
+    if (!isPlainObject(variantObj)) {
+      diagnostics.push(makeDiagnostic(
+        'error',
+        'invalid-year-variant',
+        `הערך עבור שנת ${year} חייב להיות אובייקט.`,
+        context,
+      ));
+      continue;
+    }
+
+    const variant: SpecializationGroupYearVariant = {};
+
+    if (Array.isArray(variantObj.mandatory_course_ids)) {
+      variant.mandatoryCourseIds = variantObj.mandatory_course_ids
+        .map((id) => (typeof id === 'string' ? id.trim() : ''))
+        .filter(Boolean);
+    }
+
+    if (Array.isArray(variantObj.mandatory_choice_groups)) {
+      variant.mandatoryChoiceGroups = variantObj.mandatory_choice_groups
+        .map((group) => {
+          if (!Array.isArray(group)) return [];
+          return group.map((id) => (typeof id === 'string' ? id.trim() : '')).filter(Boolean);
+        })
+        .filter((group) => group.length > 0);
+    }
+
+    if (Array.isArray(variantObj.course_substitutions)) {
+      variant.courseSubstitutions = variantObj.course_substitutions.flatMap((sub, index) => {
+        if (!isPlainObject(sub)) return [];
+        const from = typeof sub.from === 'string' ? sub.from.trim() : '';
+        const to = parseCourseReference(sub.to, diagnostics, {
+          ...context,
+          field: `year_variants[${year}].course_substitutions[${index}].to`,
+        });
+        if (!from || !to) return [];
+        return [{ from, to }];
+      });
+    }
+
+    variants[year] = variant;
+  }
+
+  return Object.keys(variants).length > 0 ? variants : undefined;
+}
+
 function parseRequirementSet(
   value: unknown,
   diagnostics: SpecializationDiagnostic[],
@@ -646,6 +722,7 @@ function buildTrackCatalog(
 
     const replacementRules = parseReplacementRules(parsed.replacement_rules, groupDiagnostics, context);
     const mutualExclusionRules = parseMutualExclusionRules(parsed.mutual_exclusion_rules, groupDiagnostics, context);
+    const yearVariants = parseYearVariants(parsed.year_variants, groupDiagnostics, context);
     const courses = buildGroupCourseList(parsed.courses, replacementRules, groupDiagnostics, context);
     const rawRequirements = isPlainObject(parsed.requirements) ? parsed.requirements : null;
 
@@ -735,6 +812,7 @@ function buildTrackCatalog(
       requirementsByMode,
       mutualExclusionRules,
       replacementRules,
+      yearVariants,
       diagnostics: groupDiagnostics,
     };
 

@@ -619,7 +619,7 @@ function sanitizeStudentPlanRecord(
 
   if ('selectedScienceChain' in value) {
     if (value.selectedScienceChain !== null && (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32)) return null;
-    sanitized.selectedScienceChain = value.selectedScienceChain;
+    sanitized.selectedScienceChain = value.selectedScienceChain === null ? undefined : value.selectedScienceChain;
   }
 
   if ('reviewLecturerAliases' in value) {

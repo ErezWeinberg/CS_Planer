@@ -34,7 +34,7 @@
     ],
     "additional_courses_required": 3,
     "additional_course_selection_rule": {
-      "type": "choose_from_list",
+      "type": "choose_3_from",
       "options": [
         {
           "course_number": "02360351",

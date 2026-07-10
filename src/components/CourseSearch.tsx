@@ -57,7 +57,7 @@ type PickerPosition = {
   maxHeight: number;
 };
 
-export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded }: Props) {const { t } = useLanguage();
+export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded }: Props) {
   const shareMode = useShareMode();
   const isReadOnly = shareMode?.isShareReview ?? false;
   const [query, setQuery] = useState('');
