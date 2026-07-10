@@ -913,7 +913,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                   {canRelease.map((id) => {
                     const isReleased = coreToChainOverrides.includes(id);
                     const slot = slots.find((s) => s.ids.includes(id));
-                    const name = slot?.names[slot.ids.indexOf(id)] ? dataDict(slot.names[slot.ids.indexOf(id)]) ?? id;
+                    const name = slot?.names[slot.ids.indexOf(id)] ? (dataDict(slot.names[slot.ids.indexOf(id)]) ?? id) : id;
                     return (
                       <label key={id} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                         <input
