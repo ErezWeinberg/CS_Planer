@@ -1,6 +1,44 @@
 export type Language = 'he' | 'en';
 
 export interface Translations {
+  // CourseDetailModal
+  openInSap: string;
+  countedForChains: string;
+  countedAsCoreHint: string;
+  mandatory: string;
+  elective: string;
+  assigned: string;
+  assignToThisChainOnly: string;
+  assignBtn: string;
+  countedOnlyInAssigned: string;
+  returnToCore: string;
+  prerequisitesTitle: string;
+  noPrerequisites: string;
+  replacedBy: string;
+  auto: string;
+  customComposition: string;
+  optionSelected: string;
+  autoDefault: string;
+  optionN: string;
+  customPrereqComposition: string;
+  searchCourseToAdd: string;
+  prereqReplacement: string;
+  prereqReplacementHint: string;
+  searchCourseByNameOrId: string;
+  whatDependsOnThis: string;
+  noDependentCourses: string;
+  dependentCoursesCount: string;
+  inPlan: string;
+  noAdditionalCreditTitle: string;
+  creditConflictWith: string;
+  thisCourseNoCredit: string;
+  otherCourseNoCredit: string;
+  noCreditDefaultHint: string;
+  containingCourseTitle: string;
+  containsCourse: string;
+  mandatoryCreditsCounted: string;
+  excessCreditsCounted: string;
+
   // General UI
   loading: string;
   searchCourse: string;

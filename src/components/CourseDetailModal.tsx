@@ -257,7 +257,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               onClick={(e) => e.stopPropagation()}
               className="text-xs text-blue-500 hover:text-blue-700 hover:underline mt-0.5 inline-block"
             >
-              פתח ב-SAP ↗
+              {t('openInSap')}
             </a>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none mr-2">✕</button>
@@ -270,10 +270,10 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
         {/* Chain membership */}
         {chainMemberships.length > 0 && (
           <div className="mb-4 border border-gray-200 rounded-lg p-3">
-            <p className="text-xs font-semibold text-gray-700 mb-2">נספר לשרשראות:</p>
+            <p className="text-xs font-semibold text-gray-700 mb-2">{t('countedForChains')}</p>
             {isCoreLocked && (
               <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5 mb-2">
-                קורס זה נספר כליבה. הקצאה לשרשרת תשחרר אותו מספירת הליבה.
+                {t('countedAsCoreHint')}
               </p>
             )}
             <ul className="space-y-1.5">
@@ -287,7 +287,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                       <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
                         role === 'mandatory' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {role === 'mandatory' ? 'חובה' : 'בחירה'}
+                        {role === 'mandatory' ? t('mandatory') : t('elective')}
                       </span>
                       {(isCoreLocked || chainMemberships.length > 1 || !!courseChainAssignments?.[course.id]) && (
                         isAssignedHere ? (
@@ -296,13 +296,13 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                             className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-100 text-green-700 hover:bg-red-100 hover:text-red-600 transition-colors"
                             title={t('cancelAssignment')}
                           >
-                            ✓ מוקצה
+                            {t('assigned')}
                           </button>
                         ) : (
                           <button
                             onClick={() => setCourseChainAssignment(course.id, id)}
                             className="text-xs px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-500 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
-                            title="הקצה קורס זה לשרשרת זו בלבד"
+                            title={t("assignToThisChainOnly")}
                           >
                             הקצה
                           </button>
@@ -316,13 +316,13 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
             </ul>
             {!isCoreLocked && courseChainAssignments?.[course.id] && (
               <div className="mt-1.5 border-t pt-1.5 flex items-center justify-between gap-2">
-                <p className="text-xs text-gray-400">הקורס נספר רק בשרשרת המוקצית</p>
+                <p className="text-xs text-gray-400">{t('countedOnlyInAssigned')}</p>
                 {isCoreCandidate && (
                   <button
                     onClick={() => setCourseChainAssignment(course.id, null)}
                     className="text-xs px-2 py-0.5 rounded font-medium bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors shrink-0"
                   >
-                    החזר לליבה
+                    {t('returnToCore')}
                   </button>
                 )}
               </div>
@@ -334,8 +334,8 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
         <div className="mb-4 border border-gray-200 rounded-lg p-3">
           {prereqs.length === 0 && !subTargetCourse && (
             <>
-              <p className="text-xs font-semibold text-gray-700 mb-2">תנאי קדם</p>
-              <p className="text-xs text-gray-400 italic">אין תנאי קדם</p>
+              <p className="text-xs font-semibold text-gray-700 mb-2">{t('prerequisitesTitle')}</p>
+              <p className="text-xs text-gray-400 italic">{t('noPrerequisites')}</p>
             </>
           )}
 
@@ -345,7 +345,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               className="w-full flex items-center justify-between text-xs text-gray-700 hover:text-gray-900"
             >
               <span className="font-semibold">
-                תנאי קדם <span className="text-gray-400 font-normal">— מוחלף ע״י {subTargetCourse.name}</span>
+                {t('prerequisitesTitle')} <span className="text-gray-400 font-normal">— {t('replacedBy')} {subTargetCourse.name}</span>
               </span>
               <span className="text-gray-400">{prereqOpen ? '▴' : '▾'}</span>
             </button>
@@ -357,16 +357,16 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               className="w-full flex items-center justify-between text-xs text-gray-700 hover:text-gray-900"
             >
               <span className="font-semibold">
-                תנאי קדם{' '}
+                {t('prerequisitesTitle')}{' '}
                 <span className="text-gray-400 font-normal">
                   —{' '}
                   {subTargetCourse
-                    ? `מוחלף ע״י ${subTargetCourse.name}`
+                    ? ` ${t('replacedBy')} ${subTargetCourse.name}`
                     : mode === 'auto'
-                    ? 'אוטומטי'
+                    ? t('auto')
                     : mode === 'custom'
-                    ? 'הרכב מותאם'
-                    : `אפשרות ${mode + 1} נבחרה`}
+                    ? t('customComposition')
+                    : t('optionSelected').replace('{n}', (mode + 1).toString())}
                 </span>
               </span>
               <span className="text-gray-400">{prereqOpen ? '▴' : '▾'}</span>
@@ -384,7 +384,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                   className="mt-0.5 shrink-0"
                 />
                 <span className="text-xs text-gray-600 font-medium">
-                  אוטומטי <span className="text-gray-400 font-normal">(ברירת מחדל)</span>
+                  {t('auto')} <span className="text-gray-400 font-normal">({t('autoDefault').split('(')[1]}
                 </span>
               </label>
 
@@ -406,7 +406,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1 mb-0.5">
-                        <span className="text-xs font-medium text-gray-700">אפשרות {gi + 1}</span>
+                        <span className="text-xs font-medium text-gray-700">{t('optionN').replace('{n}', (gi + 1).toString())}</span>
                         {satisfied && <span className="text-xs text-green-600">✓</span>}
                       </div>
                       <ul className="space-y-0.5">
@@ -436,7 +436,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                   onChange={() => setMode('custom')}
                   className="mt-0.5 shrink-0"
                 />
-                <span className="text-xs font-medium text-gray-600">הרכב קדמים בעצמי...</span>
+                <span className="text-xs font-medium text-gray-600">{t('customPrereqComposition')}</span>
               </label>
 
               {/* Custom builder */}
@@ -468,7 +468,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                     type="text"
                     value={customSearch}
                     onChange={e => setCustomSearch(e.target.value)}
-                    placeholder="חפש קורס להוספה..."
+                    placeholder={t("searchCourseToAdd")}
                     className="w-full border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-blue-400 text-right"
                   />
                   {customResults.length > 0 && (
@@ -498,9 +498,9 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
           {prereqOpen && (
             <>
               <hr className="my-2 border-gray-100" />
-              <p className="text-xs font-medium text-gray-500 mb-2">מחליף קדם</p>
+              <p className="text-xs font-medium text-gray-500 mb-2">{t('prereqReplacement')}</p>
               <p className="text-xs text-gray-400 mb-2 leading-relaxed">
-                אם קורס זה שקול לקורס אחר בטכניון, בחר אותו כדי שיתפוס את מקומו בבדיקת קדמים.
+                {t('prereqReplacementHint')}
               </p>
               {subTargetCourse ? (
                 <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
@@ -519,7 +519,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                     type="text"
                     value={subSearch}
                     onChange={(e) => setSubSearch(e.target.value)}
-                    placeholder="חפש קורס לפי שם או מספר..."
+                    placeholder={t("searchCourseByNameOrId")}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-400 text-right"
                   />
                   {subResults.length > 0 && (
@@ -545,10 +545,10 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
 
         {/* Downstream dependents section */}
         <div className="mb-4 border border-gray-200 rounded-lg p-3">
-          <p className="text-xs font-semibold text-gray-700 mb-2">מה תלוי בקורס זה</p>
+          <p className="text-xs font-semibold text-gray-700 mb-2">{t('whatDependsOnThis')}</p>
 
           {downstreamTotal === 0 && (
-            <p className="text-xs text-gray-400 italic">אין קורסים שתלויים בקורס זה</p>
+            <p className="text-xs text-gray-400 italic">{t('noDependentCourses')}</p>
           )}
 
           {downstreamTotal > 0 && (
@@ -557,7 +557,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                 onClick={() => setDownstreamOpen((o) => !o)}
                 className="w-full flex items-center justify-between text-xs text-gray-600 hover:text-gray-800"
               >
-                <span>{downstreamTotal} קורסים תלויים בקורס זה</span>
+                <span>{downstreamTotal} {t('dependentCoursesCount')}</span>
                 <span className="text-gray-400">{downstreamOpen ? '▴' : '▾'}</span>
               </button>
 
@@ -574,7 +574,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                       >
                         <span className={inPlan ? 'text-green-700' : 'text-gray-700'}>{dep.name}</span>
                         {inPlan && (
-                          <span className="text-xs font-medium text-green-600 shrink-0">✓ בתכנית</span>
+                          <span className="text-xs font-medium text-green-600 shrink-0">{t('inPlan')}</span>
                         )}
                       </li>
                     );
@@ -587,7 +587,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
 
         {noAdditionalCreditConflicts.length > 0 && (
           <div className="mb-4 border border-orange-200 bg-orange-50 rounded-lg p-3">
-            <p className="text-xs font-semibold text-orange-800 mb-2">ללא זיכוי נוסף</p>
+            <p className="text-xs font-semibold text-orange-800 mb-2">{t('noAdditionalCreditTitle')}</p>
             <div className="space-y-3">
               {noAdditionalCreditConflicts.map((conflict) => {
                 const otherCourse = courses.get(conflict.conflictingCourseId);
@@ -601,7 +601,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                 return (
                   <div key={conflict.pairKey} className="space-y-1.5">
                     <p className="text-xs text-orange-700 leading-relaxed">
-                      הקורס מתנגש בזיכוי עם {otherName}.
+                      {t('creditConflictWith')} {otherName}.
                     </p>
                     <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
                       <input
@@ -609,7 +609,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                         checked={conflict.uncreditedCourseId === course.id}
                         onChange={() => setUncredited(course.id)}
                       />
-                      <span>קורס זה ללא זיכוי</span>
+                      <span>{t('thisCourseNoCredit')}</span>
                     </label>
                     <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
                       <input
@@ -617,10 +617,10 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                         checked={conflict.uncreditedCourseId === conflict.conflictingCourseId}
                         onChange={() => setUncredited(conflict.conflictingCourseId)}
                       />
-                      <span>הקורס השני ללא זיכוי</span>
+                      <span>{t('otherCourseNoCredit')}</span>
                     </label>
                     <p className="text-xs text-orange-600">
-                      ברירת המחדל היא שהקורס המאוחר יותר בתוכנית לא יקבל נק"ז.
+                      {t('noCreditDefaultHint')}
                     </p>
                   </div>
                 );
@@ -631,12 +631,12 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
 
         {containingSubstitution && (
           <div className="mb-4 border border-teal-200 bg-teal-50 rounded-lg p-3">
-            <p className="text-xs font-semibold text-teal-800 mb-2">קורס מכיל</p>
+            <p className="text-xs font-semibold text-teal-800 mb-2">{t('containingCourseTitle')}</p>
             <p className="text-xs text-teal-700 leading-relaxed">
-              קורס זה מכיל את {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId} (קורס חובה).{' '}
-              {containingSubstitution.mandatoryCredits} נק"ז נספרות כחובה במקומו
+              {t('containsCourse')} {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId} ({t('mandatory')}).{' '}
+              {containingSubstitution.mandatoryCredits} {t('mandatoryCreditsCounted')}
               {containingSubstitution.excessCredits > 0
-                ? <>, והיתרה ({containingSubstitution.excessCredits} נק"ז) נספרת כבחירה חופשית.</>
+                ? <>{t('excessCreditsCounted').replace('{credits}', containingSubstitution.excessCredits.toString())}</>
                 : <>.</>}
             </p>
           </div>
