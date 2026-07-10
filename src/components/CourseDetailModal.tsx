@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import type { SapCourse } from '../types';
 import type { NoAdditionalCreditConflict } from '../domain/noAdditionalCredit';

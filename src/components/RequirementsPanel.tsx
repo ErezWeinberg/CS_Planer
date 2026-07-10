@@ -218,7 +218,7 @@ interface CompactRequirementRowProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: Record<string, string> | ((key: any) => string)): string {
+function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: string) => string): string {
   switch (req.requirementId) {
     case 'general_electives':
       return t('generalElectivesLabel');
@@ -232,7 +232,7 @@ function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: Record<s
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: Record<string, string> | ((key: any) => string)): string {
+function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: (key: string) => string): string {
   const unit = req.targetUnit === 'credits' ? t('creditsLabel') : t('coursesLabel');
   const completed = req.completedValue % 1 === 0 ? req.completedValue : req.completedValue.toFixed(1);
   return `${completed} / ${targetValue} ${unit}`;
@@ -313,7 +313,7 @@ function GeneralElectivesRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t)}</span>
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t as unknown as (key: string) => string)}</span>
             {isDone && <span className="text-xs font-semibold text-green-600">{t('completedLabel')}</span>}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{missingText}</p>
@@ -480,13 +480,13 @@ function CompactRequirementRow({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t)}</span>
+            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{getRequirementDisplayLabel(req, t as unknown as (key: string) => string)}</span>
             {isDone && <span className="text-xs font-semibold text-green-600">{t('completedLabel')}</span>}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{missingText}</p>
         </div>
         <span className={`text-xs font-semibold shrink-0 ${isDone ? 'text-green-600' : 'text-gray-600 dark:text-gray-400'}`}>
-          {formatRequirementValue(req, targetValue, t)}
+          {formatRequirementValue(req, targetValue, t as unknown as (key: string) => string)}
         </span>
       </div>
 
@@ -634,6 +634,8 @@ interface Props {
     roboticsMinorProgress: RoboticsMinorProgress | null;
     entrepreneurshipMinorProgress: EntrepreneurshipMinorProgress | null;
     quantumComputingMinorProgress: QuantumComputingMinorProgress | null;
+    scienceChainProgress?: { completed: number; required: number } | null;
+    scienceChainDetails?: { name: string; done: number; min: number } | null;
     isReady: boolean;
   } | null;
   weightedAverage: number | null;
