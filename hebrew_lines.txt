@@ -1,0 +1,24 @@
+src/App.tsx:457:setSyncErrorMessage(`${message}. ננסה שוב אוטומטית.`);
+src/App.tsx:641:if (window.confirm('האם לאפס את תכנית הלימודים? כל השינויים שלך יימחקו.')) {
+src/App.tsx:650:? 'אי אפשר ליצור עותק: הגעת למגבלת הגרסאות הפנימית'
+src/App.tsx:651:: 'לא נמצאה גרסת שיתוף להעתקה');
+src/App.tsx:655:showToast('נוצר עותק לעריכה מהשיתוף');
+src/App.tsx:703:גרסת שיתוף לבדיקה{shareMode.isNewShareReview ? ' · עדכון חדש' : ''}
+src/App.tsx:706:אתה צופה בגרסת שיתוף לבדיקה. אי אפשר לערוך אותה ישירות. כדי לעבוד עליה, צור עותק לעריכה.
+src/App.tsx:712:צור עותק לעריכה
+src/App.tsx:720:? '⚠ אתה צופה בתוכנית משותפת במצב עריכה. שינויים ישמרו ישירות על הגרסה המשותפת.'
+src/App.tsx:721:: '👁 אתה צופה בתוכנית משותפת (צפייה בלבד). שינויים שתבצע לא יישמרו.'}
+src/App.tsx:722:{shareMode.share.ownerEmail && ` שותפה על ידי ${shareMode.share.ownerEmail}.`}
+src/App.tsx:726:{shareSaveStatus === 'saving' ? 'שומר...' : shareSaveStatus === 'saved' ? '✓ נשמר' : 'שגיאה בשמירה'}
+src/App.tsx:731:כדי לעבוד על עותק נפרד,{' '}
+src/App.tsx:732:<a href={window.location.origin} className="underline hover:text-amber-900">פתח את המתכנן שלך</a>.
+src/App.tsx:754:aria-label="פתח תפריט"
+src/App.tsx:764:title="קבוצת תמיכה בוואטסאפ"
+src/App.tsx:773:title="מדריך קצר למערכת"
+src/App.tsx:783:? `יש ${pendingShareUpdates.length} עדכון מהשיתוף ממתינים לאישור`
+src/App.tsx:784:: 'ייצוא, שיתוף, או ייבוא של המערכת'}
+src/App.tsx:790:aria-label={`${pendingShareUpdates.length} עדכוני שיתוף ממתינים`}
+src/App.tsx:802:title={darkMode === 'dark' ? 'מצב כהה — לחץ למצב בהיר' : darkMode === 'light' ? 'מצב בהיר — לחץ למצב אוטומטי' : 'אוטומטי — לחץ למצב כהה'}
+src/App.tsx:950:setError('שגיאה בטעינת נתוני הקורסים. אנא בדוק את חיבור האינטרנט.');
+src/App.tsx:981:<p className="text-gray-600">טוען נתוני קורסים...</p>
+src/App.tsx:991:<p className="text-red-600 font-semibold mb-2">⚠️ שגיאה בטעינה</p>

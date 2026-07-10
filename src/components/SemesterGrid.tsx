@@ -185,7 +185,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
         }
       } else {
         // Multiple catalog chains → needs manual assignment
-        map.set(id, 'לא שובץ');
+        map.set(id, t('notAssigned'));
       }
     }
 
@@ -349,7 +349,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
         if (placedCount > 1) {
           const courseLabels = group.courseIds.map((id) => courses.get(id)?.name ?? id);
           entryWarnings.push(
-            group.warningText ?? `⚠️ בסמסטר הזה אפשר לקחת רק אחד מהקורסים: ${courseLabels.join(' / ')}`,
+            group.warningText ?? `${t('oneCourseOnlyPrefix')} ${courseLabels.join(' / ')}`,
           );
         }
       }
@@ -464,7 +464,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title={`תצוגת ${label}`}
+              title={`${t('viewMode')} ${label}`}
             >
               <span>{icon}</span>
               <span className="hidden sm:inline">{label}</span>
@@ -478,14 +478,14 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
               onClick={() => setGridCols(gridCols > 1 ? (gridCols - 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 : 1)}
               disabled={gridCols <= 1}
               className="px-2.5 py-1.5 hover:bg-gray-100 disabled:opacity-30 transition-colors"
-              title="הצג יותר עמודות (קטן יותר)"
+              title={t('moreColumns')}
             >−</button>
             <span className="px-1 py-1.5 text-xs border-x border-gray-200 select-none">{gridCols}</span>
             <button
               onClick={() => setGridCols(gridCols < 8 ? (gridCols + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 : 8)}
               disabled={gridCols >= 8}
               className="px-2.5 py-1.5 hover:bg-gray-100 disabled:opacity-30 transition-colors"
-              title="הצג פחות עמודות (גדול יותר)"
+              title={t('lessColumns')}
             >+</button>
           </div>
         )}
@@ -498,14 +498,14 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
                 ? 'border-gray-400 bg-gray-100 text-gray-700'
                 : 'border-gray-300 text-gray-500 hover:bg-gray-100'
             }`}
-            title="מקרא פקולטות"
+            title={t('facultyLegend')}
           >
             <span className="flex gap-0.5">
               {placedFaculties.slice(0, 3).map(({ faculty, dot }) => (
                 <span key={faculty} className={`w-2 h-2 rounded-full inline-block ${dot}`} />
               ))}
             </span>
-            <span>מקרא</span>
+            <span>{t('legend')}</span>
           </button>
         )}
       </div>
@@ -519,7 +519,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
                 <button
                   onClick={() => setColorPickerFor(colorPickerFor === faculty ? null : faculty)}
                   className={`w-3 h-3 rounded-full shrink-0 ${dot} hover:ring-2 hover:ring-offset-1 hover:ring-gray-400 transition-all`}
-                  title="לחץ לשינוי צבע"
+                  title={t('clickToChangeColor')}
                 />
                 <span className="text-xs text-gray-600">{getFacultyShortName(faculty)}</span>
                 {colorPickerFor === faculty && (
@@ -538,7 +538,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
             ))}
           </div>
           {colorPickerFor && (
-            <p className="text-xs text-gray-400 mt-1.5">לחץ על עיגול צבע לשינוי · לחץ שוב לסגירה</p>
+            <p className="text-xs text-gray-400 mt-1.5">{t('colorPickerHint')}</p>
           )}
         </div>
       )}
@@ -581,7 +581,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
               className="flex-1 sm:flex-none flex flex-col items-center justify-center gap-1 px-3 sm:px-5 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors min-h-14 text-sm font-medium"
             >
               <span className="text-xl leading-none">+</span>
-              <span>הוסף סמסטר</span>
+              <span>{t('addSemester')}</span>
             </button>
           )}
           {!isReadOnly && maxSemester > 1 && (
@@ -590,7 +590,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
               className="flex-1 sm:flex-none flex flex-col items-center justify-center gap-1 px-3 sm:px-5 border-2 border-dashed border-red-200 rounded-xl text-red-300 hover:border-red-400 hover:text-red-500 transition-colors min-h-14 text-sm font-medium"
             >
               <span className="text-xl leading-none">−</span>
-              <span>הסר סמסטר</span>
+              <span>{t('removeSemester')}</span>
             </button>
           )}
           {!isReadOnly && maxSemester < MAX_SEMESTERS && (
@@ -599,7 +599,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
               className="flex-1 sm:flex-none flex flex-col items-center justify-center gap-1 px-3 sm:px-5 border-2 border-dashed border-amber-300 rounded-xl text-amber-400 hover:border-amber-500 hover:text-amber-600 transition-colors min-h-14 text-sm font-medium"
             >
               <span className="text-lg leading-none">☀️</span>
-              <span>הוסף קיץ</span>
+              <span>{t('addSummer')}</span>
             </button>
           )}
           {!isReadOnly && hasSummers && (
@@ -608,7 +608,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
               className="flex-1 sm:flex-none flex flex-col items-center justify-center gap-1 px-3 sm:px-5 border-2 border-dashed border-orange-200 rounded-xl text-orange-300 hover:border-orange-400 hover:text-orange-500 transition-colors min-h-14 text-sm font-medium"
             >
               <span className="text-lg leading-none">🌤️</span>
-              <span>הסר קיץ</span>
+              <span>{t('removeSummer')}</span>
             </button>
           )}
         </div>

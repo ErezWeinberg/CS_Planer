@@ -43,6 +43,10 @@ const ALLOWED_TOP_LEVEL_KEYS = new Set<keyof StudentPlan>([
   'loadProfile',
   'catalogYear',
   'countOnlyCompletedCourses',
+  'selectedScienceChain',
+  'reviewLecturerAliases',
+  'reviewTAAliases',
+  'reviewDismissedNameSuggestions',
 ]);
 const ELECTIVE_CREDIT_AREAS = new Set<ElectiveCreditArea>(['ee', 'physics', 'math', 'general']);
 
@@ -232,6 +236,33 @@ function validateStringArrayMap(
     }
 
     result[key] = validatedArray;
+  }
+
+  return result;
+}
+
+function validateStringRecordMap(
+  value: unknown,
+  maxEntries: number,
+  maxSubEntries: number,
+  maxValueLength = 128,
+): Record<string, Record<string, string>> | null {
+  if (!isPlainObject(value) || Object.keys(value).length > maxEntries) {
+    return null;
+  }
+
+  const result: Record<string, Record<string, string>> = {};
+  for (const [key, entryValue] of Object.entries(value)) {
+    if (typeof key !== 'string' || key.length === 0 || key.length > 128) {
+      return null;
+    }
+
+    const validatedRecord = validateStringMap(entryValue, maxSubEntries, maxValueLength);
+    if (!validatedRecord) {
+      return null;
+    }
+
+    result[key] = validatedRecord;
   }
 
   return result;
@@ -584,6 +615,29 @@ function sanitizeStudentPlanRecord(
   if ('countOnlyCompletedCourses' in value) {
     if (typeof value.countOnlyCompletedCourses !== 'boolean') return null;
     sanitized.countOnlyCompletedCourses = value.countOnlyCompletedCourses;
+  }
+
+  if ('selectedScienceChain' in value) {
+    if (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32) return null;
+    sanitized.selectedScienceChain = value.selectedScienceChain;
+  }
+
+  if ('reviewLecturerAliases' in value) {
+    const reviewLecturerAliases = validateStringRecordMap(value.reviewLecturerAliases, 600, 50, 128);
+    if (!reviewLecturerAliases) return null;
+    sanitized.reviewLecturerAliases = reviewLecturerAliases;
+  }
+
+  if ('reviewTAAliases' in value) {
+    const reviewTAAliases = validateStringRecordMap(value.reviewTAAliases, 600, 50, 128);
+    if (!reviewTAAliases) return null;
+    sanitized.reviewTAAliases = reviewTAAliases;
+  }
+
+  if ('reviewDismissedNameSuggestions' in value) {
+    const reviewDismissedNameSuggestions = validateStringArrayMap(value.reviewDismissedNameSuggestions, 600, 50, 128);
+    if (!reviewDismissedNameSuggestions) return null;
+    sanitized.reviewDismissedNameSuggestions = reviewDismissedNameSuggestions;
   }
 
   return sanitized as StudentPlan;

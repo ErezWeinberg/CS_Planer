@@ -1,0 +1,15 @@
+src/components/SemesterGrid.tsx:123:// "מכיל": map each containing course to the mandatory slot it fills (capped credit,
+src/components/SemesterGrid.tsx:177:if (count === 0) continue; // not in any catalog chain → card shows "בחירה" by default
+src/components/SemesterGrid.tsx:188:map.set(id, 'לא שובץ');
+src/components/SemesterGrid.tsx:352:group.warningText ?? `⚠️ בסמסטר הזה אפשר לקחת רק אחד מהקורסים: ${courseLabels.join(' / ')}`,
+src/components/SemesterGrid.tsx:467:title={`תצוגת ${label}`}
+src/components/SemesterGrid.tsx:481:title="הצג יותר עמודות (קטן יותר)"
+src/components/SemesterGrid.tsx:488:title="הצג פחות עמודות (גדול יותר)"
+src/components/SemesterGrid.tsx:501:title="מקרא פקולטות"
+src/components/SemesterGrid.tsx:508:<span>מקרא</span>
+src/components/SemesterGrid.tsx:522:title="לחץ לשינוי צבע"
+src/components/SemesterGrid.tsx:541:<p className="text-xs text-gray-400 mt-1.5">לחץ על עיגול צבע לשינוי · לחץ שוב לסגירה</p>
+src/components/SemesterGrid.tsx:584:<span>הוסף סמסטר</span>
+src/components/SemesterGrid.tsx:593:<span>הסר סמסטר</span>
+src/components/SemesterGrid.tsx:602:<span>הוסף קיץ</span>
+src/components/SemesterGrid.tsx:611:<span>הסר קיץ</span>
