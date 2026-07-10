@@ -357,10 +357,12 @@ function sanitizeStudentPlanRecord(
   if ('trackId' in value) {
     const { trackId } = value;
     if (trackId !== null && !isTrackId(trackId)) {
-      return null;
+      console.warn('Validation failed trackId', trackId);
+    } else if (options.expectedTrackId && trackId !== undefined && trackId !== options.expectedTrackId) {
+      console.warn('Validation failed block');
+    } else {
+      sanitized.trackId = trackId as TrackId | null;
     }
-
-    if (options.expectedTrackId && trackId !== undefined && trackId !== options.expectedTrackId) { console.warn('Validation failed block'); } else { sanitized.trackId = trackId as TrackId | null; }
   }
 
   if ('semesters' in value) {
@@ -394,7 +396,7 @@ function sanitizeStudentPlanRecord(
   }
 
   if ('maxSemester' in value) {
-    if (!isIntegerInRange(value.maxSemester, 1, 16)) return null;
+    if (!isIntegerInRange(value.maxSemester, 1, 16)) { console.warn('Validation failed maxSemester'); } else
     sanitized.maxSemester = value.maxSemester;
   }
 
@@ -411,9 +413,10 @@ function sanitizeStudentPlanRecord(
   if ('currentSemester' in value) {
     const { currentSemester } = value;
     if (currentSemester !== null && !isIntegerInRange(currentSemester, 0, 16)) {
-      return null;
+      console.warn('Validation failed currentSemester', currentSemester);
+    } else {
+      sanitized.currentSemester = currentSemester as number | null;
     }
-    sanitized.currentSemester = currentSemester as number | null;
   }
 
   if ('semesterOrder' in value) {
@@ -462,36 +465,38 @@ function sanitizeStudentPlanRecord(
 
   if ('savedTracks' in value && options.allowSavedTracks) {
     if (!isPlainObject(value.savedTracks)) {
-      return null;
-    }
+      console.warn('Validation failed savedTracks object', value.savedTracks);
+    } else {
+      const savedTracks: Record<string, StudentPlan> = {};
+      for (const [trackId, trackPlan] of Object.entries(value.savedTracks)) {
+        if (!isTrackId(trackId)) {
+          console.warn('Validation failed savedTracks trackId', trackId);
+          continue;
+        }
 
-    const savedTracks: Record<string, StudentPlan> = {};
-    for (const [trackId, trackPlan] of Object.entries(value.savedTracks)) {
-      if (!isTrackId(trackId)) {
-        return null;
+        const sanitizedTrack = sanitizeStudentPlanRecord(trackPlan, {
+          allowSavedTracks: false,
+          expectedTrackId: trackId,
+        });
+        if (!sanitizedTrack) {
+          console.warn('Validation failed sanitizedTrack', trackId);
+          continue;
+        }
+
+        savedTracks[trackId] = sanitizedTrack;
       }
 
-      const sanitizedTrack = sanitizeStudentPlanRecord(trackPlan, {
-        allowSavedTracks: false,
-        expectedTrackId: trackId,
-      });
-      if (!sanitizedTrack) {
-        return null;
-      }
-
-      savedTracks[trackId] = sanitizedTrack;
+      sanitized.savedTracks = savedTracks;
     }
-
-    sanitized.savedTracks = savedTracks;
   }
 
   if ('miluimCredits' in value) {
-    if (!isIntegerInRange(value.miluimCredits, 0, 10)) return null;
+    if (!isIntegerInRange(value.miluimCredits, 0, 10)) { console.warn('Validation failed miluimCredits'); } else
     sanitized.miluimCredits = value.miluimCredits;
   }
 
   if ('englishScore' in value) {
-    if (!isIntegerInRange(value.englishScore, 0, 150)) return null;
+    if (!isIntegerInRange(value.englishScore, 0, 150)) { console.warn('Validation failed englishScore'); } else
     sanitized.englishScore = value.englishScore;
   }
 
