@@ -29,7 +29,6 @@ export const he: Translations = {
 
   semester: 'סמסטר',
   summerSemester: 'סמסטר קיץ',
-  totalCredits: 'סה״כ נקי',
   mandatory: 'חובה',
   elective: 'בחירה',
 
@@ -38,7 +37,6 @@ export const he: Translations = {
   faculty: 'פקולטה',
   syllabus: 'סילבוס',
 
-  degreeProgress: 'התקדמות בתואר',
   overallCredits: 'סה״כ נקודות זכות',
 
   myPlan: 'התוכנית שלי',
@@ -51,14 +49,12 @@ export const he: Translations = {
   guide: 'מדריך',
   shareImport: 'שיתוף/ייבוא',
   darkModeToggle: 'החלף מצב תאורה',
-  darkModeToggle: 'החלף מצב תאורה',
   goToMyPlan: 'עבור לתוכנית שלי',
   addedTo: 'נוסף ל',
 
   currentSemester: 'נוכחי',
   unmarkCompleted: 'בטל סימון הושלם',
   markAllCompleted: 'סמן הכל כהושלם',
-  creditsLabel: 'נ"ז',
   semesterAverageTooltip: 'ממוצע סמסטר משוקלל',
   showSeasonWarnings: 'הצג אזהרות עונה',
   ignoreSeasonWarnings: 'התעלם מאזהרות עונה',

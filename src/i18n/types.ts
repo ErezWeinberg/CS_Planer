@@ -24,7 +24,6 @@ export interface Translations {
   // Semesters
   semester: string;
   summerSemester: string;
-  totalCredits: string;
   mandatory: string;
   elective: string;
 
@@ -35,7 +34,6 @@ export interface Translations {
   syllabus: string;
   
   // Progress
-  degreeProgress: string;
   overallCredits: string;
   
   // Topbar
@@ -50,8 +48,6 @@ export interface Translations {
   guide: string;
   shareImport: string;
   darkModeToggle: string;
-  shareImport: string;
-  darkModeToggle: string;
   goToMyPlan: string;
   addedTo: string;
 
@@ -59,7 +55,6 @@ export interface Translations {
   currentSemester: string;
   unmarkCompleted: string;
   markAllCompleted: string;
-  creditsLabel: string;
   semesterAverageTooltip: string;
   showSeasonWarnings: string;
   ignoreSeasonWarnings: string;

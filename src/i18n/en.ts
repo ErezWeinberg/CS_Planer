@@ -29,7 +29,6 @@ export const en: Translations = {
 
   semester: 'Semester',
   summerSemester: 'Summer Semester',
-  totalCredits: 'Total Credits',
   mandatory: 'Mandatory',
   elective: 'Elective',
 
@@ -38,7 +37,6 @@ export const en: Translations = {
   faculty: 'Faculty',
   syllabus: 'Syllabus',
 
-  degreeProgress: 'Degree Progress',
   overallCredits: 'Overall Credits',
 
   myPlan: 'My Plan',
@@ -51,14 +49,12 @@ export const en: Translations = {
   guide: 'Guide',
   shareImport: 'Share/Import',
   darkModeToggle: 'Toggle Theme',
-  darkModeToggle: 'Toggle Theme',
   goToMyPlan: 'Go to my plan',
   addedTo: 'Added to',
 
   currentSemester: 'Current',
   unmarkCompleted: 'Unmark Completed',
   markAllCompleted: 'Mark All Completed',
-  creditsLabel: 'CR',
   semesterAverageTooltip: 'Weighted Semester Average',
   showSeasonWarnings: 'Show Season Warnings',
   ignoreSeasonWarnings: 'Ignore Season Warnings',
