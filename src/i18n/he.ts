@@ -140,8 +140,6 @@ export const he: Translations = {
   binaryPassDesc: 'הקורס יסומן כעובר בינארי',
   gradePlaceholder: 'הזן ציון (0-100)...',
   gradeError: 'ציון חייב להיות בין 0 ל-100',
-  removeFromPlan: '✕ הסר מהתכנית',
-  removeFromSemester: '✕ הסר מהסמסטר',
   savePass: 'שמור עובר',
   saveGrade: 'שמור ציון',
   deleteGrade: 'מחק ציון',

@@ -140,8 +140,6 @@ export const en: Translations = {
   binaryPassDesc: 'Course will be marked as a pass',
   gradePlaceholder: 'Enter grade (0-100)...',
   gradeError: 'Grade must be between 0 and 100',
-  removeFromPlan: '✕ Remove from Plan',
-  removeFromSemester: '✕ Remove from Semester',
   savePass: 'Save Pass',
   saveGrade: 'Save Grade',
   deleteGrade: 'Delete Grade',

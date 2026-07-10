@@ -143,8 +143,6 @@ export interface Translations {
   binaryPassDesc: string;
   gradePlaceholder: string;
   gradeError: string;
-  removeFromPlan: string;
-  removeFromSemester: string;
   savePass: string;
   saveGrade: string;
   deleteGrade: string;
