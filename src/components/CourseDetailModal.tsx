@@ -9,9 +9,8 @@ import { getTrackSpecializationCatalog } from '../domain/specializations';
 import { CheeseForkInfo } from './CheeseForkInfo';
 import { CourseGradeStats } from './CourseGradeStats';
 import { getTrackDefinition } from '../data/tracks';
-import { getTrackDefinition } from '../data/tracks';
 import { getVisibleMandatoryCourseIds } from '../data/tracks/semesterSchedule';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   course: SapCourse;
