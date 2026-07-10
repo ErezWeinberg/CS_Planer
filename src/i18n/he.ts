@@ -261,8 +261,6 @@ export const he: Translations = {
   otherCourseNoCredit: 'הקורס השני יעניק 0 נק"ז',
   noCreditDefaultHint: 'ללא נק"ז נוסף',
   containingCourseTitle: 'קורס מכיל',
-  containsCourse: 'מכיל את',
-  mandatoryCreditsCounted: 'נק"ז חובה שנספר',
   excessCreditsCounted: 'נק"ז עודף שנספר',
   courseNames: {}
 };

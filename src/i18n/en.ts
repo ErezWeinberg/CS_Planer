@@ -326,8 +326,6 @@ export const en: Translations = {
   otherCourseNoCredit: 'Other course gives 0 credit',
   noCreditDefaultHint: 'No additional credit hint',
   containingCourseTitle: 'Containing Course',
-  containsCourse: 'Contains',
-  mandatoryCreditsCounted: 'Mandatory credits counted',
   excessCreditsCounted: 'Excess credits counted',
   courseNames: {
     '01040031': 'Calculus 1M',
