@@ -217,7 +217,8 @@ interface CompactRequirementRowProps {
   englishRequirementItems?: EnglishRequirementItem[];
 }
 
-function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: any): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: Record<string, string> | ((key: any) => string)): string {
   switch (req.requirementId) {
     case 'general_electives':
       return t('generalElectivesLabel');
@@ -230,7 +231,8 @@ function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: any): st
   }
 }
 
-function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: any): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: Record<string, string> | ((key: any) => string)): string {
   const unit = req.targetUnit === 'credits' ? t('creditsLabel') : t('coursesLabel');
   const completed = req.completedValue % 1 === 0 ? req.completedValue : req.completedValue.toFixed(1);
   return `${completed} / ${targetValue} ${unit}`;

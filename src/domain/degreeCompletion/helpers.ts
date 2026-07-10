@@ -68,7 +68,7 @@ export interface DegreeProgressShape {
   };
   scienceChainProgress?: { completed: number; required: number } | null;
   scienceChainDetails?: { name: string; done: number; min: number } | null;
-  groupDetails?: any[];
+  groupDetails?: unknown[];
   isReady: boolean;
 }
 
