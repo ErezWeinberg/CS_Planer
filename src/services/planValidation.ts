@@ -1,6 +1,6 @@
 import type { StudentPlan, TrackId, PlanVersion, VersionedPlanEnvelope, ElectiveCreditArea } from '../types';
 
-const TRACK_IDS: TrackId[] = ['ee', 'cs', 'ee_math', 'ee_physics', 'ee_combined', 'ce'];
+const TRACK_IDS: TrackId[] = ['ee', 'cs', 'ee_math', 'ee_physics', 'ee_combined', 'ce', 'cs_3_year', 'cs_4_year', 'se', 'math_cs', 'cs_math', 'cs_physics', 'cs_cyber'];
 const TRACK_ID_SET = new Set<TrackId>(TRACK_IDS);
 const ALLOWED_TOP_LEVEL_KEYS = new Set<keyof StudentPlan>([
   'trackId',
