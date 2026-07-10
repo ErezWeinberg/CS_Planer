@@ -620,27 +620,54 @@ export function sanitizeStudentPlan(value: unknown): StudentPlan | null {
 }
 
 export function sanitizeEnvelope(value: unknown): VersionedPlanEnvelope | null {
-  if (!isPlainObject(value)) return null;
-  if (value.schemaVersion !== 2) return null;
-  if (!Array.isArray(value.versions) || value.versions.length === 0 || value.versions.length > 6) return null;
-  if (typeof value.activeVersionId !== 'string' || value.activeVersionId.length === 0) return null;
+  if (!isPlainObject(value)) { console.warn('sanitizeEnvelope: not plain object', value); return null; }
+  if (value.schemaVersion !== 2) { console.warn('sanitizeEnvelope: schemaVersion !== 2', value.schemaVersion); return null; }
+  if (!Array.isArray(value.versions)) { console.warn('sanitizeEnvelope: versions not array'); return null; }
+  if (value.versions.length === 0) { console.warn('sanitizeEnvelope: versions empty'); return null; }
+  
+  // Relax the length > 6 restriction just in case the user has too many versions! We can slice it.
+  let rawVersions = value.versions as unknown[];
+  if (rawVersions.length > 6) {
+    console.warn('sanitizeEnvelope: too many versions, slicing to 6', rawVersions.length);
+    rawVersions = rawVersions.slice(0, 6);
+  }
+
+  if (typeof value.activeVersionId !== 'string' || value.activeVersionId.length === 0) { console.warn('sanitizeEnvelope: invalid activeVersionId', value.activeVersionId); return null; }
 
   const versions: PlanVersion[] = [];
-  for (const v of value.versions as unknown[]) {
-    if (!isPlainObject(v)) return null;
-    if (typeof v.id !== 'string' || v.id.length === 0 || v.id.length > 128) return null;
-    if (typeof v.name !== 'string' || v.name.length === 0 || v.name.length > 128) return null;
-    if (!isPlainObject(v.plan)) return null;
-    if (typeof v.createdAt !== 'number' || typeof v.updatedAt !== 'number') return null;
+  for (const v of rawVersions) {
+    if (!isPlainObject(v)) { console.warn('sanitizeEnvelope: version not plain object', v); continue; }
+    if (typeof v.id !== 'string' || v.id.length === 0 || v.id.length > 128) { console.warn('sanitizeEnvelope: invalid v.id', v.id); continue; }
+    
+    let vName = v.name;
+    if (typeof vName !== 'string' || vName.length === 0 || vName.length > 128) {
+      console.warn('sanitizeEnvelope: invalid v.name, falling back', vName);
+      vName = 'גרסה ללא שם';
+    }
+    
+    if (!isPlainObject(v.plan)) { console.warn('sanitizeEnvelope: v.plan not plain object', v.plan); continue; }
+    
+    let createdAt = v.createdAt;
+    let updatedAt = v.updatedAt;
+    if (typeof createdAt !== 'number') { console.warn('sanitizeEnvelope: invalid createdAt', createdAt); createdAt = Date.now(); }
+    if (typeof updatedAt !== 'number') { console.warn('sanitizeEnvelope: invalid updatedAt', updatedAt); updatedAt = Date.now(); }
 
     const plan = sanitizeStudentPlan(v.plan);
-    if (!plan) return null;
+    if (!plan) { console.warn('sanitizeEnvelope: plan validation returned null for version', v.id); continue; }
 
-    versions.push({ id: v.id, name: v.name, plan, createdAt: v.createdAt, updatedAt: v.updatedAt });
+    versions.push({ id: v.id, name: vName as string, plan, createdAt: createdAt as number, updatedAt: updatedAt as number });
+  }
+
+  if (versions.length === 0) {
+    console.warn('sanitizeEnvelope: all versions failed validation');
+    return null;
   }
 
   const hasActive = versions.some((v) => v.id === value.activeVersionId);
-  if (!hasActive) return null;
+  if (!hasActive) {
+    console.warn('sanitizeEnvelope: activeVersionId not found, falling back to first version', value.activeVersionId);
+    value.activeVersionId = versions[0].id;
+  }
 
   return { schemaVersion: 2, versions, activeVersionId: value.activeVersionId as string };
 }
