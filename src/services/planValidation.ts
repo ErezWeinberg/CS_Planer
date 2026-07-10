@@ -618,26 +618,32 @@ function sanitizeStudentPlanRecord(
   }
 
   if ('selectedScienceChain' in value) {
-    if (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32) return null;
+    if (value.selectedScienceChain !== null && (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32)) return null;
     sanitized.selectedScienceChain = value.selectedScienceChain;
   }
 
   if ('reviewLecturerAliases' in value) {
-    const reviewLecturerAliases = validateStringRecordMap(value.reviewLecturerAliases, 600, 50, 128);
-    if (!reviewLecturerAliases) return null;
-    sanitized.reviewLecturerAliases = reviewLecturerAliases;
+    if (value.reviewLecturerAliases !== null) {
+      const reviewLecturerAliases = validateStringRecordMap(value.reviewLecturerAliases, 600, 50, 128);
+      if (!reviewLecturerAliases) return null;
+      sanitized.reviewLecturerAliases = reviewLecturerAliases;
+    }
   }
 
   if ('reviewTAAliases' in value) {
-    const reviewTAAliases = validateStringRecordMap(value.reviewTAAliases, 600, 50, 128);
-    if (!reviewTAAliases) return null;
-    sanitized.reviewTAAliases = reviewTAAliases;
+    if (value.reviewTAAliases !== null) {
+      const reviewTAAliases = validateStringRecordMap(value.reviewTAAliases, 600, 50, 128);
+      if (!reviewTAAliases) return null;
+      sanitized.reviewTAAliases = reviewTAAliases;
+    }
   }
 
   if ('reviewDismissedNameSuggestions' in value) {
-    const reviewDismissedNameSuggestions = validateStringArrayMap(value.reviewDismissedNameSuggestions, 600, 50, 128);
-    if (!reviewDismissedNameSuggestions) return null;
-    sanitized.reviewDismissedNameSuggestions = reviewDismissedNameSuggestions;
+    if (value.reviewDismissedNameSuggestions !== null) {
+      const reviewDismissedNameSuggestions = validateStringArrayMap(value.reviewDismissedNameSuggestions, 600, 50, 128);
+      if (!reviewDismissedNameSuggestions) return null;
+      sanitized.reviewDismissedNameSuggestions = reviewDismissedNameSuggestions;
+    }
   }
 
   return sanitized as StudentPlan;
