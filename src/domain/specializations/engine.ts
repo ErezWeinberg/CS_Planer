@@ -755,21 +755,13 @@ function buildTrackCatalog(
 export function buildTrackSpecializationCatalogs(
   sources: RawTrackSpecializationSource,
 ): Record<TrackId, TrackSpecializationCatalog> {
-  return {
-    ee: buildTrackCatalog('ee', sources.ee ?? []),
-    cs: buildTrackCatalog('cs', sources.cs ?? []),
-    ee_math: buildTrackCatalog('ee_math', sources.ee_math ?? []),
-    ee_physics: buildTrackCatalog('ee_physics', sources.ee_physics ?? []),
-    ee_combined: buildTrackCatalog('ee_combined', sources.ee_combined ?? []),
-    ce: buildTrackCatalog('ce', sources.ce ?? []),
-    cs_3_year: buildTrackCatalog('cs_3_year', sources.cs_3_year ?? []),
-    cs_4_year: buildTrackCatalog('cs_4_year', sources.cs_4_year ?? []),
-    se: buildTrackCatalog('se', sources.se ?? []),
-    math_cs: buildTrackCatalog('math_cs', sources.math_cs ?? []),
-    cs_math: buildTrackCatalog('cs_math', sources.cs_math ?? []),
-    cs_physics: buildTrackCatalog('cs_physics', sources.cs_physics ?? []),
-    cs_cyber: buildTrackCatalog('cs_cyber', sources.cs_cyber ?? []),
-  };
+  return (Object.keys(TRACK_SPECIALIZATION_FOLDERS) as TrackId[]).reduce(
+    (catalogs, trackId) => {
+      catalogs[trackId] = buildTrackCatalog(trackId, sources[trackId] ?? []);
+      return catalogs;
+    },
+    {} as Record<TrackId, TrackSpecializationCatalog>,
+  );
 }
 
 function buildReplacementAliasMap(group: SpecializationGroup): Map<string, string[]> {
