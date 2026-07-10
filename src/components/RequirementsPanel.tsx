@@ -217,7 +217,7 @@ interface CompactRequirementRowProps {
   englishRequirementItems?: EnglishRequirementItem[];
 }
 
-function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: string) => string): string {
+function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: any): string {
   switch (req.requirementId) {
     case 'general_electives':
       return t('generalElectivesLabel');
@@ -230,7 +230,7 @@ function getRequirementDisplayLabel(req: GeneralRequirementProgress, t: (key: st
   }
 }
 
-function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: (key: string) => string): string {
+function formatRequirementValue(req: GeneralRequirementProgress, targetValue: number, t: any): string {
   const unit = req.targetUnit === 'credits' ? t('creditsLabel') : t('coursesLabel');
   const completed = req.completedValue % 1 === 0 ? req.completedValue : req.completedValue.toFixed(1);
   return `${completed} / ${targetValue} ${unit}`;
@@ -697,6 +697,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
   const [expandedQuantumGroup, setExpandedQuantumGroup] = useState<string | null>(null);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -796,8 +797,6 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
 
   const isMiluim = miluimCredits !== undefined;
   const shouldShowCoreAddButton = trackId === 'ce' || trackId === 'cs';
-
-  const { t } = useLanguage();
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 sidebar-panel">

@@ -66,6 +66,9 @@ export interface DegreeProgressShape {
     requirements: ReadonlyArray<{ done: boolean }>;
     englishInPlan: string[];
   };
+  scienceChainProgress?: { completed: number; required: number } | null;
+  scienceChainDetails?: { name: string; done: number; min: number } | null;
+  groupDetails?: any[];
   isReady: boolean;
 }
 

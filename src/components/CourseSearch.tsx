@@ -293,7 +293,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
         : `${t('semester')} ${language === 'he' ? SEM_LABELS[sem - 1] ?? sem : sem}`,
       value: sem,
     })),
-  ], [semesterOrder, summerSemesters]);
+  ], [semesterOrder, summerSemesters, language, t]);
 
   const pickerDesiredHeight = useMemo(
     () => (Math.min(semesterOptions.length, MIN_VISIBLE_PICKER_OPTIONS) * PICKER_OPTION_HEIGHT) + PICKER_VERTICAL_PADDING,

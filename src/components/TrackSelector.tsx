@@ -52,7 +52,7 @@ export function TrackSelector({ tracks }: { tracks: TrackDefinition[] }) {
           {tracks.map((track) => {
             const availableYears = getAvailableYears(track);
             // Quick dynamic description or fallback
-            const tDesc = t('trackDescriptions') as any;
+            const tDesc = t('trackDescriptions') as Record<string, string>;
             const desc = tDesc?.[track.id] ?? track.description;
 
             return (

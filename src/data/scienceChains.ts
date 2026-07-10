@@ -1,4 +1,4 @@
-import { TrackSpecializationCatalog, SpecializationGroup } from '../types';
+import type { TrackSpecializationCatalog, TrackId } from '../types';
 
 export const CS_SCIENCE_CHAINS: TrackSpecializationCatalog = {
   trackId: 'cs',

@@ -210,10 +210,10 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
     setCustomGroup(savedGroup && savedIdx < 0 ? savedGroup : []);
   }, [savedGroup, savedIdx, course.id]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setCourseNote(effectiveId, noteInput);
     onClose();
-  };
+  }, [effectiveId, noteInput, onClose, setCourseNote]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -729,7 +729,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               onClick={handleClose}
               className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-2 rounded-lg transition-colors"
             >
-              {t('closeButton')}
+              {t('close')}
             </button>
           </div>
         </div>

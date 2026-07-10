@@ -38,10 +38,11 @@ function mapFirebaseError(code: string, err: unknown): string | null {
       return 'מפתח ה-API חסר או שגוי. יש להגדיר קובץ .env.local עם פרטי Firebase.';
     case 'auth/operation-not-allowed':
       return 'התחברות דרך גוגל אינה מופעלת בפרויקט ה-Firebase שלך (Sign-in provider disabled).';
-    default:
+    default: {
       console.error('Unhandled Firebase Auth Error:', code, err);
       const errMsg = (err as Error).message || String(err);
       return `שגיאה: ${code} - ${errMsg}`;
+    }
   }
 }
 
