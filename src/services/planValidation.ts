@@ -346,8 +346,10 @@ function sanitizeStudentPlanRecord(
   }
 
   const keys = Object.keys(value);
-  if (keys.some((key) => !ALLOWED_TOP_LEVEL_KEYS.has(key as keyof StudentPlan))) {
-    return null;
+  for (const key of keys) {
+    if (!ALLOWED_TOP_LEVEL_KEYS.has(key as keyof StudentPlan)) {
+      console.warn('Unknown key ignored:', key);
+    }
   }
 
   const sanitized: Partial<StudentPlan> = {};
@@ -358,47 +360,37 @@ function sanitizeStudentPlanRecord(
       return null;
     }
 
-    if (options.expectedTrackId && trackId !== undefined && trackId !== options.expectedTrackId) {
-      return null;
-    }
-
-    sanitized.trackId = trackId as TrackId | null;
+    if (options.expectedTrackId && trackId !== undefined && trackId !== options.expectedTrackId) { console.warn('Validation failed block'); } else { sanitized.trackId = trackId as TrackId | null; }
   }
 
   if ('semesters' in value) {
     const semesters = validateSemesterMap(value.semesters);
-    if (!semesters) return null;
-    sanitized.semesters = semesters;
+    if (!semesters) { console.warn('Validation failed'); } else { sanitized.semesters = semesters; }
   }
 
   if ('completedCourses' in value) {
     const completedCourses = validateStringArray(value.completedCourses, 600, 32);
-    if (!completedCourses) return null;
-    sanitized.completedCourses = completedCourses;
+    if (!completedCourses) { console.warn('Validation failed'); } else { sanitized.completedCourses = completedCourses; }
   }
 
   if ('selectedSpecializations' in value) {
     const selectedSpecializations = validateStringArray(value.selectedSpecializations, 100, 128);
-    if (!selectedSpecializations) return null;
-    sanitized.selectedSpecializations = selectedSpecializations;
+    if (!selectedSpecializations) { console.warn('Validation failed'); } else { sanitized.selectedSpecializations = selectedSpecializations; }
   }
 
   if ('favorites' in value) {
     const favorites = validateStringArray(value.favorites, 600, 32);
-    if (!favorites) return null;
-    sanitized.favorites = favorites;
+    if (!favorites) { console.warn('Validation failed'); } else { sanitized.favorites = favorites; }
   }
 
   if ('grades' in value) {
     const grades = validateNumberMap(value.grades, 600, 0, 100);
-    if (!grades) return null;
-    sanitized.grades = grades;
+    if (!grades) { console.warn('Validation failed'); } else { sanitized.grades = grades; }
   }
 
   if ('substitutions' in value) {
     const substitutions = validateStringMap(value.substitutions, 600, 64);
-    if (!substitutions) return null;
-    sanitized.substitutions = substitutions;
+    if (!substitutions) { console.warn('Validation failed'); } else { sanitized.substitutions = substitutions; }
   }
 
   if ('maxSemester' in value) {
@@ -408,14 +400,12 @@ function sanitizeStudentPlanRecord(
 
   if ('selectedPrereqGroups' in value) {
     const selectedPrereqGroups = validateStringArrayMap(value.selectedPrereqGroups, 600, 16, 32);
-    if (!selectedPrereqGroups) return null;
-    sanitized.selectedPrereqGroups = selectedPrereqGroups;
+    if (!selectedPrereqGroups) { console.warn('Validation failed'); } else { sanitized.selectedPrereqGroups = selectedPrereqGroups; }
   }
 
   if ('summerSemesters' in value) {
     const summerSemesters = validateIntegerArray(value.summerSemesters, 16, 1, 16);
-    if (!summerSemesters) return null;
-    sanitized.summerSemesters = summerSemesters;
+    if (!summerSemesters) { console.warn('Validation failed'); } else { sanitized.summerSemesters = summerSemesters; }
   }
 
   if ('currentSemester' in value) {
@@ -428,55 +418,46 @@ function sanitizeStudentPlanRecord(
 
   if ('semesterOrder' in value) {
     const semesterOrder = validateIntegerArray(value.semesterOrder, 16, 1, 16);
-    if (!semesterOrder) return null;
-    sanitized.semesterOrder = semesterOrder;
+    if (!semesterOrder) { console.warn('Validation failed'); } else { sanitized.semesterOrder = semesterOrder; }
   }
 
   if ('semesterTypeOverrides' in value) {
     const semesterTypeOverrides = validateSemesterTypeOverrides(value.semesterTypeOverrides);
-    if (!semesterTypeOverrides) return null;
-    sanitized.semesterTypeOverrides = semesterTypeOverrides;
+    if (!semesterTypeOverrides) { console.warn('Validation failed'); } else { sanitized.semesterTypeOverrides = semesterTypeOverrides; }
   }
 
   if ('semesterWarningsIgnored' in value) {
     const semesterWarningsIgnored = validateIntegerArray(value.semesterWarningsIgnored, 16, 1, 16);
-    if (!semesterWarningsIgnored) return null;
-    sanitized.semesterWarningsIgnored = semesterWarningsIgnored;
+    if (!semesterWarningsIgnored) { console.warn('Validation failed'); } else { sanitized.semesterWarningsIgnored = semesterWarningsIgnored; }
   }
 
   if ('doubleSpecializations' in value) {
     const doubleSpecializations = validateStringArray(value.doubleSpecializations, 100, 128);
-    if (!doubleSpecializations) return null;
-    sanitized.doubleSpecializations = doubleSpecializations;
+    if (!doubleSpecializations) { console.warn('Validation failed'); } else { sanitized.doubleSpecializations = doubleSpecializations; }
   }
 
   if ('hasEnglishExemption' in value) {
-    if (typeof value.hasEnglishExemption !== 'boolean') return null;
-    sanitized.hasEnglishExemption = value.hasEnglishExemption;
+    if (typeof value.hasEnglishExemption !== 'boolean') { console.warn('Validation failed'); } else { sanitized.hasEnglishExemption = value.hasEnglishExemption; }
   }
 
   if ('manualSapAverages' in value) {
     const manualSapAverages = validateNumberMap(value.manualSapAverages, 600, 0, 100);
-    if (!manualSapAverages) return null;
-    sanitized.manualSapAverages = manualSapAverages;
+    if (!manualSapAverages) { console.warn('Validation failed'); } else { sanitized.manualSapAverages = manualSapAverages; }
   }
 
   if ('binaryPass' in value) {
     const binaryPass = validateBooleanMap(value.binaryPass, 600);
-    if (!binaryPass) return null;
-    sanitized.binaryPass = binaryPass;
+    if (!binaryPass) { console.warn('Validation failed'); } else { sanitized.binaryPass = binaryPass; }
   }
 
   if ('explicitSportCompletions' in value) {
     const explicitSportCompletions = validateStringArray(value.explicitSportCompletions, 600, 32);
-    if (!explicitSportCompletions) return null;
-    sanitized.explicitSportCompletions = explicitSportCompletions;
+    if (!explicitSportCompletions) { console.warn('Validation failed'); } else { sanitized.explicitSportCompletions = explicitSportCompletions; }
   }
 
   if ('completedInstances' in value) {
     const completedInstances = validateStringArray(value.completedInstances, 600, 64);
-    if (!completedInstances) return null;
-    sanitized.completedInstances = completedInstances;
+    if (!completedInstances) { console.warn('Validation failed'); } else { sanitized.completedInstances = completedInstances; }
   }
 
   if ('savedTracks' in value && options.allowSavedTracks) {
@@ -516,133 +497,118 @@ function sanitizeStudentPlanRecord(
 
   if ('englishTaughtCourses' in value) {
     const englishTaughtCourses = validateStringArray(value.englishTaughtCourses, 600, 32);
-    if (!englishTaughtCourses) return null;
-    sanitized.englishTaughtCourses = englishTaughtCourses;
+    if (!englishTaughtCourses) { console.warn('Validation failed'); } else { sanitized.englishTaughtCourses = englishTaughtCourses; }
   }
 
   if ('dismissedRecommendedCourses' in value) {
     const dismissedRecommendedCourses = validateTrackStringArrayMap(value.dismissedRecommendedCourses, 600, 32);
-    if (!dismissedRecommendedCourses) return null;
-    sanitized.dismissedRecommendedCourses = dismissedRecommendedCourses;
+    if (!dismissedRecommendedCourses) { console.warn('Validation failed'); } else { sanitized.dismissedRecommendedCourses = dismissedRecommendedCourses; }
   }
 
   if ('facultyColorOverrides' in value) {
     const facultyColorOverrides = validateStringMap(value.facultyColorOverrides, 100, 32);
-    if (!facultyColorOverrides) return null;
-    sanitized.facultyColorOverrides = facultyColorOverrides;
+    if (!facultyColorOverrides) { console.warn('Validation failed'); } else { sanitized.facultyColorOverrides = facultyColorOverrides; }
   }
 
   if ('coreToChainOverrides' in value) {
     const coreToChainOverrides = validateStringArray(value.coreToChainOverrides, 600, 32);
-    if (!coreToChainOverrides) return null;
-    sanitized.coreToChainOverrides = coreToChainOverrides;
+    if (!coreToChainOverrides) { console.warn('Validation failed'); } else { sanitized.coreToChainOverrides = coreToChainOverrides; }
   }
 
   if ('courseChainAssignments' in value) {
     // keys = courseIds (≤32 chars), values = chainGroupIds (≤64 chars), max 200 entries
     const courseChainAssignments = validateStringMap(value.courseChainAssignments, 200, 64);
-    if (!courseChainAssignments) return null;
-    sanitized.courseChainAssignments = courseChainAssignments;
+    if (!courseChainAssignments) { console.warn('Validation failed'); } else { sanitized.courseChainAssignments = courseChainAssignments; }
   }
 
   if ('electiveCreditAssignments' in value) {
     const electiveCreditAssignments = validateElectiveCreditAssignmentMap(value.electiveCreditAssignments, 600);
-    if (!electiveCreditAssignments) return null;
-    sanitized.electiveCreditAssignments = electiveCreditAssignments;
+    if (!electiveCreditAssignments) { console.warn('Validation failed'); } else { sanitized.electiveCreditAssignments = electiveCreditAssignments; }
   }
 
   if ('courseNotes' in value) {
     const courseNotes = validateStringMap(value.courseNotes, 600, 4000);
-    if (!courseNotes) return null;
-    sanitized.courseNotes = courseNotes;
+    if (!courseNotes) { console.warn('Validation failed'); } else { sanitized.courseNotes = courseNotes; }
   }
 
   if ('noAdditionalCreditOverrides' in value) {
     const noAdditionalCreditOverrides = validateStringMap(value.noAdditionalCreditOverrides, 600, 32);
-    if (!noAdditionalCreditOverrides) return null;
-    sanitized.noAdditionalCreditOverrides = noAdditionalCreditOverrides;
+    if (!noAdditionalCreditOverrides) { console.warn('Validation failed'); } else { sanitized.noAdditionalCreditOverrides = noAdditionalCreditOverrides; }
   }
 
   if ('roboticsMinorEnabled' in value) {
-    if (typeof value.roboticsMinorEnabled !== 'boolean') return null;
-    sanitized.roboticsMinorEnabled = value.roboticsMinorEnabled;
+    if (typeof value.roboticsMinorEnabled !== 'boolean') { console.warn('Validation failed'); } else { sanitized.roboticsMinorEnabled = value.roboticsMinorEnabled; }
   }
 
   if ('entrepreneurshipMinorEnabled' in value) {
-    if (typeof value.entrepreneurshipMinorEnabled !== 'boolean') return null;
-    sanitized.entrepreneurshipMinorEnabled = value.entrepreneurshipMinorEnabled;
+    if (typeof value.entrepreneurshipMinorEnabled !== 'boolean') { console.warn('Validation failed'); } else { sanitized.entrepreneurshipMinorEnabled = value.entrepreneurshipMinorEnabled; }
   }
 
   if ('quantumComputingMinorEnabled' in value) {
-    if (typeof value.quantumComputingMinorEnabled !== 'boolean') return null;
-    sanitized.quantumComputingMinorEnabled = value.quantumComputingMinorEnabled;
+    if (typeof value.quantumComputingMinorEnabled !== 'boolean') { console.warn('Validation failed'); } else { sanitized.quantumComputingMinorEnabled = value.quantumComputingMinorEnabled; }
   }
 
   if ('newLabFormatEnabled' in value) {
-    if (typeof value.newLabFormatEnabled !== 'boolean') return null;
-    sanitized.newLabFormatEnabled = value.newLabFormatEnabled;
+    if (typeof value.newLabFormatEnabled !== 'boolean') { console.warn('Validation failed'); } else { sanitized.newLabFormatEnabled = value.newLabFormatEnabled; }
   }
 
   if ('initializedTracks' in value) {
     const initializedTracks = validateStringArray(value.initializedTracks, 20, 32);
-    if (!initializedTracks) return null;
-    sanitized.initializedTracks = initializedTracks;
+    if (!initializedTracks) { console.warn('Validation failed'); } else { sanitized.initializedTracks = initializedTracks; }
   }
 
   if ('targetGraduationSemesterId' in value) {
     const { targetGraduationSemesterId } = value;
     if (targetGraduationSemesterId !== null && !isIntegerInRange(targetGraduationSemesterId, 1, 16)) {
-      return null;
+      console.warn('Validation failed: targetGraduationSemesterId');
+    } else {
+      sanitized.targetGraduationSemesterId = targetGraduationSemesterId as number | null;
     }
-    sanitized.targetGraduationSemesterId = targetGraduationSemesterId as number | null;
   }
 
   if ('loadProfile' in value) {
-    if (value.loadProfile !== 'working' && value.loadProfile !== 'fulltime') {
-      return null;
-    }
-    sanitized.loadProfile = value.loadProfile;
+    if (value.loadProfile !== 'working' && value.loadProfile !== 'fulltime') { console.warn('Validation failed block'); } else { sanitized.loadProfile = value.loadProfile; }
   }
 
   if ('catalogYear' in value) {
     const { catalogYear } = value;
     if (catalogYear !== null && !isIntegerInRange(catalogYear, 2000, 2100)) {
-      return null;
+      console.warn('Validation failed: catalogYear');
+    } else {
+      sanitized.catalogYear = catalogYear as number | null;
     }
-    sanitized.catalogYear = catalogYear as number | null;
   }
 
   if ('countOnlyCompletedCourses' in value) {
-    if (typeof value.countOnlyCompletedCourses !== 'boolean') return null;
-    sanitized.countOnlyCompletedCourses = value.countOnlyCompletedCourses;
+    if (typeof value.countOnlyCompletedCourses !== 'boolean') { console.warn('Validation failed'); } else { sanitized.countOnlyCompletedCourses = value.countOnlyCompletedCourses; }
   }
 
   if ('selectedScienceChain' in value) {
-    if (value.selectedScienceChain !== null && (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32)) return null;
-    sanitized.selectedScienceChain = value.selectedScienceChain === null ? undefined : value.selectedScienceChain;
+    if (value.selectedScienceChain !== null && (typeof value.selectedScienceChain !== 'string' || value.selectedScienceChain.length === 0 || value.selectedScienceChain.length > 32)) {
+      console.warn('Validation failed: selectedScienceChain');
+    } else {
+      sanitized.selectedScienceChain = value.selectedScienceChain === null ? undefined : value.selectedScienceChain;
+    }
   }
 
   if ('reviewLecturerAliases' in value) {
     if (value.reviewLecturerAliases !== null) {
       const reviewLecturerAliases = validateStringRecordMap(value.reviewLecturerAliases, 600, 50, 128);
-      if (!reviewLecturerAliases) return null;
-      sanitized.reviewLecturerAliases = reviewLecturerAliases;
+      if (!reviewLecturerAliases) { console.warn('Validation failed'); } else { sanitized.reviewLecturerAliases = reviewLecturerAliases; }
     }
   }
 
   if ('reviewTAAliases' in value) {
     if (value.reviewTAAliases !== null) {
       const reviewTAAliases = validateStringRecordMap(value.reviewTAAliases, 600, 50, 128);
-      if (!reviewTAAliases) return null;
-      sanitized.reviewTAAliases = reviewTAAliases;
+      if (!reviewTAAliases) { console.warn('Validation failed'); } else { sanitized.reviewTAAliases = reviewTAAliases; }
     }
   }
 
   if ('reviewDismissedNameSuggestions' in value) {
     if (value.reviewDismissedNameSuggestions !== null) {
       const reviewDismissedNameSuggestions = validateStringArrayMap(value.reviewDismissedNameSuggestions, 600, 50, 128);
-      if (!reviewDismissedNameSuggestions) return null;
-      sanitized.reviewDismissedNameSuggestions = reviewDismissedNameSuggestions;
+      if (!reviewDismissedNameSuggestions) { console.warn('Validation failed'); } else { sanitized.reviewDismissedNameSuggestions = reviewDismissedNameSuggestions; }
     }
   }
 
