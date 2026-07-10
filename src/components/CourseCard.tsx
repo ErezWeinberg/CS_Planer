@@ -132,13 +132,13 @@ export const CourseCard = memo(function CourseCard({
   else if (isMandatory) colorClass = 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-900 hover:border-blue-300';
 
   const namedGroups = missingPrereqGroups.filter((group) =>
-    group.every((id) => courses.get(id)?.name !== undefined)
+    group.every((id) => ((t('courseNames') as any)?.[id] ?? courses.get(id)?.name) !== undefined)
   );
   const candidateGroups = namedGroups.length > 0 ? namedGroups : missingPrereqGroups;
   const bestGroup = missingPrereqGroups.length > 0
     ? candidateGroups.reduce((min, group) => group.length < min.length ? group : min, candidateGroups[0])
     : [];
-  const displayedNames = bestGroup.slice(0, 2).map((id) => courses.get(id)?.name ?? id);
+  const displayedNames = bestGroup.slice(0, 2).map((id) => ((t('courseNames') as any)?.[id] ?? courses.get(id)?.name) ?? id);
   const hasMoreInGroup = bestGroup.length > 2;
 
   const facultyStyle = course.faculty
@@ -235,7 +235,7 @@ export const CourseCard = memo(function CourseCard({
           </button>
         )}
 
-        <p className={`text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug pt-0.5 break-words ${showCardActions ? 'pr-11 pl-28' : ''}`}>{course.name}</p>
+        <p className={`text-xs font-semibold text-slate-800 dark:text-slate-100 leading-snug pt-0.5 break-words ${showCardActions ? 'pr-11 pl-28' : ''}`}>{((t('courseNames') as any)?.[course.id] ?? course.name)}</p>
 
         {wrongSemesterType && (
           <p className="text-xs text-red-500 mt-0.5 px-4 leading-tight">
@@ -258,7 +258,7 @@ export const CourseCard = memo(function CourseCard({
               const conflictingCourse = courses.get(conflict.conflictingCourseId);
               return (
                 <p key={conflict.pairKey} className="text-xs text-orange-500 leading-tight">
-                  {t('noAdditionalCreditPrefix')}{conflictingCourse?.name ?? conflict.conflictingCourseId}
+                  {t('noAdditionalCreditPrefix')}{((t('courseNames') as any)?.[conflict.conflictingCourseId] ?? conflictingCourse?.name) ?? conflict.conflictingCourseId}
                 </p>
               );
             })}
@@ -269,7 +269,7 @@ export const CourseCard = memo(function CourseCard({
         {containingSubstitution && (
           <div className="mt-1 px-4">
             <p className="text-xs text-teal-600 dark:text-teal-400 leading-tight">
-              {t('containsCourse')} {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId}: {containingSubstitution.mandatoryCredits} {t('mandatoryCreditsCounted')}
+              {t('containsCourse')} {((t('courseNames') as any)?.[containingSubstitution.containedCourseId] ?? courses.get(containingSubstitution.containedCourseId)?.name) ?? containingSubstitution.containedCourseId}: {containingSubstitution.mandatoryCredits} {t('mandatoryCreditsCounted')}
               {containingSubstitution.excessCredits > 0 && <>, {containingSubstitution.excessCredits} {t('freeElectiveCreditsCounted')}</>}
             </p>
           </div>

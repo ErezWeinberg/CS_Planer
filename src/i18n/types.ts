@@ -1,6 +1,52 @@
 export type Language = 'he' | 'en';
 
 export interface Translations {
+  courseNames?: Record<string, string>;
+  // SemesterGrid & App & Login
+  notAssigned: string;
+  oneCourseOnlyPrefix: string;
+  viewMode: string;
+  moreColumns: string;
+  lessColumns: string;
+  facultyLegend: string;
+  legend: string;
+  clickToChangeColor: string;
+  colorPickerHint: string;
+  addSemester: string;
+  removeSemester: string;
+  addSummer: string;
+  removeSummer: string;
+  autoRetry: string;
+  confirmReset: string;
+  errorCopyLimit: string;
+  errorNoShareToCopy: string;
+  copyCreated: string;
+  shareReviewTitle: string;
+  newUpdate: string;
+  shareReviewDesc: string;
+  createCopyBtn: string;
+  shareEditWarning: string;
+  shareViewWarning: string;
+  sharedBy: string;
+  saving: string;
+  saved: string;
+  saveError: string;
+  workOnSeparateCopy: string;
+  openYourPlanner: string;
+  openMenu: string;
+  whatsappSupport: string;
+  systemGuide: string;
+  pendingUpdates1: string;
+  pendingUpdates2: string;
+  exportShareImport: string;
+  pendingUpdatesLabel: string;
+  darkModeToLight: string;
+  lightModeToAuto: string;
+  autoModeToDark: string;
+  errorLoadingCourses: string;
+  loadingCourses: string;
+  errorLoading: string;
+  logout: string;
   // CourseDetailModal
   openInSap: string;
   countedForChains: string;

@@ -1,4 +1,4 @@
-﻿import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import {
   DndContext, DragOverlay, closestCenter, closestCorners, pointerWithin, rectIntersection,
   PointerSensor, TouchSensor, KeyboardSensor,
@@ -27,6 +27,7 @@ import { computeContainingSubstitutions } from '../domain/containingCourse';
 import type { ContainingSubstitution } from '../domain/containingCourse';
 import { createSemesterGridCollisionDetection } from '../utils/semesterGridCollision';
 import { useShareMode } from '../context/ShareModeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { bareId } from '../utils/occurrenceId';
 
 interface Props {
@@ -44,6 +45,7 @@ const semesterGridCollisionDetection = createSemesterGridCollisionDetection({
 
 export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, specializations }: Props) {
   const shareMode = useShareMode();
+  const { t } = useLanguage();
   const isReadOnly = shareMode?.isShareReview ?? false;
   const {
     semesters, moveCourse, addCourseToSemester, completedCourses, markSemesterComplete, maxSemester,
@@ -347,7 +349,7 @@ export const SemesterGrid = memo(function SemesterGrid({ courses, trackDef, spec
       for (const group of entry.alternativeGroups ?? []) {
         const placedCount = group.courseIds.filter((id) => semesterCourseIds.includes(id)).length;
         if (placedCount > 1) {
-          const courseLabels = group.courseIds.map((id) => courses.get(id)?.name ?? id);
+          const courseLabels = group.courseIds.map((id) => ((t('courseNames') as any)?.[id] ?? courses.get(id)?.name) ?? id);
           entryWarnings.push(
             group.warningText ?? `${t('oneCourseOnlyPrefix')} ${courseLabels.join(' / ')}`,
           );

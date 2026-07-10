@@ -58,6 +58,8 @@ type PickerPosition = {
 };
 
 export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded }: Props) {
+  const { t } = useLanguage();
+  const { t } = useLanguage();
   const shareMode = useShareMode();
   const isReadOnly = shareMode?.isShareReview ?? false;
   const [query, setQuery] = useState('');
@@ -100,7 +102,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
   const indexedCourses = useMemo(
     () => [...courses.values()].map((course) => ({
       course,
-      lowerName: course.name.toLowerCase(),
+      lowerName: ((t('courseNames') as any)?.[course.id] ?? course.name).toLowerCase(),
     })),
     [courses],
   );
@@ -118,6 +120,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
+  const { t } = useLanguage();
       if (event.key === 'Escape') {
         setOpen(false);
         setPickerFor(null);
@@ -126,6 +129,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
     }
 
     function onClickOutside(event: MouseEvent) {
+  const { t } = useLanguage();
       const target = event.target as Node;
       if (
         containerRef.current
@@ -221,7 +225,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
       filters,
       {
         matchesAcademic: (course) => matchesAcademic(course) && matchesRating(course),
-        matchesQuery: (course) => matchesQueryText(course, (course.name ?? '').toLowerCase()),
+        matchesQuery: (course) => matchesQueryText(course, (((t('courseNames') as any)?.[course.id] ?? course.name ?? '')).toLowerCase()),
       },
     ),
     [courses, favorites, getStat, filters, matchesAcademic, matchesRating, matchesQueryText],
@@ -239,7 +243,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
 
     for (const id of favorites) {
       const course = courses.get(id);
-      if (course && passesPreRating(course, (course.name ?? '').toLowerCase()) && !capped.some((c) => c.id === course.id)) {
+      if (course && passesPreRating(course, (((t('courseNames') as any)?.[course.id] ?? course.name ?? '')).toLowerCase()) && !capped.some((c) => c.id === course.id)) {
         capped.push(course);
       }
     }
@@ -301,6 +305,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
   );
 
   function addToSemester(courseId: string, semValue: number) {
+  const { t } = useLanguage();
     addCourseToSemester(courseId, semValue);
     setPickerFor(null);
     setPickerPosition(null);
@@ -316,6 +321,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
   }
 
   function openSemesterPicker(button: HTMLButtonElement, courseId: string) {
+  const { t } = useLanguage();
     const rect = button.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom - PICKER_GAP - PICKER_VIEWPORT_MARGIN;
     const spaceAbove = rect.top - PICKER_GAP - PICKER_VIEWPORT_MARGIN;
@@ -338,6 +344,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
     if (!pickerFor) return undefined;
 
     function closePicker() {
+  const { t } = useLanguage();
       setPickerFor(null);
       setPickerPosition(null);
     }
@@ -351,6 +358,7 @@ export const CourseSearch = memo(function CourseSearch({ courses, onCourseAdded 
   }, [pickerFor]);
 
   function renderAddButton(courseId: string) {
+  const { t } = useLanguage();
     if (isReadOnly) return null;
     const isPickerOpen = pickerFor === courseId;
     return (

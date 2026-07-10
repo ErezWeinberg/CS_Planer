@@ -83,6 +83,7 @@ interface SectionProps {
 }
 
 function PrintPlanSection({ plan, courses, trackDef, catalog, includeGrades, versionName }: SectionProps) {
+  const { t } = useLanguage();
   const {
     semesters,
     completedCourses,
@@ -270,7 +271,6 @@ function PrintPlanSection({ plan, courses, trackDef, catalog, includeGrades, ver
 }
 
 export function PrintView({ courses, trackDef, catalog, includeGrades = true, versionIds }: Props) {
-  const { t } = useLanguage();
   const storeVersions = usePlanStore((s) => s.versions);
 
   // Capture all active-version fields for the default (no versionIds) path

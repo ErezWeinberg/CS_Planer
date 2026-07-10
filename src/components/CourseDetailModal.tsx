@@ -247,7 +247,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-base font-bold text-gray-900 leading-snug">{course.name}</h3>
+            <h3 className="text-base font-bold text-gray-900 leading-snug">{((t('courseNames') as any)?.[course.id] ?? course.name)}</h3>
             <p className="text-xs text-gray-400 mt-0.5">{course.id} · {course.credits} נ״ז</p>
             <a
               href={`https://portalex.technion.ac.il/ovv/?sap-theme=sap_belize#/details/2025/201/SM/${course.id}`}
@@ -345,7 +345,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               className="w-full flex items-center justify-between text-xs text-gray-700 hover:text-gray-900"
             >
               <span className="font-semibold">
-                {t('prerequisitesTitle')} <span className="text-gray-400 font-normal">— {t('replacedBy')} {subTargetCourse.name}</span>
+                {t('prerequisitesTitle')} <span className="text-gray-400 font-normal">— {t('replacedBy')} {((t('courseNames') as any)?.[subTargetCourse.id] ?? subTargetCourse.name)}</span>
               </span>
               <span className="text-gray-400">{prereqOpen ? '▴' : '▾'}</span>
             </button>
@@ -361,7 +361,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                 <span className="text-gray-400 font-normal">
                   —{' '}
                   {subTargetCourse
-                    ? ` ${t('replacedBy')} ${subTargetCourse.name}`
+                    ? ` ${t('replacedBy')} ${((t('courseNames') as any)?.[subTargetCourse.id] ?? subTargetCourse.name)}`
                     : mode === 'auto'
                     ? t('auto')
                     : mode === 'custom'
@@ -505,7 +505,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
               {subTargetCourse ? (
                 <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
                   <div>
-                    <p className="text-xs font-medium text-blue-800">{subTargetCourse.name}</p>
+                    <p className="text-xs font-medium text-blue-800">{((t('courseNames') as any)?.[subTargetCourse.id] ?? subTargetCourse.name)}</p>
                     <p className="text-xs text-blue-500">{subTargetCourse.id}</p>
                   </div>
                   <button
@@ -572,7 +572,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                           inPlan ? 'border-green-200 bg-green-50' : 'border-gray-200'
                         }`}
                       >
-                        <span className={inPlan ? 'text-green-700' : 'text-gray-700'}>{dep.name}</span>
+                        <span className={inPlan ? 'text-green-700' : 'text-gray-700'}>{((t('courseNames') as any)?.[dep.id] ?? dep.name)}</span>
                         {inPlan && (
                           <span className="text-xs font-medium text-green-600 shrink-0">{t('inPlan')}</span>
                         )}
@@ -633,7 +633,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
           <div className="mb-4 border border-teal-200 bg-teal-50 rounded-lg p-3">
             <p className="text-xs font-semibold text-teal-800 mb-2">{t('containingCourseTitle')}</p>
             <p className="text-xs text-teal-700 leading-relaxed">
-              {t('containsCourse')} {courses.get(containingSubstitution.containedCourseId)?.name ?? containingSubstitution.containedCourseId} ({t('mandatory')}).{' '}
+              {t('containsCourse')} {((t('courseNames') as any)?.[containingSubstitution.containedCourseId] ?? courses.get(containingSubstitution.containedCourseId)?.name) ?? containingSubstitution.containedCourseId} ({t('mandatory')}).{' '}
               {containingSubstitution.mandatoryCredits} {t('mandatoryCreditsCounted')}
               {containingSubstitution.excessCredits > 0
                 ? <>{t('excessCreditsCounted').replace('{credits}', containingSubstitution.excessCredits.toString())}</>

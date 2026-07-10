@@ -132,7 +132,7 @@ function ElectiveBreakdown({
                 const course = courses.get(id);
                 return (
                   <li key={id} className="flex justify-between items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <span className="truncate">{course?.name ? dataDict(course.name) : id}</span>
+                    <span className="truncate">{course?.name ? dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name) : id}</span>
                     <span className="shrink-0 font-medium text-purple-700">
                       {formatCredits(course?.credits ?? 0)} נק"ז
                     </span>
@@ -287,6 +287,7 @@ function GeneralElectivesRow({
   const isDone = total.target > 0 && total.recognized >= total.target;
   const missing = Math.max(0, total.target - total.recognized);
   const { t } = useLanguage();
+  const dataDict = t('dataDict') as (key: string) => string;
   const missingText = missing > 0
     ? `${formatCredits(missing)}${t('missingCredits')}`
     : t('completedLabel');
@@ -403,7 +404,7 @@ function GeneralElectivesRow({
         for (const course of req.countedCourses) {
           const entry = grouped.get(course.courseId);
           if (entry) entry.count++;
-          else grouped.set(course.courseId, { name: dataDict(course.name), count: 1 });
+          else grouped.set(course.courseId, { name: dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 });
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -429,7 +430,7 @@ function GeneralElectivesRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{dataDict(course.name)} נלמד באנגלית</span>
+                <span>{dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -469,6 +470,7 @@ function CompactRequirementRow({
   englishRequirementItems,
 }: CompactRequirementRowProps) {
   const { t } = useLanguage();
+  const dataDict = t('dataDict') as (key: string) => string;
   const pct = Math.min(100, targetValue > 0 ? (req.completedValue / targetValue) * 100 : 0);
   const isDone = req.completedValue >= targetValue;
   const missingText = missingValue > 0
@@ -540,7 +542,7 @@ function CompactRequirementRow({
         for (const course of req.countedCourses) {
           const entry = grouped.get(course.courseId);
           if (entry) { entry.count++; }
-          else { grouped.set(course.courseId, { name: dataDict(course.name), count: 1 }); }
+          else { grouped.set(course.courseId, { name: dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 }); }
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -567,7 +569,7 @@ function CompactRequirementRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{dataDict(course.name)} נלמד באנגלית</span>
+                <span>{dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -702,6 +704,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
+  const dataDict = t('dataDict') as (key: string) => string;
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -1038,7 +1041,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {dataDict(course.name)}
+                                {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1140,7 +1143,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                                 {placed ? '✓' : '○'}
                               </span>
                               <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                                {dataDict(course.name)}
+                                {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
                               </span>
                               <span className="text-gray-300 shrink-0">{course.credits} נק"ז</span>
                               {!placed && renderMinorAddButton(course.id)}
@@ -1172,7 +1175,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
                               {placed ? '✓' : '○'}
                             </span>
                             <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                              {dataDict(course.name)}
+                              {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
                             </span>
                             {!placed && renderMinorAddButton(course.id)}
                           </div>
@@ -1247,12 +1250,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {mandatoryCourses.map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={dataDict(course.name)} className="flex items-center gap-1.5 text-xs">
+                  <div key={dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {dataDict(course.name)}
+                      {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}
@@ -1268,12 +1271,12 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
               {ENTREPRENEURSHIP_COURSES.filter((c) => !c.mandatory).map((course) => {
                 const placed = course.id !== null && allPlaced.has(course.id);
                 return (
-                  <div key={dataDict(course.name)} className="flex items-center gap-1.5 text-xs">
+                  <div key={dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)} className="flex items-center gap-1.5 text-xs">
                     <span className={`font-bold shrink-0 ${placed ? 'text-green-600' : 'text-gray-400'}`}>
                       {placed ? '✓' : '○'}
                     </span>
                     <span className={`${placed ? 'text-green-700' : 'text-gray-500'} flex-1 min-w-0`}>
-                      {dataDict(course.name)}
+                      {dataDict((t('courseNames') as any)?.[course.courseId] ?? course.name)}
                       {course.id === null && <span className="text-gray-400"> (מ"ק ?)</span>}
                     </span>
                     {course.id !== null && !placed && renderMinorAddButton(course.id)}

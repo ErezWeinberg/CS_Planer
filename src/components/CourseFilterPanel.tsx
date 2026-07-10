@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { CourseFilters, SortBy, SortDirection, SubjectId } from '../domain/gradeStatistics/types';
 import { SUBJECT_OPTIONS } from '../utils/subjects';
@@ -246,7 +247,6 @@ function GradeStatsChip({
 export function CourseFilterPanel({
   filters, onChange, onReset, availableSemesters, statsAvailable, statsLoading, ratingLoading,
 }: Props) {
-  const { t } = useLanguage();
   const activeCount =
     filters.subjects.length +
     TOGGLE_FILTERS.filter((t) => filters[t.key]).length +

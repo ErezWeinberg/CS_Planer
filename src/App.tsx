@@ -913,6 +913,7 @@ function PlannerApp({ courses, trackDef, availableYears }: { courses: Map<string
 }
 
 function AppInner() {
+  const { t } = useLanguage();
   const [courses, setCourses] = useState<Map<string, SapCourse>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

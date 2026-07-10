@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext';
 import { useMemo, useState } from 'react';
 import type { SapCourse, TrackDefinition, PlanVersion } from '../types';
 import { getTrackSpecializationCatalog } from '../domain/specializations';
