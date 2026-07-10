@@ -384,7 +384,7 @@ export function CourseDetailModal({ course, courses, semester, instanceKey, noAd
                   className="mt-0.5 shrink-0"
                 />
                 <span className="text-xs text-gray-600 font-medium">
-                  {t('auto')} <span className="text-gray-400 font-normal">({t('autoDefault').split('(')[1]}</span>
+                  {t('auto')} <span className="text-gray-400 font-normal">({t('autoDefault').split('(')[1]})</span>
                 </span>
               </label>
 
