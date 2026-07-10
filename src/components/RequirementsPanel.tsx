@@ -543,9 +543,9 @@ function CompactRequirementRow({
       {req.countedCourses.length > 0 && req.requirementId !== 'english' && (() => {
         const grouped = new Map<string, { name: string; count: number }>();
         for (const course of req.countedCourses) {
-          const entry = grouped.get(course.id);
+          const entry = grouped.get(course.courseId);
           if (entry) { entry.count++; }
-          else { grouped.set(course.id, { name: (dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name), count: 1 }); }
+          else { grouped.set(course.courseId, { name: (dataDict as any)((t('courseNames') as any)?.[course.courseId] ?? course.name), count: 1 }); }
         }
         return (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -572,7 +572,7 @@ function CompactRequirementRow({
                   onChange={() => onToggleEnglishCourse(courseId)}
                   className="rounded"
                 />
-                <span>{(dataDict as any)((t('courseNames') as any)?.[(course.id ?? (course as any).courseId)] ?? course.name)} נלמד באנגלית</span>
+                <span>{(dataDict as any)((t('courseNames') as any)?.[course.courseId] ?? course.name)} נלמד באנגלית</span>
               </label>
             );
           })}
@@ -761,7 +761,7 @@ export const RequirementsPanel = memo(function RequirementsPanel({ progress, wei
     if (!generalElectives) return [];
     return generalElectives.countedCourses
       .filter((course) => isManualEnglishEligible(course.courseId))
-      .map((course) => course.id);
+      .map((course) => course.courseId);
   }, [compactRequirements]);
 
   if (!progress) return null;
